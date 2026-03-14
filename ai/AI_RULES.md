@@ -252,23 +252,51 @@ return <PostCard post={data} />
 ```
 
 ### shadcn rules
+
+> ⚠️ **shadcn/ui has replaced the old `<Form><FormField>` pattern.**
+> The new pattern uses `<Controller>` from React Hook Form + `<Field>` from shadcn.
+> Never use `FormField`, `FormItem`, `FormControl`, `FormMessage` — those are legacy.
+
 ```typescript
-// ✅ Always use shadcn Form wrapper for forms
-<Form {...form}>
-  <FormField
-    control={form.control}
-    name="email"
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Email</FormLabel>
-        <FormControl>
-          <Input placeholder="you@example.com" {...field} />
-        </FormControl>
-        <FormMessage />  {/* ← never skip this */}
-      </FormItem>
-    )}
-  />
-</Form>
+// ✅ NEW PATTERN — Controller + Field (use this always)
+import { Controller, useForm } from "react-hook-form"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+
+<form onSubmit={form.handleSubmit(onSubmit)}>
+  <FieldGroup>
+    <Controller
+      name="email"
+      control={form.control}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <Input
+            {...field}
+            id="email"
+            aria-invalid={fieldState.invalid}
+            placeholder="you@example.com"
+          />
+          {fieldState.invalid && (
+            <FieldError errors={[fieldState.error]} /> // ← never skip this
+          )}
+        </Field>
+      )}
+    />
+  </FieldGroup>
+</form>
+
+// ❌ OLD PATTERN — never use these legacy components
+// <Form>, <FormField>, <FormItem>, <FormControl>, <FormMessage>
+// These no longer exist in the current shadcn version.
+
+// ✅ Always install the Field component if missing
+// npx shadcn@latest add field
 
 // ✅ Always use cn() for className merging
 import { cn } from "@/lib/utils"
@@ -282,17 +310,36 @@ import { cn } from "@/lib/utils"
 
 ## 8 — FORM RULES
 
-Every form follows this exact pattern:
+> shadcn/ui now uses `<Controller>` + `<Field>` for all forms.
+> The old `<Form><FormField><FormItem><FormControl><FormMessage>` pattern is **removed**.
+> Always follow the pattern below — sourced directly from the official shadcn docs.
+
+### Install the required component first
+```bash
+npx shadcn@latest add field
+```
+
+### The mandatory form pattern
 
 ```typescript
 "use client"
 
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
-// 1. Define schema with meaningful error messages
+// Step 1 — Define schema with meaningful error messages
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -300,31 +347,96 @@ const loginSchema = z.object({
 
 type LoginInput = z.infer<typeof loginSchema>
 
-// 2. Use the form
-const form = useForm<LoginInput>({
-  resolver: zodResolver(loginSchema),
-  defaultValues: { email: "", password: "" },
-})
+export function LoginForm() {
+  // Step 2 — Set up the form
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  })
 
-// 3. Handle submit with loading state
-const onSubmit = async (data: LoginInput) => {
-  try {
-    await doSomething(data)
-    toast.success("Logged in successfully")
-  } catch (error) {
-    toast.error("Something went wrong. Please try again.")
+  // Step 3 — Handle submit with loading + error handling
+  const onSubmit = async (data: LoginInput) => {
+    try {
+      await doSomething(data)
+      toast.success("Logged in successfully")
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.")
+    }
   }
-}
 
-// 4. Disable button while loading
-<Button type="submit" disabled={form.formState.isSubmitting}>
-  {form.formState.isSubmitting ? (
-    <Loader2 className="h-4 w-4 animate-spin" />
-  ) : (
-    "Log in"
-  )}
-</Button>
+  return (
+    // Step 4 — Build the form with Controller + Field
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldGroup>
+
+        {/* Each field uses Controller + Field */}
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                {...field}
+                id="email"
+                type="email"
+                aria-invalid={fieldState.invalid}
+                placeholder="you@example.com"
+                autoComplete="email"
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <Input
+                {...field}
+                id="password"
+                type="password"
+                aria-invalid={fieldState.invalid}
+                placeholder="••••••••"
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+      </FieldGroup>
+
+      {/* Step 5 — Loading state on submit button */}
+      <Button type="submit" disabled={form.formState.isSubmitting}>
+        {form.formState.isSubmitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "Log in"
+        )}
+      </Button>
+    </form>
+  )
+}
 ```
+
+### Rules for every form
+- Every `<Controller>` must have `data-invalid={fieldState.invalid}` on its `<Field>`
+- Every input must have `aria-invalid={fieldState.invalid}` for accessibility
+- Every field must show `<FieldError>` when `fieldState.invalid` is true — never skip it
+- Always use `<FieldGroup>` to wrap multiple fields
+- Always use `<FieldDescription>` for helper text below an input
+- Always disable the submit button with `form.formState.isSubmitting`
+- Always show a spinner inside the button while submitting
+- Always handle errors in `onSubmit` with `toast.error()`
+- Always show success with `toast.success()`
+- Always set `defaultValues` to prevent uncontrolled → controlled warnings
 
 ---
 

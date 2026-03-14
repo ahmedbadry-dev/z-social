@@ -48,6 +48,33 @@
 }
 
 :root {
+  /* Social Platform Design Tokens */
+  /* Primary - Blue */
+  --primary-900: #2d46d6;
+  --primary-700: #3b55e6;
+  --primary-500: #6b7fe8;
+  --primary-300: #a5b3f0;
+  --primary-100: #e8eaff;
+
+  /* Neutral */
+  --neutral-800: #0f172a;
+  --neutral-700: #1e293b;
+  --neutral-600: #334155;
+  --neutral-500: #475569;
+  --neutral-400: #64748b;
+  --neutral-300: #94a3b8;
+  --neutral-200: #e2e8f0;
+  --neutral-100: #f1f5f9;
+
+  /* Semantic */
+  --success: #22c55e;
+  --destructive-foreground: #dc2626;
+  --warning: #f59e0b;
+
+  /* App backgrounds */
+  --bg-page: #f3f4f6;
+  --bg-card: #ffffff;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

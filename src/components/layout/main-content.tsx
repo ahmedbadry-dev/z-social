@@ -1,13 +1,10 @@
 "use client"
 
 import { Authenticated, AuthLoading } from "convex/react"
-import type { Preloaded } from "convex/react"
-import type { api } from "../../../convex/_generated/api"
 import { Sidebar } from "./sidebar"
 import { RightPanel } from "./right-panel"
 
 interface MainContentProps {
-    preloadedUser: Preloaded<typeof api.auth.getCurrentUser>
     children: React.ReactNode
 }
 
@@ -24,7 +21,7 @@ function SidebarSkeleton() {
     )
 }
 
-export function MainContent({ preloadedUser, children }: MainContentProps) {
+export function MainContent({ children }: MainContentProps) {
     return (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_1fr] lg:grid-cols-[240px_1fr_240px]">
 
@@ -33,7 +30,7 @@ export function MainContent({ preloadedUser, children }: MainContentProps) {
                     <SidebarSkeleton />
                 </AuthLoading>
                 <Authenticated>
-                    <Sidebar preloadedUser={preloadedUser} />
+                    <Sidebar />
                 </Authenticated>
             </aside>
 

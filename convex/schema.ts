@@ -7,6 +7,8 @@ export default defineSchema({
     mediaUrl: v.optional(v.string()),
     mediaType: v.optional(v.union(v.literal("image"), v.literal("video"))),
     authorId: v.string(),
+    authorName: v.optional(v.string()),
+    authorImage: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
     isEdited: v.optional(v.boolean()),

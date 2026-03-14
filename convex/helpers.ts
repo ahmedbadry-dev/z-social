@@ -5,10 +5,16 @@ import { authComponent } from "./auth"
 type Ctx = QueryCtx | MutationCtx
 
 export async function getCurrentUser(ctx: Ctx) {
-  return authComponent.getAuthUser(ctx)
+  try {
+    return await authComponent.getAuthUser(ctx)
+  } catch {
+    return null
+  }
 }
 
-function pickUserId(user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>) {
+function pickUserId(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+) {
   return user.userId ?? String(user._id)
 }
 

@@ -1,12 +1,13 @@
 import { paginationOptsValidator } from "convex/server"
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { requireAuthUserId } from "./helpers"
+import { getCurrentUserId, requireAuthUserId } from "./helpers"
 
 export const getConversations = query({
   args: {},
   handler: async (ctx) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return []
 
     const sent = await ctx.db
       .query("messages")
@@ -22,7 +23,10 @@ export const getConversations = query({
     const conversationMap = new Map<string, (typeof allMessages)[number]>()
 
     for (const message of allMessages) {
-      const partnerId = message.senderId === currentUserId ? message.receiverId : message.senderId
+      const partnerId =
+        message.senderId === currentUserId
+          ? message.receiverId
+          : message.senderId
       const existing = conversationMap.get(partnerId)
       if (!existing || message.createdAt > existing.createdAt) {
         conversationMap.set(partnerId, message)
@@ -43,16 +47,21 @@ export const getConversations = query({
 export const getMessages = query({
   args: { otherUserId: v.string(), paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return []
 
     const sent = await ctx.db
       .query("messages")
-      .withIndex("by_conversation", (q) => q.eq("senderId", currentUserId).eq("receiverId", args.otherUserId))
+      .withIndex("by_conversation", (q) =>
+        q.eq("senderId", currentUserId).eq("receiverId", args.otherUserId)
+      )
       .collect()
 
     const received = await ctx.db
       .query("messages")
-      .withIndex("by_conversation", (q) => q.eq("senderId", args.otherUserId).eq("receiverId", currentUserId))
+      .withIndex("by_conversation", (q) =>
+        q.eq("senderId", args.otherUserId).eq("receiverId", currentUserId)
+      )
       .collect()
 
     return [...sent, ...received].sort((a, b) => a.createdAt - b.createdAt)
@@ -88,15 +97,20 @@ export const sendMessage = mutation({
 export const markConversationAsRead = mutation({
   args: { otherUserId: v.string() },
   handler: async (ctx, args) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return 0
 
     const unread = await ctx.db
       .query("messages")
-      .withIndex("by_conversation", (q) => q.eq("senderId", args.otherUserId).eq("receiverId", currentUserId))
+      .withIndex("by_conversation", (q) =>
+        q.eq("senderId", args.otherUserId).eq("receiverId", currentUserId)
+      )
       .filter((q) => q.eq(q.field("read"), false))
       .collect()
 
-    await Promise.all(unread.map((message) => ctx.db.patch(message._id, { read: true })))
+    await Promise.all(
+      unread.map((message) => ctx.db.patch(message._id, { read: true }))
+    )
     return null
   },
 })
@@ -104,12 +118,15 @@ export const markConversationAsRead = mutation({
 export const getUnreadCount = query({
   args: {},
   handler: async (ctx) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return 0
+
     const unread = await ctx.db
       .query("messages")
       .withIndex("by_receiver", (q) => q.eq("receiverId", currentUserId))
       .filter((q) => q.eq(q.field("read"), false))
       .collect()
+
     return unread.length
   },
 })

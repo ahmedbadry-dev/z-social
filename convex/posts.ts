@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server"
 import { ConvexError, v } from "convex/values"
 import type { Doc } from "./_generated/dataModel"
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server"
-import { getCurrentUserId, requireAuthUserId } from "./helpers"
+import { getCurrentUserId, requireAuth, requireAuthUserId } from "./helpers"
 
 type PostDoc = Doc<"posts">
 
@@ -128,7 +128,8 @@ export const createPost = mutation({
     mediaType: v.optional(v.union(v.literal("image"), v.literal("video"))),
   },
   handler: async (ctx, args) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUser = await requireAuth(ctx)
+    const currentUserId = currentUser.userId ?? String(currentUser._id)
     const content = args.content.trim()
 
     if (!content) {
@@ -143,6 +144,8 @@ export const createPost = mutation({
       mediaUrl: args.mediaUrl,
       mediaType: args.mediaType,
       authorId: currentUserId,
+      authorName: currentUser.name ?? "User",
+      authorImage: currentUser.image ?? undefined,
       createdAt: Date.now(),
     })
   },

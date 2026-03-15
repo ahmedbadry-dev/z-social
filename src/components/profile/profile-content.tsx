@@ -13,8 +13,6 @@ import { useEffect } from "react"
 
 export function ProfileContent() {
   const currentUser = useQuery(api.auth.getCurrentUser)
-  console.log("currentUser:", currentUser)
-  console.log("userId:", currentUser?.userId)
   const profile = useQuery(
     api.users.getUserProfile,
     currentUser?._id ? { userId: currentUser._id } : "skip"
@@ -48,6 +46,9 @@ export function ProfileContent() {
         name={currentUser.name ?? "User"}
         email={currentUser.email}
         image={currentUser.image ?? undefined}
+        username={profile.username ?? undefined}
+        bio={profile.bio ?? undefined}
+        coverImageUrl={profile.coverImageUrl ?? undefined}
         postsCount={profile.postsCount}
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}

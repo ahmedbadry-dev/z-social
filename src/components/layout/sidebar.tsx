@@ -33,6 +33,11 @@ function SidebarContent() {
   const pathname = usePathname()
   const currentUser = useQuery(api.auth.getCurrentUser)
 
+  const userProfile = useQuery(
+    api.users.getUserProfile,
+    currentUser?._id ? { userId: String(currentUser._id) } : "skip"
+  )
+
   const displayName =
     currentUser?.name?.trim() ||
     currentUser?.email?.split("@")[0] ||
@@ -41,12 +46,26 @@ function SidebarContent() {
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow-sm">
       <div className="relative h-20 bg-[#E2E8F0]">
-        <UserAvatar
-          name={displayName}
-          imageUrl={currentUser?.image ?? undefined}
-          size="lg"
-          className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-white"
-        />
+        {/* Cover */}
+        <div
+          className="relative h-20"
+          style={
+            userProfile?.coverImageUrl
+              ? {
+                backgroundImage: `url(${userProfile.coverImageUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+              : { backgroundColor: "#E2E8F0" }
+          }
+        >
+          <UserAvatar
+            name={displayName}
+            imageUrl={currentUser?.image ?? undefined}
+            size="lg"
+            className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-white"
+          />
+        </div>
       </div>
       <div className="border-b border-neutral-200 px-4 pt-8 pb-4">
         <p className="text-base font-semibold text-[#0F172A]">{displayName}</p>

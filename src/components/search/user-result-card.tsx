@@ -40,9 +40,9 @@ export function UserResultCard({ userId, username, bio, isCurrentUser }: UserRes
   const onOpenProfile = () => {
     if (isCurrentUser) {
       router.push("/profile")
-      return
+    } else {
+      router.push(`/messages?userId=${userId}`)
     }
-    toast.message("Profile view coming soon")
   }
 
   return (

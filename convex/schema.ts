@@ -87,5 +87,7 @@ export default defineSchema({
     bio: v.optional(v.string()),
     username: v.optional(v.string()),
     coverImageUrl: v.optional(v.string()),
-  }).index("by_user", ["userId"]),
+  })
+    .index("by_user", ["userId"])
+    .searchIndex("search_username", { searchField: "username" }),
 })

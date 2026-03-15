@@ -139,9 +139,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         <UserAvatar name={post.authorName} imageUrl={post.authorImage} size="md" />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-[#0F172A]">{post.authorName}</p>
-          <p className="text-xs text-[#64748B]">
-            @{post.authorId} · {formatRelativeTime(post.createdAt)}
-          </p>
+          <p className="text-xs text-[#64748B]">{formatRelativeTime(post.createdAt)}</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

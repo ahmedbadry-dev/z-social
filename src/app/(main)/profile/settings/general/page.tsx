@@ -1,8 +1,12 @@
+"use client"
+
+import { Authenticated } from "convex/react"
+import { GeneralSettings } from "@/components/profile/general-settings"
+
 export default function GeneralSettingsPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold">General Settings</h1>
-      <p className="text-muted-foreground">Coming in Phase 5</p>
-    </div>
+    <Authenticated>
+      <GeneralSettings />
+    </Authenticated>
   )
 }

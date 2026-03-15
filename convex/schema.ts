@@ -7,6 +7,8 @@ export default defineSchema({
     mediaUrl: v.optional(v.string()),
     mediaType: v.optional(v.union(v.literal("image"), v.literal("video"))),
     authorId: v.string(),
+    authorName: v.optional(v.string()),
+    authorImage: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
     isEdited: v.optional(v.boolean()),
@@ -66,7 +68,12 @@ export default defineSchema({
   notifications: defineTable({
     userId: v.string(),
     actorId: v.string(),
-    type: v.union(v.literal("like"), v.literal("comment"), v.literal("reply"), v.literal("follow")),
+    type: v.union(
+      v.literal("like"),
+      v.literal("comment"),
+      v.literal("reply"),
+      v.literal("follow")
+    ),
     postId: v.optional(v.id("posts")),
     commentId: v.optional(v.id("comments")),
     read: v.boolean(),
@@ -74,4 +81,13 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_read", ["userId", "read"]),
+
+  userProfiles: defineTable({
+    userId: v.string(),
+    bio: v.optional(v.string()),
+    username: v.optional(v.string()),
+    coverImageUrl: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .searchIndex("search_username", { searchField: "username" }),
 })

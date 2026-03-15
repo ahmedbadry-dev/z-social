@@ -1,12 +1,13 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { requireAuthUserId } from "./helpers"
+import { getCurrentUserId, requireAuthUserId } from "./helpers"
 
 export const getNotifications = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return { page: [], isDone: true, continueCursor: "" }
     return ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", currentUserId))
@@ -18,10 +19,13 @@ export const getNotifications = query({
 export const getUnreadNotificationsCount = query({
   args: {},
   handler: async (ctx) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return 0
     const unread = await ctx.db
       .query("notifications")
-      .withIndex("by_user_read", (q) => q.eq("userId", currentUserId).eq("read", false))
+      .withIndex("by_user_read", (q) =>
+        q.eq("userId", currentUserId).eq("read", false)
+      )
       .collect()
     return unread.length
   },
@@ -30,13 +34,20 @@ export const getUnreadNotificationsCount = query({
 export const markAllAsRead = mutation({
   args: {},
   handler: async (ctx) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return []
     const unread = await ctx.db
       .query("notifications")
-      .withIndex("by_user_read", (q) => q.eq("userId", currentUserId).eq("read", false))
+      .withIndex("by_user_read", (q) =>
+        q.eq("userId", currentUserId).eq("read", false)
+      )
       .collect()
 
-    await Promise.all(unread.map((notification) => ctx.db.patch(notification._id, { read: true })))
+    await Promise.all(
+      unread.map((notification) =>
+        ctx.db.patch(notification._id, { read: true })
+      )
+    )
     return null
   },
 })
@@ -44,7 +55,8 @@ export const markAllAsRead = mutation({
 export const markAsRead = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, args) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return []
     const notification = await ctx.db.get(args.notificationId)
     if (!notification || notification.userId !== currentUserId) {
       return null

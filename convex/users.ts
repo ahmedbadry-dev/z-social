@@ -80,6 +80,7 @@ export const getUserProfile = query({
       isOwnProfile: currentUserId === args.userId,
       bio: profileDoc?.bio ?? "",
       username: profileDoc?.username ?? "",
+      coverImageUrl: profileDoc?.coverImageUrl ?? null,
     }
   },
 })
@@ -88,6 +89,7 @@ export const updateUserProfile = mutation({
   args: {
     bio: v.optional(v.string()),
     username: v.optional(v.string()),
+    coverImageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const currentUser = await requireAuth(ctx)
@@ -98,22 +100,23 @@ export const updateUserProfile = mutation({
       .withIndex("by_user", (q) => q.eq("userId", currentUserId))
       .first()
 
-    const bio = args.bio?.trim()
-    const username = args.username?.trim()
-
     if (existing) {
-      await ctx.db.patch(existing._id, {
-        bio: bio || undefined,
-        username: username || undefined,
-      })
-      return existing._id
-    }
+      const updates: Record<string, string | undefined> = {}
+      if (args.bio !== undefined) updates.bio = args.bio.trim() || undefined
+      if (args.username !== undefined)
+        updates.username = args.username.trim() || undefined
+      if (args.coverImageUrl !== undefined)
+        updates.coverImageUrl = args.coverImageUrl || undefined
 
-    return await ctx.db.insert("userProfiles", {
-      userId: currentUserId,
-      bio: bio || undefined,
-      username: username || undefined,
-    })
+      await ctx.db.patch(existing._id, updates)
+    } else {
+      await ctx.db.insert("userProfiles", {
+        userId: currentUserId,
+        bio: args.bio?.trim() || undefined,
+        username: args.username?.trim() || undefined,
+        coverImageUrl: args.coverImageUrl || undefined,
+      })
+    }
   },
 })
 
@@ -162,7 +165,9 @@ export const deleteUserData = mutation({
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", currentUserId))
       .collect()
-    await Promise.all(notificationsForUser.map((item) => ctx.db.delete(item._id)))
+    await Promise.all(
+      notificationsForUser.map((item) => ctx.db.delete(item._id))
+    )
 
     const allNotifications = await ctx.db.query("notifications").collect()
     await Promise.all(

@@ -68,7 +68,12 @@ export default defineSchema({
   notifications: defineTable({
     userId: v.string(),
     actorId: v.string(),
-    type: v.union(v.literal("like"), v.literal("comment"), v.literal("reply"), v.literal("follow")),
+    type: v.union(
+      v.literal("like"),
+      v.literal("comment"),
+      v.literal("reply"),
+      v.literal("follow")
+    ),
     postId: v.optional(v.id("posts")),
     commentId: v.optional(v.id("comments")),
     read: v.boolean(),
@@ -81,5 +86,6 @@ export default defineSchema({
     userId: v.string(),
     bio: v.optional(v.string()),
     username: v.optional(v.string()),
+    coverImageUrl: v.optional(v.string()),
   }).index("by_user", ["userId"]),
 })

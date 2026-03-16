@@ -33,6 +33,14 @@ export const getConversations = query({
       }
     }
 
+    const allUnread = await ctx.db
+      .query("messages")
+      .withIndex("by_receiver", (q) => q.eq("receiverId", currentUserId))
+      .filter((q) => q.eq(q.field("read"), false))
+      .collect()
+
+    const unreadPartners = new Set(allUnread.map((msg) => msg.senderId))
+
     return Array.from(conversationMap.entries())
       .sort(([, a], [, b]) => b.createdAt - a.createdAt)
       .map(([partnerId, lastMessage]) => ({
@@ -40,6 +48,7 @@ export const getConversations = query({
         lastMessage: lastMessage.content,
         lastMessageTime: lastMessage.createdAt,
         isLastMessageMine: lastMessage.senderId === currentUserId,
+        hasUnread: unreadPartners.has(partnerId), // ← أضف هذا السطر
       }))
   },
 })

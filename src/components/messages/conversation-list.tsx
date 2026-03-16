@@ -55,6 +55,7 @@ export function ConversationList({ selectedUserId, onSelect }: ConversationListP
             lastMessage={conversation.lastMessage}
             lastMessageTime={conversation.lastMessageTime}
             isLastMessageMine={conversation.isLastMessageMine}
+            hasUnread={conversation.hasUnread}  // ← أضف هذا
             isActive={selectedUserId === conversation.partnerId}
             onClick={() => onSelect(conversation.partnerId)}
           />

@@ -1,5 +1,4 @@
 "use client"
-
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { cn, formatRelativeTime } from "@/lib/utils"
 
@@ -9,6 +8,7 @@ interface ConversationItemProps {
   lastMessageTime: number
   isLastMessageMine: boolean
   isActive: boolean
+  hasUnread?: boolean
   onClick: () => void
 }
 
@@ -23,6 +23,7 @@ export function ConversationItem({
   lastMessageTime,
   isLastMessageMine,
   isActive,
+  hasUnread = false,
   onClick,
 }: ConversationItemProps) {
   const displayName = truncatePartnerId(partnerId)
@@ -39,10 +40,26 @@ export function ConversationItem({
       <UserAvatar name={displayName} size="md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm font-semibold text-[#0F172A]">{displayName}</p>
-          <span className="shrink-0 text-xs text-[#64748B]">{formatRelativeTime(lastMessageTime)}</span>
+          <p className={cn(
+            "truncate text-sm text-[#0F172A]",
+            hasUnread ? "font-bold" : "font-semibold"
+          )}>
+            {displayName}
+          </p>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs text-[#64748B]">
+              {formatRelativeTime(lastMessageTime)}
+            </span>
+            {/* Blue dot — disappears when conversation is open */}
+            {hasUnread && !isActive && (
+              <span className="h-2.5 w-2.5 rounded-full bg-[#3B55E6]" />
+            )}
+          </div>
         </div>
-        <p className="truncate text-xs text-[#64748B]">
+        <p className={cn(
+          "truncate text-xs",
+          hasUnread ? "font-medium text-[#0F172A]" : "text-[#64748B]"
+        )}>
           {isLastMessageMine ? "You: " : ""}
           {lastMessage}
         </p>

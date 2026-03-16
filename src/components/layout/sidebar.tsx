@@ -1,6 +1,6 @@
 "use client"
 
-import { useConvexAuth, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { Authenticated, AuthLoading } from "convex/react"
 import { Bell, Home, Send, User } from "lucide-react"
 import Link from "next/link"
@@ -32,6 +32,8 @@ function SidebarSkeleton() {
 function SidebarContent() {
   const pathname = usePathname()
   const currentUser = useQuery(api.auth.getCurrentUser)
+  const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount)
+  const unreadMessages = useQuery(api.messages.getUnreadCount)
 
   const userProfile = useQuery(
     api.users.getUserProfile,
@@ -74,6 +76,8 @@ function SidebarContent() {
       <nav className="space-y-1 p-3">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(`${href}/`)
+          const showNotificationsBadge = href === "/notifications" && !!unreadNotifications && unreadNotifications > 0
+          const showMessagesBadge = href === "/messages" && !!unreadMessages && unreadMessages > 0
           return (
             <Link
               key={href}
@@ -85,6 +89,16 @@ function SidebarContent() {
             >
               <Icon className="size-5" />
               <span>{label}</span>
+              {showNotificationsBadge && (
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              )}
+              {showMessagesBadge && (
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                  {unreadMessages > 9 ? "9+" : unreadMessages}
+                </span>
+              )}
             </Link>
           )
         })}

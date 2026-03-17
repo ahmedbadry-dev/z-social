@@ -3,7 +3,6 @@
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { AuthCard } from "@/components/auth/auth-card"
@@ -12,12 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-})
-
-type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations"
 
 export default function ForgotPasswordPage() {
   const router = useRouter()

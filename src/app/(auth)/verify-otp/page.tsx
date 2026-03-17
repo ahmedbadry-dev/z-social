@@ -13,6 +13,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { authClient } from "@/lib/auth-client"
+import { otpSchema } from "@/lib/validations"
 
 export default function VerifyOtpPage() {
   const router = useRouter()
@@ -41,8 +42,9 @@ export default function VerifyOtpPage() {
       return
     }
 
-    if (otp.length !== 4) {
-      toast.error("Please enter the 4-digit code")
+    const validation = otpSchema.safeParse({ otp })
+    if (!validation.success) {
+      toast.error(validation.error.issues[0]?.message ?? "Invalid code")
       return
     }
 

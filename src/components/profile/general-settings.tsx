@@ -4,7 +4,6 @@ import Image from "next/image"
 import { ImageUp, Loader2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
@@ -15,14 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAvatarUpload } from "@/hooks/use-avatar-upload"
 import { authClient } from "@/lib/auth-client"
 import { api } from "../../../convex/_generated/api"
-
-const generalSettingsSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(50),
-  username: z.string().max(30, "Username cannot exceed 30 characters").optional(),
-  bio: z.string().max(160, "Bio cannot exceed 160 characters").optional(),
-})
-
-type GeneralSettingsInput = z.infer<typeof generalSettingsSchema>
+import { generalSettingsSchema, type GeneralSettingsInput } from "@/lib/validations"
 
 export function GeneralSettings() {
   const currentUser = useQuery(api.auth.getCurrentUser)

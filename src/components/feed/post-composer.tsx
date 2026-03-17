@@ -4,7 +4,6 @@ import Image from "next/image"
 import { ImagePlus, Loader2, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
@@ -14,12 +13,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Textarea } from "@/components/ui/textarea"
 import { usePostMediaUpload } from "@/hooks/use-post-media-upload"
 import { api } from "../../../convex/_generated/api"
-
-const postSchema = z.object({
-  content: z.string().min(1, "Post cannot be empty").max(500),
-})
-
-type PostInput = z.infer<typeof postSchema>
+import { createPostSchema, type CreatePostInput } from "@/lib/validations"
 
 export function PostComposer() {
   const createPost = useMutation(api.posts.createPost)
@@ -29,8 +23,8 @@ export function PostComposer() {
   const [mediaFile, setMediaFile] = useState<File | null>(null)
   const [mediaPreview, setMediaPreview] = useState<string | null>(null)
 
-  const form = useForm<PostInput>({
-    resolver: zodResolver(postSchema),
+  const form = useForm<CreatePostInput>({
+    resolver: zodResolver(createPostSchema),
     defaultValues: { content: "" },
   })
 
@@ -50,7 +44,7 @@ export function PostComposer() {
     setMediaPreview(file ? URL.createObjectURL(file) : null)
   }
 
-  const onSubmit = async (data: PostInput) => {
+  const onSubmit = async (data: CreatePostInput) => {
     const content = data.content.trim()
     let mediaData:
       | {

@@ -5,7 +5,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { AuthCard } from "@/components/auth/auth-card"
@@ -17,28 +16,22 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-})
-
-type LoginInput = z.infer<typeof loginSchema>
+import { signInSchema, type SignInInput } from "@/lib/validations"
 
 export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<SignInInput>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   })
 
-  const onSubmit = async (data: LoginInput) => {
+  const onSubmit = async (data: SignInInput) => {
     const result = await authClient.signIn.email({
       email: data.email,
       password: data.password,

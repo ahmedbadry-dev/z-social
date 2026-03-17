@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { SocialLogo } from "@/components/auth/social-logo"
 import { authClient } from "@/lib/auth-client"
+import { useAuthStore } from "@/stores/auth-store"
 
 export function Navbar() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export function Navbar() {
   const [q, setQ] = useQueryState("q", { defaultValue: "" })
   const [inputValue, setInputValue] = useState(q)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { clearCachedUser } = useAuthStore()
 
   useEffect(() => {
     setInputValue(q)
@@ -27,7 +29,14 @@ export function Navbar() {
   const onLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await authClient.signOut()
+      clearCachedUser()
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.replace("/login")
+          },
+        },
+      })
     } finally {
       setIsLoggingOut(false)
     }

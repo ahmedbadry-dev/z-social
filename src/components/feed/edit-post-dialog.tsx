@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { editPostSchema } from "@/lib/validations"
 
 interface EditPostDialogProps {
   post: { _id: Id<"posts">; content: string }
@@ -38,7 +39,7 @@ export function EditPostDialog({
   }, [open, post.content])
 
   const trimmed = content.trim()
-  const canSave = trimmed.length > 0 && trimmed.length <= 500 && !isSaving
+  const canSave = editPostSchema.safeParse({ content: trimmed }).success && !isSaving
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,7 +65,9 @@ export function EditPostDialog({
             type="button"
             disabled={!canSave}
             onClick={() => {
-              void onSave(trimmed)
+              if (editPostSchema.safeParse({ content: trimmed }).success) {
+                void onSave(trimmed)
+              }
             }}
           >
             {isSaving ? <Loader2 className="size-4 animate-spin" /> : "Save Changes"}

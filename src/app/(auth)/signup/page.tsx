@@ -18,16 +18,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
+import { signUpSchema } from "@/lib/validations"
 
-const signupSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
+const signupSchema = signUpSchema.extend({
   username: z
     .string()
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username cannot exceed 20 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
   terms: z.boolean().refine((value) => value === true, {
     message: "You must accept the terms",
   }),

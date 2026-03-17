@@ -4,7 +4,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { AuthCard } from "@/components/auth/auth-card"
@@ -13,18 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
-
-const resetSchema = z
-  .object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  })
-
-type ResetInput = z.infer<typeof resetSchema>
+import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations"
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -33,15 +21,15 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const form = useForm<ResetInput>({
-    resolver: zodResolver(resetSchema),
+  const form = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: "",
       confirmPassword: "",
     },
   })
 
-  const onSubmit = async (data: ResetInput) => {
+  const onSubmit = async (data: ResetPasswordInput) => {
     if (!token) {
       toast.error("Invalid or missing reset token")
       return

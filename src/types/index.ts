@@ -1,38 +1,77 @@
 import type { Id } from "../../convex/_generated/dataModel"
 
-export interface User {
+export interface CurrentUser {
   _id: string
   name: string
-  username: string
   email: string
-  bio?: string
-  avatarUrl?: string
-  coverImageUrl?: string
-  createdAt: number
+  image?: string | null
 }
 
-export interface Post {
+export interface PostCardData {
   _id: Id<"posts">
   content: string
   mediaUrl?: string
   mediaType?: "image" | "video"
   authorId: string
+  authorName: string
+  authorImage?: string
   createdAt: number
-  updatedAt?: number
   isEdited?: boolean
-}
-
-export interface PostWithMeta extends Post {
-  author: User
   likesCount: number
   commentsCount: number
   isLikedByMe: boolean
   isSavedByMe: boolean
+  isOwnPost: boolean
 }
 
-export interface UserProfile extends User {
+export interface CommentData {
+  _id: Id<"comments">
+  content: string
+  authorId: string
+  authorName: string
+  authorImage?: string
+  postId: Id<"posts">
+  parentId?: Id<"comments">
+  createdAt: number
+}
+
+export type NotificationType = "like" | "comment" | "reply" | "follow"
+
+export interface NotificationData {
+  _id: Id<"notifications">
+  type: NotificationType
+  actorId: string
+  userId: string
+  postId?: Id<"posts">
+  read: boolean
+  createdAt: number
+}
+
+export interface ConversationData {
+  partnerId: string
+  lastMessage: string
+  lastMessageTime: number
+  isLastMessageMine: boolean
+  hasUnread: boolean
+}
+
+export interface MessageData {
+  _id: Id<"messages">
+  content: string
+  senderId: string
+  receiverId: string
+  read: boolean
+  createdAt: number
+}
+
+export interface UserProfileData {
+  userId: string
+  bio?: string | null
+  username?: string | null
+  coverImageUrl?: string | null
   postsCount: number
   followersCount: number
   followingCount: number
-  isFollowedByMe?: boolean
+  isFollowing: boolean
+  isOwnProfile: boolean
 }

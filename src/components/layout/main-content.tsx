@@ -3,6 +3,7 @@
 import { Authenticated, AuthLoading } from "convex/react"
 import { Sidebar } from "./sidebar"
 import { RightPanel } from "./right-panel"
+import { ZustandHydration } from "@/components/providers/zustand-hydration"
 
 interface MainContentProps {
     children: React.ReactNode
@@ -24,6 +25,10 @@ function SidebarSkeleton() {
 export function MainContent({ children }: MainContentProps) {
     return (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_1fr] lg:grid-cols-[240px_1fr_240px]">
+
+            <Authenticated>
+                <ZustandHydration />
+            </Authenticated>
 
             <aside className="hidden md:block">
                 <AuthLoading>

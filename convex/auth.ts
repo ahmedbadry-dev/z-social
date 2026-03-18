@@ -20,6 +20,14 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+      sendResetPassword: async ({ user, url }) => {
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM!,
+          to: user.email,
+          subject: "Reset your password",
+          html: `<p>Click <a href="${url}">here</a> to reset your password</p>`,
+        })
+      },
     },
     socialProviders: {
       google: {

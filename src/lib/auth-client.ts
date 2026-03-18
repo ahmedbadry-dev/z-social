@@ -4,12 +4,11 @@ import { magicLinkClient, emailOTPClient } from "better-auth/client/plugins"
 
 const baseURL =
   process.env.NEXT_PUBLIC_BETTER_AUTH_URL ||
-  (typeof window !== "undefined"
-    ? window.location.origin
-    : `https://${process.env.VERCEL_URL}`)
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "")
 
 export const authClient = createAuthClient({
-  baseURL: baseURL!,
+  baseURL: baseURL,
   plugins: [convexClient(), magicLinkClient(), emailOTPClient()],
 })
 

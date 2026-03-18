@@ -71,7 +71,9 @@ function SidebarContent() {
       </div>
       <div className="border-b border-neutral-200 px-4 pt-8 pb-4">
         <p className="text-base font-semibold text-[#0F172A]">{displayName}</p>
-        <p className="text-sm text-[#64748B]">Welcome back to Social</p>
+        <p className="max-w-[160px] truncate text-sm text-[#64748B]">
+          {currentUser?.email ?? ""}
+        </p>
       </div>
       <nav className="space-y-1 p-3">
         {navItems.map(({ href, label, icon: Icon }) => {

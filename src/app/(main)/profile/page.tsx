@@ -1,12 +1,7 @@
-"use client"
+import { ProfilePageClient } from "@/components/profile/profile-page-client"
 
-import { Authenticated } from "convex/react"
-import { ProfileContent } from "@/components/profile/profile-content"
+export const metadata = { title: "Profile" }
 
 export default function ProfilePage() {
-  return (
-    <Authenticated>
-      <ProfileContent />
-    </Authenticated>
-  )
+  return <ProfilePageClient />
 }

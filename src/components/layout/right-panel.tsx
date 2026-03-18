@@ -8,6 +8,11 @@ import { api } from "../../../convex/_generated/api"
 
 type FollowStateMap = Record<string, boolean>
 
+function getDisplayName(userId: string) {
+  if (userId.length <= 16) return userId
+  return `${userId.slice(0, 6)}...${userId.slice(-4)}`
+}
+
 export function RightPanel() {
   const suggestedUsers = useQuery(api.users.getSuggestedUsers)
   const toggleFollow = useMutation(api.follows.toggleFollow)
@@ -48,13 +53,12 @@ export function RightPanel() {
           <div className="space-y-3">
             {suggestions.map((item) => {
               const isFollowing = followMap[item.userId] ?? false
+              const displayName = getDisplayName(item.userId)
               return (
                 <div key={item.userId} className="flex items-center gap-2">
-                  <UserAvatar name={item.userId} size="sm" />
+                  <UserAvatar name={displayName} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[#0F172A]">
-                      {item.name ?? item.userId.slice(0, 12) + "..."}
-                    </p>
+                    <p className="truncate text-sm font-semibold text-[#0F172A]">{displayName}</p>
                     <p className="truncate text-xs text-[#64748B]">Suggested for you</p>
                   </div>
                   <button

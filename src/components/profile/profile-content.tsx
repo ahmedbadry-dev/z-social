@@ -48,7 +48,6 @@ export function ProfileContent() {
         image={currentUser.image ?? undefined}
         username={profile.username ?? undefined}
         bio={profile.bio ?? undefined}
-        coverImageUrl={profile.coverImageUrl ?? undefined}
         postsCount={profile.postsCount}
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}

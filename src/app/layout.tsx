@@ -20,8 +20,18 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Social",
-  description: "A modern social platform",
+  title: {
+    default: "Social — Connect with people",
+    template: "%s | Social",
+  },
+  description:
+    "A modern social platform to share posts, connect with friends, and stay updated.",
+  keywords: ["social", "network", "posts", "connect"],
+  openGraph: {
+    title: "Social",
+    description: "A modern social platform",
+    type: "website",
+  },
 }
 
 export default async function RootLayout({

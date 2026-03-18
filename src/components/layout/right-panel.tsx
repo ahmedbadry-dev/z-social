@@ -25,7 +25,7 @@ export function RightPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="flex h-fit flex-col gap-4">
       {suggestedUsers === undefined && (
         <div className="space-y-3 rounded-lg bg-white p-4 shadow-sm">
           <div className="h-4 w-32 animate-pulse rounded bg-[#E2E8F0]" />
@@ -52,7 +52,9 @@ export function RightPanel() {
                 <div key={item.userId} className="flex items-center gap-2">
                   <UserAvatar name={item.userId} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[#0F172A]">{item.userId}</p>
+                    <p className="truncate text-sm font-semibold text-[#0F172A]">
+                      {item.name ?? item.userId.slice(0, 12) + "..."}
+                    </p>
                     <p className="truncate text-xs text-[#64748B]">Suggested for you</p>
                   </div>
                   <button

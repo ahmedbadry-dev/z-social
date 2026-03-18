@@ -18,7 +18,7 @@ export function SavedPostsTab() {
 
   if (status === "LoadingFirstPage" || currentUser === undefined) {
     return (
-      <div className="space-y-4 p-6">
+      <div className="space-y-4 ">
         <PostSkeleton />
         <PostSkeleton />
       </div>
@@ -38,7 +38,7 @@ export function SavedPostsTab() {
   const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 ">
       {results.map((post) => (
         <PostCard
           key={post._id}

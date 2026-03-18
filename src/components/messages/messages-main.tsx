@@ -16,8 +16,9 @@ export function MessagesMain() {
   const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
 
   return (
-    <div className="min-h-[600px] overflow-hidden rounded-lg bg-white shadow-sm">
-      <div className="flex h-[600px]">
+    <div className="overflow-hidden rounded-lg bg-white shadow-sm" style={{ height: "calc(100vh - 161px)" }}>
+      <div className="flex h-full">
+
         <div className={`${selectedUserId ? "hidden md:block" : "block"} w-full md:w-[280px] md:shrink-0`}>
           <ConversationList
             selectedUserId={selectedUserId}

@@ -21,7 +21,7 @@ export function MyPostsTab({ userId }: MyPostsTabProps) {
 
   if (status === "LoadingFirstPage") {
     return (
-      <div className="space-y-4 p-6">
+      <div className="space-y-4">
         <PostSkeleton />
         <PostSkeleton />
       </div>
@@ -35,7 +35,7 @@ export function MyPostsTab({ userId }: MyPostsTabProps) {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 ">
       {results.map((post) => (
         <PostCard
           key={post._id}

@@ -1,21 +1,21 @@
 "use client"
 
 import { useQueryState } from "nuqs"
-import { useQuery } from "convex/react"
+import { Authenticated, useQuery } from "convex/react"
 import { MyPostsTab } from "@/components/profile/my-posts-tab"
 import { ProfileHeader } from "@/components/profile/profile-header"
 import { ProfileSettings } from "@/components/profile/profile-settings"
 import { ProfileTabs } from "@/components/profile/profile-tabs"
 import { SavedPostsTab } from "@/components/profile/saved-posts-tab"
+import { RightPanel } from "@/components/layout/right-panel"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { api } from "../../../convex/_generated/api"
-import { useEffect } from "react"
 
 export function ProfileContent() {
   const currentUser = useQuery(api.auth.getCurrentUser)
   const profile = useQuery(
     api.users.getUserProfile,
-    currentUser?._id ? { userId: currentUser._id } : "skip"
+    currentUser?._id ? { userId: String(currentUser._id) } : "skip"
   )
   const [activeTab, setActiveTab] = useQueryState("tab", {
     defaultValue: "posts",
@@ -37,10 +37,10 @@ export function ProfileContent() {
   const userId = String(currentUser._id)
   const canViewSettings = profile.isOwnProfile
   const normalizedTab = activeTab === "settings" && !canViewSettings ? "posts" : activeTab
-
+  const isSettingsTab = normalizedTab === "settings"
 
   return (
-    <section className="overflow-hidden rounded-lg bg-white shadow-sm">
+    <div className="space-y-4">
       <ProfileHeader
         userId={userId}
         name={currentUser.name ?? "User"}
@@ -56,15 +56,29 @@ export function ProfileContent() {
         isOwnProfile={profile.isOwnProfile}
       />
 
-      <ProfileTabs
-        activeTab={normalizedTab}
-        isOwnProfile={canViewSettings}
-        onTabChange={(tab) => void setActiveTab(tab)}
-      />
+      <div className="rounded-lg bg-white shadow-sm">
+        <ProfileTabs
+          activeTab={normalizedTab}
+          isOwnProfile={canViewSettings}
+          onTabChange={(tab) => void setActiveTab(tab)}
+        />
+      </div>
 
-      {normalizedTab === "posts" && <MyPostsTab userId={userId} />}
-      {normalizedTab === "saved" && <SavedPostsTab />}
-      {normalizedTab === "settings" && canViewSettings && <ProfileSettings />}
-    </section>
+      {isSettingsTab ? (
+        <div>{canViewSettings && <ProfileSettings />}</div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
+          <div className="min-w-0">
+            {normalizedTab === "posts" && <MyPostsTab userId={userId} />}
+            {normalizedTab === "saved" && <SavedPostsTab />}
+          </div>
+          <aside className="hidden lg:block">
+            <Authenticated>
+              <RightPanel />
+            </Authenticated>
+          </aside>
+        </div>
+      )}
+    </div>
   )
 }

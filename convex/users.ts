@@ -33,7 +33,14 @@ export const getSuggestedUsers = query({
       if (suggestedIds.length >= 4) break
     }
 
-    return suggestedIds.map((userId) => ({ userId }))
+    return suggestedIds.map((userId) => {
+      const post = recentPosts.find((p) => p.authorId === userId)
+      return {
+        userId,
+        name: post?.authorName ?? null,
+        image: post?.authorImage ?? null,
+      }
+    })
   },
 })
 

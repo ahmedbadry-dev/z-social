@@ -6,9 +6,7 @@ import {
   BookmarkCheck,
   Check,
   Edit3,
-  MessageCircle,
   MoreHorizontal,
-  ThumbsUp,
   Trash2,
 } from "lucide-react"
 import { useState } from "react"
@@ -16,6 +14,7 @@ import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { CommentItem } from "@/components/feed/comment-item"
+import { PostActions } from "@/components/feed/post-actions"
 import { EditPostDialog } from "@/components/feed/edit-post-dialog"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { api } from "../../../convex/_generated/api"
 import { formatRelativeTime } from "@/lib/utils"
+import type { ReactionType } from "@/types"
 
 interface PostCardProps {
   post: {
@@ -40,9 +40,10 @@ interface PostCardProps {
     authorImage?: string
     createdAt: number
     isEdited?: boolean
-    likesCount: number
+    myReaction: ReactionType | null
+    reactionsCount: number
+    reactionsSummary: Array<{ type: string; count: number }>
     commentsCount: number
-    isLikedByMe: boolean
     isSavedByMe: boolean
     isOwnPost: boolean
   }
@@ -52,33 +53,17 @@ interface PostCardProps {
 export function PostCard({ post, currentUserId }: PostCardProps) {
   const comments = useQuery(api.comments.getCommentsByPost, { postId: post._id })
   const addComment = useMutation(api.comments.addComment)
-  const toggleLikeMutation = useMutation(api.posts.toggleLike)
   const toggleSaveMutation = useMutation(api.posts.toggleSave)
   const updatePostMutation = useMutation(api.posts.updatePost)
   const deletePostMutation = useMutation(api.posts.deletePost)
 
   const [showComments, setShowComments] = useState(false)
   const [commentText, setCommentText] = useState("")
-  const [optimisticLiked, setOptimisticLiked] = useState(post.isLikedByMe)
-  const [optimisticCount, setOptimisticCount] = useState(post.likesCount)
   const [saved, setSaved] = useState(post.isSavedByMe)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleLike = async () => {
-    const newLiked = !optimisticLiked
-    setOptimisticLiked(newLiked)
-    setOptimisticCount((prev) => (newLiked ? prev + 1 : prev - 1))
-    try {
-      await toggleLikeMutation({ postId: post._id })
-    } catch {
-      setOptimisticLiked(!newLiked)
-      setOptimisticCount((prev) => (newLiked ? prev - 1 : prev + 1))
-      toast.error("Failed to update like")
-    }
-  }
 
   const handleSaveToggle = async () => {
     const next = !saved
@@ -194,25 +179,16 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         />
       )}
 
-      <div className="mt-3 flex items-center justify-between border-t pt-3">
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          onClick={() => setShowComments((prev) => !prev)}
-        >
-          <MessageCircle className="size-4" />
-          <span>Comment {post.commentsCount > 0 ? `(${post.commentsCount})` : ""}</span>
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          onClick={() => void handleLike()}
-        >
-          <ThumbsUp
-            className={`size-4 ${optimisticLiked ? "fill-[#3B55E6] text-[#3B55E6]" : ""}`}
-          />
-          <span className={optimisticLiked ? "text-[#3B55E6]" : ""}>{optimisticCount}</span>
-        </button>
+      <div className="mt-3">
+        <PostActions
+          postId={post._id}
+          myReaction={post.myReaction}
+          reactionsCount={post.reactionsCount}
+          reactionsSummary={post.reactionsSummary}
+          commentsCount={post.commentsCount}
+          onCommentToggle={() => setShowComments((prev) => !prev)}
+          onReactionChange={(_type, _countDelta) => {}}
+        />
       </div>
 
       {showComments && (

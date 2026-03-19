@@ -7,6 +7,13 @@ export interface CurrentUser {
   image?: string | null
 }
 
+export type ReactionType = "like" | "love" | "haha" | "wow" | "sad" | "angry"
+
+export interface ReactionSummary {
+  type: ReactionType
+  count: number
+}
+
 export interface PostCardData {
   _id: Id<"posts">
   content: string
@@ -17,9 +24,10 @@ export interface PostCardData {
   authorImage?: string
   createdAt: number
   isEdited?: boolean
-  likesCount: number
+  myReaction: ReactionType | null
+  reactionsCount: number
+  reactionsSummary: ReactionSummary[]
   commentsCount: number
-  isLikedByMe: boolean
   isSavedByMe: boolean
   isOwnPost: boolean
 }

@@ -10,11 +10,23 @@ async function buildPostWithMeta(
   post: PostDoc,
   currentUserId: string | null
 ) {
-  const likesCount = await ctx.db
+  const allReactions = await ctx.db
     .query("likes")
     .withIndex("by_post", (q) => q.eq("postId", post._id))
     .collect()
-    .then((rows) => rows.length)
+
+  const reactionsCount = allReactions.length
+
+  const reactionsSummary = Object.entries(
+    allReactions.reduce((acc, reaction) => {
+      const type = reaction.reactionType ?? "like"
+      acc[type] = (acc[type] ?? 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  )
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
 
   const commentsCount = await ctx.db
     .query("comments")
@@ -22,12 +34,14 @@ async function buildPostWithMeta(
     .collect()
     .then((rows) => rows.length)
 
-  const isLikedByMe = currentUserId
-    ? !!(await ctx.db
+  const myReactionDoc = currentUserId
+    ? await ctx.db
         .query("likes")
         .withIndex("by_post_user", (q) => q.eq("postId", post._id).eq("userId", currentUserId))
-        .unique())
-    : false
+        .unique()
+    : null
+
+  const myReaction = myReactionDoc ? (myReactionDoc.reactionType ?? "like") : null
 
   const isSavedByMe = currentUserId
     ? !!(await ctx.db
@@ -38,9 +52,10 @@ async function buildPostWithMeta(
 
   return {
     ...post,
-    likesCount,
+    myReaction,
+    reactionsCount,
+    reactionsSummary,
     commentsCount,
-    isLikedByMe,
     isSavedByMe,
   }
 }

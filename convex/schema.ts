@@ -31,6 +31,14 @@ export default defineSchema({
   likes: defineTable({
     postId: v.id("posts"),
     userId: v.string(),
+    reactionType: v.optional(v.union(
+      v.literal("like"),
+      v.literal("love"),
+      v.literal("haha"),
+      v.literal("wow"),
+      v.literal("sad"),
+      v.literal("angry")
+    )),
     createdAt: v.number(),
   })
     .index("by_post", ["postId"])

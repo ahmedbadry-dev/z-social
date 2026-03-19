@@ -54,9 +54,10 @@ export function FeedList() {
             authorImage: post.authorImage,
             createdAt: post.createdAt,
             isEdited: post.isEdited,
-            likesCount: post.likesCount,
+            myReaction: post.myReaction,
+            reactionsCount: post.reactionsCount,
+            reactionsSummary: post.reactionsSummary,
             commentsCount: post.commentsCount,
-            isLikedByMe: post.isLikedByMe,
             isSavedByMe: post.isSavedByMe,
             isOwnPost: currentUserId === post.authorId,
           }}

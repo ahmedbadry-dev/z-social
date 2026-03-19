@@ -1,3 +1,4 @@
+import type { ReactElement } from "react"
 import { FollowingList } from "@/components/profile/following-list"
 
 export const metadata = { title: "Following" }
@@ -8,7 +9,7 @@ interface FollowingPageProps {
 
 export default async function FollowingPage({
   searchParams,
-}: FollowingPageProps): Promise<JSX.Element> {
+}: FollowingPageProps): Promise<ReactElement> {
   const { userId } = await searchParams
 
   return <FollowingList userId={userId ?? ""} />

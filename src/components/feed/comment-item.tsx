@@ -131,7 +131,7 @@ export function CommentItem({
           {replies.map((reply) => (
             <CommentItem
               key={reply._id}
-              comment={{ ...reply, authorName: reply.authorName ?? reply.authorId }}
+              comment={{ ...reply, authorName: reply.authorId }}
               postId={postId}
               postAuthorId={postAuthorId}
               currentUserId={currentUserId}

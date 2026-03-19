@@ -38,7 +38,7 @@ function TabBarContent() {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "relative flex flex-col items-center justify-center gap-1 text-[11px] text-[#94A3B8]",
+              "relative flex flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground",
               isActive && "text-[#3B55E6]"
             )}
           >
@@ -60,7 +60,7 @@ function TabBarContent() {
 
 export function MobileTabBar() {
   return (
-    <nav className="fixed right-0 bottom-0 left-0 z-50 h-14 border-t border-neutral-200 bg-white md:hidden">
+    <nav className="fixed right-0 bottom-0 left-0 z-50 h-14 border-t border-border bg-card md:hidden">
       <Authenticated>
         <TabBarContent />
       </Authenticated>

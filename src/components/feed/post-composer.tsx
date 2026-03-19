@@ -81,7 +81,7 @@ export function PostComposer() {
   const contentLength = form.watch("content")?.length ?? 0
 
   return (
-    <section className="rounded-lg bg-white p-4 shadow-sm">
+    <section className="rounded-lg bg-card p-4 shadow-sm">
       <form className="space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <Controller
@@ -106,7 +106,7 @@ export function PostComposer() {
                       rows={3}
                       maxLength={500}
                       placeholder="What's on your mind?"
-                      className="min-h-24 resize-none border-none p-0 text-sm text-[#0F172A] shadow-none focus-visible:ring-0"
+                      className="min-h-24 resize-none border-none p-0 text-sm text-foreground shadow-none focus-visible:ring-0"
                     />
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export function PostComposer() {
         </FieldGroup>
 
         {mediaPreview && (
-          <div className="relative overflow-hidden rounded-lg border border-neutral-200">
+          <div className="relative overflow-hidden rounded-lg border border-border">
             {mediaFile?.type.startsWith("video/") ? (
               <video src={mediaPreview} controls className="max-h-80 w-full object-cover" />
             ) : (
@@ -151,14 +151,14 @@ export function PostComposer() {
           <Button
             type="button"
             variant="outline"
-            className="border-neutral-200"
+            className="border-border"
             onClick={() => fileInputRef.current?.click()}
           >
             <ImagePlus className="size-4" />
             Add Media
           </Button>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-[#64748B]">{contentLength}/500</span>
+            <span className="text-xs text-muted-foreground">{contentLength}/500</span>
             <Button
               type="submit"
               disabled={form.formState.isSubmitting || isUploading}

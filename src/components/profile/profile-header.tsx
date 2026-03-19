@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { useMutation } from "convex/react"
 import { Camera } from "lucide-react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { Button } from "@/components/ui/button"
@@ -140,16 +141,26 @@ export function ProfileHeader({
         </div>
 
         <div className="mt-5 flex items-center gap-8">
-          {[
-            { label: "Posts", value: postsCount },
-            { label: "Followers", value: followers },
-            { label: "Following", value: followingCount },
-          ].map(({ label, value }) => (
-            <div key={label} className="text-center">
-              <p className="text-lg font-bold text-foreground">{value}</p>
-              <p className="text-xs text-muted-foreground">{label}</p>
-            </div>
-          ))}
+          <div className="text-center">
+            <p className="text-lg font-bold text-foreground">{postsCount}</p>
+            <p className="text-xs text-muted-foreground">Posts</p>
+          </div>
+
+          <Link
+            href={`/profile/followers?userId=${userId}`}
+            className="text-center hover:opacity-75 transition-opacity"
+          >
+            <p className="text-lg font-bold text-foreground">{followers}</p>
+            <p className="text-xs text-muted-foreground">Followers</p>
+          </Link>
+
+          <Link
+            href={`/profile/following?userId=${userId}`}
+            className="text-center hover:opacity-75 transition-opacity"
+          >
+            <p className="text-lg font-bold text-foreground">{followingCount}</p>
+            <p className="text-xs text-muted-foreground">Following</p>
+          </Link>
         </div>
       </div>
     </div>

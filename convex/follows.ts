@@ -71,6 +71,82 @@ export const getFollowStatus = query({
   },
 })
 
+export const getFollowers = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx)
+
+    const followerDocs = await ctx.db
+      .query("follows")
+      .withIndex("by_following", (q) => q.eq("followingId", args.userId))
+      .collect()
+
+    return Promise.all(
+      followerDocs.map(async (doc) => {
+        const post = await ctx.db
+          .query("posts")
+          .withIndex("by_author", (q) => q.eq("authorId", doc.followerId))
+          .order("desc")
+          .first()
+
+        const isFollowedByMe = currentUserId
+          ? !!(await ctx.db
+              .query("follows")
+              .withIndex("by_pair", (q) =>
+                q.eq("followerId", currentUserId).eq("followingId", doc.followerId)
+              )
+              .unique())
+          : false
+
+        return {
+          userId: doc.followerId,
+          name: post?.authorName ?? null,
+          image: post?.authorImage ?? null,
+          isFollowedByMe,
+        }
+      })
+    )
+  },
+})
+
+export const getFollowing = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx)
+
+    const followingDocs = await ctx.db
+      .query("follows")
+      .withIndex("by_follower", (q) => q.eq("followerId", args.userId))
+      .collect()
+
+    return Promise.all(
+      followingDocs.map(async (doc) => {
+        const post = await ctx.db
+          .query("posts")
+          .withIndex("by_author", (q) => q.eq("authorId", doc.followingId))
+          .order("desc")
+          .first()
+
+        const isFollowedByMe = currentUserId
+          ? !!(await ctx.db
+              .query("follows")
+              .withIndex("by_pair", (q) =>
+                q.eq("followerId", currentUserId).eq("followingId", doc.followingId)
+              )
+              .unique())
+          : false
+
+        return {
+          userId: doc.followingId,
+          name: post?.authorName ?? null,
+          image: post?.authorImage ?? null,
+          isFollowedByMe,
+        }
+      })
+    )
+  },
+})
+
 export const getFollowingIds = query({
   args: {},
   handler: async (ctx) => {

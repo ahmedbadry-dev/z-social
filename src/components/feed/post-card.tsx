@@ -134,12 +134,12 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   }
 
   return (
-    <article className="rounded-lg bg-white p-4 shadow-sm">
+    <article className="rounded-lg bg-card p-4 shadow-sm">
       <header className="flex items-start gap-3">
         <UserAvatar name={post.authorName} imageUrl={post.authorImage} size="md" />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-[#0F172A]">{post.authorName}</p>
-          <p className="text-xs text-[#64748B]">{formatRelativeTime(post.createdAt)}</p>
+          <p className="truncate font-semibold text-foreground">{post.authorName}</p>
+          <p className="text-xs text-muted-foreground">{formatRelativeTime(post.createdAt)}</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -170,8 +170,8 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       </header>
 
       <div className="mt-3 space-y-2">
-        <p className="whitespace-pre-wrap text-sm text-[#0F172A]">{post.content}</p>
-        {post.isEdited && <p className="text-xs text-[#64748B]">(edited)</p>}
+        <p className="whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+        {post.isEdited && <p className="text-xs text-muted-foreground">(edited)</p>}
       </div>
 
       {post.mediaUrl && post.mediaType === "image" && (
@@ -197,7 +197,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       <div className="mt-3 flex items-center justify-between border-t pt-3">
         <button
           type="button"
-          className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-[#0F172A]"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           onClick={() => setShowComments((prev) => !prev)}
         >
           <MessageCircle className="size-4" />
@@ -205,7 +205,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         </button>
         <button
           type="button"
-          className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-[#0F172A]"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           onClick={() => void handleLike()}
         >
           <ThumbsUp
@@ -216,13 +216,13 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       </div>
 
       {showComments && (
-        <div className="mt-3 space-y-3 rounded-lg bg-[#F8FAFC] p-3">
+        <div className="mt-3 space-y-3 rounded-lg bg-muted p-3">
           <div className="flex items-center gap-2">
             <UserAvatar name={currentUserId} size="sm" />
             <input
               value={commentText}
               placeholder="Write a comment..."
-              className="h-9 flex-1 rounded-md border border-neutral-200 bg-white px-3 text-sm outline-none focus:border-[#3B55E6]"
+              className="h-9 flex-1 rounded-md border border-border bg-card px-3 text-sm outline-none focus:border-[#3B55E6]"
               onChange={(event) => setCommentText(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -233,7 +233,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             />
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-200 text-[#64748B] hover:bg-[#F1F5F9]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-muted"
               onClick={() => void handleCommentSubmit()}
             >
               <Check className="size-4" />
@@ -251,7 +251,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
               />
             ))}
             {comments && comments.length === 0 && (
-              <p className="text-sm text-[#64748B]">No comments yet.</p>
+              <p className="text-sm text-muted-foreground">No comments yet.</p>
             )}
           </div>
         </div>

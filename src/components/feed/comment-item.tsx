@@ -85,7 +85,9 @@ export function CommentItem({
             )}
             <p className="ml-auto text-xs text-muted-foreground">{formatRelativeTime(comment.createdAt)}</p>
           </div>
-          <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{comment.content}</p>
+          <p dir="auto" className="mt-1 whitespace-pre-wrap text-sm text-foreground">
+            {comment.content}
+          </p>
           <div className="mt-1 flex justify-end">
             <button
               type="button"

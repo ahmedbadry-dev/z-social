@@ -170,7 +170,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       </header>
 
       <div className="mt-3 space-y-2">
-        <p className="whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+        <p dir="auto" className="whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
         {post.isEdited && <p className="text-xs text-muted-foreground">(edited)</p>}
       </div>
 

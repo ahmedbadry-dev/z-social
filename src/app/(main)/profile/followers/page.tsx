@@ -1,3 +1,4 @@
+import type { ReactElement } from "react"
 import { FollowersList } from "@/components/profile/followers-list"
 
 export const metadata = { title: "Followers" }
@@ -8,7 +9,7 @@ interface FollowersPageProps {
 
 export default async function FollowersPage({
   searchParams,
-}: FollowersPageProps): Promise<JSX.Element> {
+}: FollowersPageProps): Promise<ReactElement> {
   const { userId } = await searchParams
 
   return <FollowersList userId={userId ?? ""} />

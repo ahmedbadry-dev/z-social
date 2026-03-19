@@ -41,8 +41,8 @@ export function NotificationItem({ notification }: NotificationItemProps) {
     <button
       type="button"
       className={cn(
-        "flex w-full items-center gap-3 border-b border-neutral-200 p-4 text-left transition-colors",
-        notification.read ? "bg-white" : "bg-[#F8FAFC]"
+        "flex w-full items-center gap-3 border-b border-border p-4 text-left transition-colors",
+        notification.read ? "bg-card" : "bg-muted"
       )}
       onClick={() => void markAsRead({ notificationId: notification._id })}
     >
@@ -54,8 +54,8 @@ export function NotificationItem({ notification }: NotificationItemProps) {
       />
       <UserAvatar name={notification.actorId} size="md" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-[#0F172A]">{text}</p>
-        <p className="text-xs text-[#64748B]">{formatRelativeTime(notification.createdAt)}</p>
+        <p className="truncate text-sm text-foreground">{text}</p>
+        <p className="text-xs text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>
       </div>
     </button>
   )

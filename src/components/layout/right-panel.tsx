@@ -32,24 +32,24 @@ export function RightPanel() {
   return (
     <div className="flex h-fit flex-col gap-4">
       {suggestedUsers === undefined && (
-        <div className="space-y-3 rounded-lg bg-white p-4 shadow-sm">
-          <div className="h-4 w-32 animate-pulse rounded bg-[#E2E8F0]" />
+        <div className="space-y-3 rounded-lg bg-card p-4 shadow-sm">
+          <div className="h-4 w-32 animate-pulse rounded bg-muted" />
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="flex items-center gap-3">
-              <div className="size-9 animate-pulse rounded-full bg-[#E2E8F0]" />
+              <div className="size-9 animate-pulse rounded-full bg-muted" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-3 w-20 animate-pulse rounded bg-[#E2E8F0]" />
-                <div className="h-2.5 w-24 animate-pulse rounded bg-[#E2E8F0]" />
+                <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                <div className="h-2.5 w-24 animate-pulse rounded bg-muted" />
               </div>
-              <div className="size-7 animate-pulse rounded-full bg-[#E2E8F0]" />
+              <div className="size-7 animate-pulse rounded-full bg-muted" />
             </div>
           ))}
         </div>
       )}
 
       {hasSuggestions && (
-        <section className="rounded-lg bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-[#0F172A]">Suggested Friends</h2>
+        <section className="rounded-lg bg-card p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Suggested Friends</h2>
           <div className="space-y-3">
             {suggestions.map((item) => {
               const isFollowing = followMap[item.userId] ?? false
@@ -58,12 +58,12 @@ export function RightPanel() {
                 <div key={item.userId} className="flex items-center gap-2">
                   <UserAvatar name={displayName} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[#0F172A]">{displayName}</p>
-                    <p className="truncate text-xs text-[#64748B]">Suggested for you</p>
+                    <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+                    <p className="truncate text-xs text-muted-foreground">Suggested for you</p>
                   </div>
                   <button
                     type="button"
-                    className="inline-flex size-7 items-center justify-center rounded-full border border-neutral-200 text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+                    className="inline-flex size-7 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={isFollowing ? "Unfollow user" : "Follow user"}
                     onClick={() => void onToggleFollow(item.userId)}
                   >
@@ -80,7 +80,7 @@ export function RightPanel() {
         </section>
       )}
 
-      <footer className="mt-auto px-2 pb-2 text-center text-xs text-[#94A3B8]">
+      <footer className="mt-auto px-2 pb-2 text-center text-xs text-muted-foreground">
         <p>© 2023 DevCut. All rights reserved.</p>
         <p className="mt-1">About · Help · Privacy & Terms</p>
       </footer>

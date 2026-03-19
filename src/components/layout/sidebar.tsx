@@ -18,12 +18,12 @@ const navItems = [
 
 function SidebarSkeleton() {
   return (
-    <div className="overflow-hidden rounded-lg bg-white shadow-sm">
-      <div className="h-20 bg-[#E2E8F0]" />
+    <div className="overflow-hidden rounded-lg bg-card shadow-sm">
+      <div className="h-20 bg-muted" />
       <div className="px-4 pb-4">
-        <div className="-mt-6 mb-3 size-12 animate-pulse rounded-full bg-[#E2E8F0]" />
-        <div className="mb-2 h-4 w-24 animate-pulse rounded bg-[#E2E8F0]" />
-        <div className="h-3 w-32 animate-pulse rounded bg-[#E2E8F0]" />
+        <div className="-mt-6 mb-3 size-12 animate-pulse rounded-full bg-muted" />
+        <div className="mb-2 h-4 w-24 animate-pulse rounded bg-muted" />
+        <div className="h-3 w-32 animate-pulse rounded bg-muted" />
       </div>
     </div>
   )
@@ -46,8 +46,8 @@ function SidebarContent() {
     "User"
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white shadow-sm">
-      <div className="relative h-20 bg-[#E2E8F0]">
+    <div className="overflow-hidden rounded-lg bg-card shadow-sm">
+      <div className="relative h-20 bg-muted">
         {/* Cover */}
         <div
           className="relative h-20"
@@ -58,7 +58,7 @@ function SidebarContent() {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }
-              : { backgroundColor: "#E2E8F0" }
+              : undefined
           }
         >
           <UserAvatar
@@ -69,9 +69,9 @@ function SidebarContent() {
           />
         </div>
       </div>
-      <div className="border-b border-neutral-200 px-4 pt-8 pb-4">
-        <p className="text-base font-semibold text-[#0F172A]">{displayName}</p>
-        <p className="max-w-[160px] truncate text-sm text-[#64748B]">
+      <div className="border-b border-border px-4 pt-8 pb-4">
+        <p className="text-base font-semibold text-foreground">{displayName}</p>
+        <p className="max-w-[160px] truncate text-sm text-muted-foreground">
           {currentUser?.email ?? ""}
         </p>
       </div>
@@ -85,8 +85,8 @@ function SidebarContent() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]",
-                isActive && "bg-[#F1F5F9] font-semibold text-[#0F172A]"
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                isActive && "bg-muted font-semibold text-foreground"
               )}
             >
               <Icon className="size-5" />

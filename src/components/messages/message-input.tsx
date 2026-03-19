@@ -38,7 +38,7 @@ export function MessageInput({ onSend, isSending }: MessageInputProps) {
         rows={1}
         value={value}
         placeholder="Type a message..."
-        className="max-h-24 min-h-10 flex-1 resize-none rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#3B55E6]"
+        className="max-h-24 min-h-10 flex-1 resize-none rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6]"
         onInput={autoResize}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={(event) => {

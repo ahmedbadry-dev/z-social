@@ -74,10 +74,10 @@ export function ProfileHeader({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg bg-card shadow-sm">
       {/* Cover image */}
       <div
-        className="relative h-[120px] bg-[#E2E8F0]"
+        className="relative h-[120px] bg-muted"
         style={coverImageUrl ? {
           backgroundImage: `url(${coverImageUrl})`,
           backgroundSize: "cover",
@@ -117,13 +117,13 @@ export function ProfileHeader({
           <div className="space-y-0.5">
             {/* Name + @username */}
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-[#0F172A]">{name}</h1>
+              <h1 className="text-xl font-bold text-foreground">{name}</h1>
               {username && (
-                <span className="text-sm text-[#64748B]">/ @{username}</span>
+                <span className="text-sm text-muted-foreground">/ @{username}</span>
               )}
             </div>
             {/* Bio or email */}
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-muted-foreground">
               {bio ?? email}
             </p>
           </div>
@@ -146,8 +146,8 @@ export function ProfileHeader({
             { label: "Following", value: followingCount },
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
-              <p className="text-lg font-bold text-[#0F172A]">{value}</p>
-              <p className="text-xs text-[#64748B]">{label}</p>
+              <p className="text-lg font-bold text-foreground">{value}</p>
+              <p className="text-xs text-muted-foreground">{label}</p>
             </div>
           ))}
         </div>

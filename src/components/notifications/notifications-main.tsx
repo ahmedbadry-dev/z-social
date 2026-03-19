@@ -21,9 +21,9 @@ export function NotificationsMain() {
   const isInitialLoading = status === "LoadingFirstPage"
 
   return (
-    <div className="rounded-lg bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-neutral-200 p-4">
-        <h2 className="text-base font-semibold text-[#0F172A]">Notifications</h2>
+    <div className="rounded-lg bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border p-4">
+        <h2 className="text-base font-semibold text-foreground">Notifications</h2>
         {hasUnread && (
           <Button
             type="button"

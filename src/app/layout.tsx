@@ -5,6 +5,7 @@ import { extractRouterConfig } from "uploadthing/server"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
 import { ourFileRouter } from "@/app/api/uploadthing/core"
 import { ConvexClientProvider } from "@/components/convex-client-provider"
+import { ThemeProvider } from "@/components/providers/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { getToken } from "@/lib/auth-server"
 import "./globals.css"
@@ -42,15 +43,22 @@ export default async function RootLayout({
   const initialToken = await getToken()
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-        <ConvexClientProvider initialToken={initialToken}>
-          <NuqsAdapter>
-            {children}
-            <Toaster position="bottom-right" richColors />
-          </NuqsAdapter>
-        </ConvexClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+          <ConvexClientProvider initialToken={initialToken}>
+            <NuqsAdapter>
+              {children}
+              <Toaster position="bottom-right" richColors />
+            </NuqsAdapter>
+          </ConvexClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

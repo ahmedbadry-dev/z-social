@@ -120,7 +120,7 @@
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(0.32 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
@@ -141,6 +141,19 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Social Platform custom token overrides */
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --neutral-800: #f1f5f9;
+  --neutral-700: #e2e8f0;
+  --neutral-600: #cbd5e1;
+  --neutral-500: #94a3b8;
+  --neutral-400: #64748b;
+  --neutral-300: #475569;
+  --neutral-200: #334155;
+  --neutral-100: #1e293b;
+  --primary-100: #1e2a5e;
 }
 
 @layer base {

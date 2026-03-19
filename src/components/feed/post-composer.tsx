@@ -106,6 +106,7 @@ export function PostComposer() {
                       rows={3}
                       maxLength={500}
                       placeholder="What's on your mind?"
+                      dir="auto"
                       className="min-h-24 resize-none border-none p-0 text-sm text-foreground shadow-none focus-visible:ring-0"
                     />
                   </div>

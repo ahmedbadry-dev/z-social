@@ -6,19 +6,16 @@ import {
   BookmarkCheck,
   Check,
   Edit3,
-  MessageCircle,
   MoreHorizontal,
-  ThumbsUp,
   Trash2,
 } from "lucide-react"
-import { useState } from "react"
+import { memo, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { CommentItem } from "@/components/feed/comment-item"
-import { EditPostDialog } from "@/components/feed/edit-post-dialog"
+import { PostActions } from "@/components/feed/post-actions"
 import { UserAvatar } from "@/components/shared/user-avatar"
-import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -28,6 +25,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { api } from "../../../convex/_generated/api"
 import { formatRelativeTime } from "@/lib/utils"
+import type { ReactionType } from "@/types"
+import dynamic from "next/dynamic"
+
+const EditPostDialog = dynamic(
+  () => import("@/components/feed/edit-post-dialog").then((m) => ({ default: m.EditPostDialog })),
+  { ssr: false }
+)
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/shared/confirm-dialog").then((m) => ({ default: m.ConfirmDialog })),
+  { ssr: false }
+)
 
 interface PostCardProps {
   post: {
@@ -40,45 +49,30 @@ interface PostCardProps {
     authorImage?: string
     createdAt: number
     isEdited?: boolean
-    likesCount: number
+    myReaction: ReactionType | null
+    reactionsCount: number
+    reactionsSummary: Array<{ type: string; count: number }>
     commentsCount: number
-    isLikedByMe: boolean
     isSavedByMe: boolean
     isOwnPost: boolean
   }
   currentUserId: string
 }
 
-export function PostCard({ post, currentUserId }: PostCardProps) {
+export const PostCard = memo(function PostCard({ post, currentUserId }: PostCardProps) {
   const comments = useQuery(api.comments.getCommentsByPost, { postId: post._id })
   const addComment = useMutation(api.comments.addComment)
-  const toggleLikeMutation = useMutation(api.posts.toggleLike)
   const toggleSaveMutation = useMutation(api.posts.toggleSave)
   const updatePostMutation = useMutation(api.posts.updatePost)
   const deletePostMutation = useMutation(api.posts.deletePost)
 
   const [showComments, setShowComments] = useState(false)
   const [commentText, setCommentText] = useState("")
-  const [optimisticLiked, setOptimisticLiked] = useState(post.isLikedByMe)
-  const [optimisticCount, setOptimisticCount] = useState(post.likesCount)
   const [saved, setSaved] = useState(post.isSavedByMe)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleLike = async () => {
-    const newLiked = !optimisticLiked
-    setOptimisticLiked(newLiked)
-    setOptimisticCount((prev) => (newLiked ? prev + 1 : prev - 1))
-    try {
-      await toggleLikeMutation({ postId: post._id })
-    } catch {
-      setOptimisticLiked(!newLiked)
-      setOptimisticCount((prev) => (newLiked ? prev - 1 : prev + 1))
-      toast.error("Failed to update like")
-    }
-  }
 
   const handleSaveToggle = async () => {
     const next = !saved
@@ -134,12 +128,12 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   }
 
   return (
-    <article className="rounded-lg bg-white p-4 shadow-sm">
+    <article className="rounded-lg bg-card p-4 shadow-sm">
       <header className="flex items-start gap-3">
         <UserAvatar name={post.authorName} imageUrl={post.authorImage} size="md" />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-[#0F172A]">{post.authorName}</p>
-          <p className="text-xs text-[#64748B]">{formatRelativeTime(post.createdAt)}</p>
+          <p className="truncate font-semibold text-foreground">{post.authorName}</p>
+          <p className="text-xs text-muted-foreground">{formatRelativeTime(post.createdAt)}</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -170,8 +164,8 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
       </header>
 
       <div className="mt-3 space-y-2">
-        <p className="whitespace-pre-wrap text-sm text-[#0F172A]">{post.content}</p>
-        {post.isEdited && <p className="text-xs text-[#64748B]">(edited)</p>}
+        <p dir="auto" className="whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+        {post.isEdited && <p className="text-xs text-muted-foreground">(edited)</p>}
       </div>
 
       {post.mediaUrl && post.mediaType === "image" && (
@@ -181,6 +175,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             alt="Post media"
             width={900}
             height={500}
+            loading="lazy"
             className="max-h-[400px] w-full object-cover"
           />
         </div>
@@ -194,35 +189,26 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         />
       )}
 
-      <div className="mt-3 flex items-center justify-between border-t pt-3">
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-[#0F172A]"
-          onClick={() => setShowComments((prev) => !prev)}
-        >
-          <MessageCircle className="size-4" />
-          <span>Comment {post.commentsCount > 0 ? `(${post.commentsCount})` : ""}</span>
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-[#0F172A]"
-          onClick={() => void handleLike()}
-        >
-          <ThumbsUp
-            className={`size-4 ${optimisticLiked ? "fill-[#3B55E6] text-[#3B55E6]" : ""}`}
-          />
-          <span className={optimisticLiked ? "text-[#3B55E6]" : ""}>{optimisticCount}</span>
-        </button>
+      <div className="mt-3">
+        <PostActions
+          postId={post._id}
+          myReaction={post.myReaction}
+          reactionsCount={post.reactionsCount}
+          reactionsSummary={post.reactionsSummary}
+          commentsCount={post.commentsCount}
+          onCommentToggle={() => setShowComments((prev) => !prev)}
+          onReactionChange={(_type, _countDelta) => {}}
+        />
       </div>
 
       {showComments && (
-        <div className="mt-3 space-y-3 rounded-lg bg-[#F8FAFC] p-3">
+        <div className="mt-3 space-y-3 rounded-lg bg-muted p-3">
           <div className="flex items-center gap-2">
             <UserAvatar name={currentUserId} size="sm" />
             <input
               value={commentText}
               placeholder="Write a comment..."
-              className="h-9 flex-1 rounded-md border border-neutral-200 bg-white px-3 text-sm outline-none focus:border-[#3B55E6]"
+              className="h-9 flex-1 rounded-md border border-border bg-card px-3 text-sm outline-none focus:border-[#3B55E6]"
               onChange={(event) => setCommentText(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -233,7 +219,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             />
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-200 text-[#64748B] hover:bg-[#F1F5F9]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-muted"
               onClick={() => void handleCommentSubmit()}
             >
               <Check className="size-4" />
@@ -251,29 +237,33 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
               />
             ))}
             {comments && comments.length === 0 && (
-              <p className="text-sm text-[#64748B]">No comments yet.</p>
+              <p className="text-sm text-muted-foreground">No comments yet.</p>
             )}
           </div>
         </div>
       )}
 
-      <EditPostDialog
-        post={{ _id: post._id, content: post.content }}
-        open={editOpen}
-        isSaving={isUpdating}
-        onOpenChange={setEditOpen}
-        onSave={handleSaveEdit}
-      />
-      <ConfirmDialog
-        open={deleteOpen}
-        title="Delete post"
-        description="This action cannot be undone."
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-        isLoading={isDeleting}
-        onOpenChange={setDeleteOpen}
-        onConfirm={handleDeletePost}
-      />
+      {editOpen && (
+        <EditPostDialog
+          post={{ _id: post._id, content: post.content }}
+          open={editOpen}
+          isSaving={isUpdating}
+          onOpenChange={setEditOpen}
+          onSave={handleSaveEdit}
+        />
+      )}
+      {deleteOpen && (
+        <ConfirmDialog
+          open={deleteOpen}
+          title="Delete post"
+          description="This action cannot be undone."
+          confirmLabel="Delete"
+          confirmVariant="destructive"
+          isLoading={isDeleting}
+          onOpenChange={setDeleteOpen}
+          onConfirm={handleDeletePost}
+        />
+      )}
     </article>
   )
-}
+})

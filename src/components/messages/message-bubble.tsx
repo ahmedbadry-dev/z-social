@@ -17,14 +17,14 @@ export function MessageBubble({ content, createdAt, isSent, isOptimistic }: Mess
             "rounded-2xl px-4 py-2 text-sm",
             isSent
               ? "rounded-br-sm bg-[#3B55E6] text-white"
-              : "rounded-bl-sm border border-[#E2E8F0] bg-white text-[#0F172A]"
+              : "rounded-bl-sm border border-border bg-card text-foreground"
           )}
         >
           {content}
         </div>
         <p
           className={cn(
-            "mt-1 text-xs text-[#64748B]",
+            "mt-1 text-xs text-muted-foreground",
             isSent ? "text-right" : "text-left"
           )}
         >

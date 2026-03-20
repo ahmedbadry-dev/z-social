@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { useMutation } from "convex/react"
 import { Camera } from "lucide-react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { Button } from "@/components/ui/button"
@@ -74,10 +75,10 @@ export function ProfileHeader({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg bg-card shadow-sm">
       {/* Cover image */}
       <div
-        className="relative h-[120px] bg-[#E2E8F0]"
+        className="relative h-[120px] bg-muted"
         style={coverImageUrl ? {
           backgroundImage: `url(${coverImageUrl})`,
           backgroundSize: "cover",
@@ -117,13 +118,13 @@ export function ProfileHeader({
           <div className="space-y-0.5">
             {/* Name + @username */}
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-[#0F172A]">{name}</h1>
+              <h1 className="text-xl font-bold text-foreground">{name}</h1>
               {username && (
-                <span className="text-sm text-[#64748B]">/ @{username}</span>
+                <span className="text-sm text-muted-foreground">/ @{username}</span>
               )}
             </div>
             {/* Bio or email */}
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-muted-foreground">
               {bio ?? email}
             </p>
           </div>
@@ -140,16 +141,26 @@ export function ProfileHeader({
         </div>
 
         <div className="mt-5 flex items-center gap-8">
-          {[
-            { label: "Posts", value: postsCount },
-            { label: "Followers", value: followers },
-            { label: "Following", value: followingCount },
-          ].map(({ label, value }) => (
-            <div key={label} className="text-center">
-              <p className="text-lg font-bold text-[#0F172A]">{value}</p>
-              <p className="text-xs text-[#64748B]">{label}</p>
-            </div>
-          ))}
+          <div className="text-center">
+            <p className="text-lg font-bold text-foreground">{postsCount}</p>
+            <p className="text-xs text-muted-foreground">Posts</p>
+          </div>
+
+          <Link
+            href={`/profile/followers?userId=${userId}`}
+            className="text-center hover:opacity-75 transition-opacity"
+          >
+            <p className="text-lg font-bold text-foreground">{followers}</p>
+            <p className="text-xs text-muted-foreground">Followers</p>
+          </Link>
+
+          <Link
+            href={`/profile/following?userId=${userId}`}
+            className="text-center hover:opacity-75 transition-opacity"
+          >
+            <p className="text-lg font-bold text-foreground">{followingCount}</p>
+            <p className="text-xs text-muted-foreground">Following</p>
+          </Link>
         </div>
       </div>
     </div>

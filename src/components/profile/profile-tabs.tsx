@@ -16,15 +16,15 @@ export function ProfileTabs({ activeTab, onTabChange, isOwnProfile }: ProfileTab
   ]
 
   return (
-    <div className="border-b border-neutral-200 px-6">
+    <div className="border-b border-border bg-card px-6">
       <div className="flex gap-6">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
             className={cn(
-              "border-b-2 border-transparent px-1 py-3 text-sm text-[#64748B] transition-colors hover:text-[#0F172A]",
-              activeTab === tab.key && "border-[#0F172A] font-semibold text-[#0F172A]"
+              "border-b-2 border-transparent px-1 py-3 text-sm text-muted-foreground transition-colors hover:text-foreground",
+              activeTab === tab.key && "border-foreground font-semibold text-foreground"
             )}
             onClick={() => onTabChange(tab.key)}
           >

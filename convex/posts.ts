@@ -11,11 +11,23 @@ async function buildPostWithMeta(
   post: PostDoc,
   currentUserId: string | null
 ) {
-  const likesCount = await ctx.db
+  const allReactions = await ctx.db
     .query("likes")
     .withIndex("by_post", (q) => q.eq("postId", post._id))
     .collect()
-    .then((rows: Doc<"likes">[]) => rows.length)
+
+  const reactionsCount = allReactions.length
+
+  const reactionsSummary = Object.entries(
+    allReactions.reduce((acc, reaction) => {
+      const type = reaction.reactionType ?? "like"
+      acc[type] = (acc[type] ?? 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  )
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
 
   const commentsCount = await ctx.db
     .query("comments")
@@ -23,12 +35,14 @@ async function buildPostWithMeta(
     .collect()
     .then((rows: Doc<"comments">[]) => rows.length)
 
-  const isLikedByMe = currentUserId
-    ? !!(await ctx.db
+  const myReactionDoc = currentUserId
+    ? await ctx.db
         .query("likes")
         .withIndex("by_post_user", (q) => q.eq("postId", post._id).eq("userId", currentUserId))
-        .unique())
-    : false
+        .unique()
+    : null
+
+  const myReaction = myReactionDoc ? (myReactionDoc.reactionType ?? "like") : null
 
   const isSavedByMe = currentUserId
     ? !!(await ctx.db
@@ -39,9 +53,10 @@ async function buildPostWithMeta(
 
   return {
     ...post,
-    likesCount,
+    myReaction,
+    reactionsCount,
+    reactionsSummary,
     commentsCount,
-    isLikedByMe,
     isSavedByMe,
   }
 }
@@ -215,6 +230,59 @@ export const deletePost = mutation({
   },
 })
 
+export const toggleReaction = mutation({
+  args: {
+    postId: v.id("posts"),
+    reactionType: v.union(
+      v.literal("like"),
+      v.literal("love"),
+      v.literal("haha"),
+      v.literal("wow"),
+      v.literal("sad"),
+      v.literal("angry")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const currentUserId = await requireAuthUserId(ctx)
+    const post = await ctx.db.get(args.postId)
+    if (!post) {
+      throw new ConvexError("Post not found")
+    }
+
+    const existing = await ctx.db
+      .query("likes")
+      .withIndex("by_post_user", (q) => q.eq("postId", args.postId).eq("userId", currentUserId))
+      .unique()
+
+    if (existing) {
+      const existingType = existing.reactionType ?? "like"
+      if (existingType === args.reactionType) {
+        await ctx.db.delete(existing._id)
+      } else {
+        await ctx.db.patch(existing._id, { reactionType: args.reactionType })
+      }
+    } else {
+      await ctx.db.insert("likes", {
+        postId: args.postId,
+        userId: currentUserId,
+        reactionType: args.reactionType,
+        createdAt: Date.now(),
+      })
+
+      if (post.authorId !== currentUserId) {
+        await ctx.db.insert("notifications", {
+          userId: post.authorId,
+          actorId: currentUserId,
+          type: "like",
+          postId: args.postId,
+          read: false,
+          createdAt: Date.now(),
+        })
+      }
+    }
+  },
+})
+
 export const toggleLike = mutation({
   args: { postId: v.id("posts") },
   handler: async (ctx, args) => {
@@ -230,13 +298,19 @@ export const toggleLike = mutation({
       .unique()
 
     if (existing) {
-      await ctx.db.delete(existing._id)
+      const existingType = existing.reactionType ?? "like"
+      if (existingType === "like") {
+        await ctx.db.delete(existing._id)
+      } else {
+        await ctx.db.patch(existing._id, { reactionType: "like" })
+      }
     } else {
-        await ctx.db.insert("likes", {
-          postId: args.postId,
-          userId: currentUserId,
-          createdAt: Date.now(),
-        })
+      await ctx.db.insert("likes", {
+        postId: args.postId,
+        userId: currentUserId,
+        reactionType: "like",
+        createdAt: Date.now(),
+      })
 
       if (post.authorId !== currentUserId) {
         await ctx.db.insert("notifications", {
@@ -249,14 +323,6 @@ export const toggleLike = mutation({
         })
       }
     }
-
-    const likesCount = await ctx.db
-      .query("likes")
-      .withIndex("by_post", (q) => q.eq("postId", args.postId))
-      .collect()
-      .then((rows) => rows.length)
-
-    return { liked: !existing, likesCount }
   },
 })
 

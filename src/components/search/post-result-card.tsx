@@ -2,12 +2,14 @@
 
 import type { Doc } from "../../../convex/_generated/dataModel"
 import { PostCard } from "@/components/feed/post-card"
+import type { ReactionSummary, ReactionType } from "@/types"
 
 interface PostResultCardProps {
   post: Doc<"posts"> & {
-    likesCount: number
+    myReaction: ReactionType | null
+    reactionsCount: number
+    reactionsSummary: ReactionSummary[]
     commentsCount: number
-    isLikedByMe: boolean
     isSavedByMe: boolean
   }
   currentUserId: string
@@ -27,9 +29,10 @@ export function PostResultCard({ post, currentUserId }: PostResultCardProps) {
         authorImage: post.authorImage,
         createdAt: post.createdAt,
         isEdited: post.isEdited,
-        likesCount: post.likesCount,
+        myReaction: post.myReaction,
+        reactionsCount: post.reactionsCount,
+        reactionsSummary: post.reactionsSummary,
         commentsCount: post.commentsCount,
-        isLikedByMe: post.isLikedByMe,
         isSavedByMe: post.isSavedByMe,
         isOwnPost: currentUserId === post.authorId,
       }}

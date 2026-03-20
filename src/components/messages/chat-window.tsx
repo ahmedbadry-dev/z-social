@@ -92,24 +92,24 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
-      <header className="flex items-center gap-3 border-b border-neutral-200 p-4">
+      <header className="flex items-center gap-3 border-b border-border p-4">
         <button
           type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] hover:bg-[#F1F5F9] md:hidden"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted md:hidden"
           onClick={onBack}
         >
           <ArrowLeft className="size-4" />
         </button>
         <UserAvatar name={displayName} size="md" />
         <div>
-          <p className="text-sm font-semibold text-[#0F172A]">{displayName}</p>
-          <p className="text-xs text-[#64748B]">Direct message</p>
+          <p className="text-sm font-semibold text-foreground">{displayName}</p>
+          <p className="text-xs text-muted-foreground">Direct message</p>
         </div>
       </header>
 
-      <div className="flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] p-4">
+      <div className="flex-1 space-y-3 overflow-y-auto bg-muted p-4">
         {allMessages.length === 0 && (
-          <p className="text-sm text-[#64748B]">No messages yet. Say hello! 👋</p>
+          <p className="text-sm text-muted-foreground">No messages yet. Say hello! 👋</p>
         )}
         {allMessages.map((message) => (
           <MessageBubble
@@ -123,7 +123,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-neutral-200 p-4">
+      <div className="border-t border-border p-4">
         <MessageInput onSend={onSend} isSending={false} />
       </div>
     </div>

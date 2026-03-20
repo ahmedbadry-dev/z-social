@@ -1,6 +1,5 @@
 "use client"
 
-import type { ReactElement } from "react"
 import { MessageCircle, Share2 } from "lucide-react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
@@ -33,7 +32,7 @@ export function PostActions({
   reactionsSummary,
   commentsCount,
   onCommentToggle,
-}: PostActionsProps): ReactElement {
+}: PostActionsProps) {
   const handleShare = async (): Promise<void> => {
     const url = `${window.location.origin}/post/${postId}`
     await navigator.clipboard.writeText(url)

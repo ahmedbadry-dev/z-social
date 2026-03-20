@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { memo, useState } from "react"
 import { useMutation } from "convex/react"
 import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
@@ -21,13 +21,13 @@ function getDisplayName(userId: string, name: string | null): string {
   return `${userId.slice(0, 6)}...${userId.slice(-4)}`
 }
 
-export function UserListItem({
+export const UserListItem = memo(function UserListItem({
   userId,
   name,
   image,
   isFollowedByMe,
   showFollowButton,
-}: UserListItemProps): JSX.Element {
+}: UserListItemProps) {
   const toggleFollow = useMutation(api.follows.toggleFollow)
   const [optimisticFollow, setOptimisticFollow] = useState<boolean | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -73,4 +73,4 @@ export function UserListItem({
       )}
     </div>
   )
-}
+})

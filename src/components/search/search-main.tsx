@@ -9,6 +9,7 @@ import { PostResultCard } from "@/components/search/post-result-card"
 import { UserResultCard } from "@/components/search/user-result-card"
 import { useDebounce } from "@/hooks/use-debounce"
 import { api } from "../../../convex/_generated/api"
+import type { ReactionType } from "@/types"
 
 export function SearchMain() {
   const [query, setQuery] = useQueryState("q", { defaultValue: "" })
@@ -67,7 +68,17 @@ export function SearchMain() {
             <h2 className="text-sm font-semibold text-[#0F172A]">Posts</h2>
             {posts && posts.length > 0 ? (
               posts.map((post) => (
-                <PostResultCard key={post._id} post={post} currentUserId={currentUserId} />
+                <PostResultCard
+                  key={post._id}
+                  post={{
+                    ...post,
+                    reactionsSummary: (post.reactionsSummary ?? []).map((reaction) => ({
+                      ...reaction,
+                      type: reaction.type as ReactionType,
+                    })),
+                  }}
+                  currentUserId={currentUserId}
+                />
               ))
             ) : (
               <p className="text-sm text-[#64748B]">No posts found for "{debouncedQuery}"</p>

@@ -1,6 +1,5 @@
 "use client"
 
-import type { ReactElement } from "react"
 import { useEffect, useRef, useState } from "react"
 import { useMutation } from "convex/react"
 import { ThumbsUp } from "lucide-react"
@@ -34,7 +33,7 @@ export function ReactionBar({
   postId,
   myReaction,
   reactionsCount,
-}: ReactionBarProps): ReactElement {
+}: ReactionBarProps) {
   const toggleReaction = useMutation(api.posts.toggleReaction)
   const [open, setOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)

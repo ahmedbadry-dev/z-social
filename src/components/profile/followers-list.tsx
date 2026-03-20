@@ -11,7 +11,7 @@ interface FollowersListProps {
   userId: string
 }
 
-function FollowersListSkeleton(): JSX.Element {
+function FollowersListSkeleton() {
   return (
     <div className="rounded-lg bg-card shadow-sm">
       <div className="border-b border-border p-4">
@@ -32,7 +32,7 @@ function FollowersListSkeleton(): JSX.Element {
   )
 }
 
-export function FollowersList({ userId }: FollowersListProps): JSX.Element {
+export function FollowersList({ userId }: FollowersListProps) {
   const followers = useQuery(
     api.follows.getFollowers,
     userId ? { userId } : "skip"

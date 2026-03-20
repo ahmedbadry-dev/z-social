@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "convex/react"
+import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { Authenticated, AuthLoading } from "convex/react"
 import { Bell, Home, Send, User } from "lucide-react"
 import Link from "next/link"
@@ -29,23 +29,30 @@ function SidebarSkeleton() {
   )
 }
 
-function SidebarContent() {
+interface SidebarProps {
+  preloadedUser?: Preloaded<typeof api.auth.getCurrentUser>
+}
+
+export function Sidebar({ preloadedUser }: SidebarProps) {
   const pathname = usePathname()
-  const currentUser = useQuery(api.auth.getCurrentUser)
+  const currentUser = preloadedUser
+    ? usePreloadedQuery(preloadedUser)
+    : useQuery(api.auth.getCurrentUser)
   const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount)
   const unreadMessages = useQuery(api.messages.getUnreadCount)
-
   const userProfile = useQuery(
     api.users.getUserProfile,
     currentUser?._id ? { userId: String(currentUser._id) } : "skip"
   )
-
   const displayName =
     currentUser?.name?.trim() ||
     currentUser?.email?.split("@")[0] ||
     "User"
 
   return (
+    <>
+      <AuthLoading><SidebarSkeleton /></AuthLoading>
+      <Authenticated>
     <div className="overflow-hidden rounded-lg bg-card shadow-sm">
       <div className="relative h-20 bg-muted">
         {/* Cover */}
@@ -106,14 +113,7 @@ function SidebarContent() {
         })}
       </nav>
     </div>
-  )
-}
-
-export function Sidebar() {
-  return (
-    <>
-      <AuthLoading><SidebarSkeleton /></AuthLoading>
-      <Authenticated><SidebarContent /></Authenticated>
+      </Authenticated>
     </>
   )
 }

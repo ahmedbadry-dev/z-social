@@ -1,22 +1,29 @@
 "use client"
 
 import { Newspaper } from "lucide-react"
-import { usePaginatedQuery, useQuery } from "convex/react"
+import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
 import { EmptyState } from "@/components/shared/empty-state"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 
-export function FeedList() {
+interface FeedListProps {
+  preloadedPosts?: Preloaded<typeof api.posts.getFeedPosts>
+}
+
+export function FeedList({ preloadedPosts }: FeedListProps) {
   const currentUser = useQuery(api.auth.getCurrentUser)
+  const preloaded = preloadedPosts
+    ? usePreloadedQuery(preloadedPosts)
+    : null
   const { results, status, loadMore } = usePaginatedQuery(
     api.posts.getFeedPosts,
     {},
     { initialNumItems: 10 }
   )
 
-  if (status === "LoadingFirstPage") {
+  if (status === "LoadingFirstPage" && !preloaded) {
     return (
       <div className="space-y-4">
         <PostSkeleton />
@@ -26,7 +33,9 @@ export function FeedList() {
     )
   }
 
-  if (status === "Exhausted" && results.length === 0) {
+  const resolvedResults = preloaded?.page ?? results
+
+  if ((status === "Exhausted" || preloaded) && resolvedResults.length === 0) {
     return (
       <EmptyState
         icon={Newspaper}
@@ -40,7 +49,7 @@ export function FeedList() {
 
   return (
     <div className="space-y-4">
-      {results.map((post) => (
+      {resolvedResults.map((post) => (
         <PostCard
           key={post._id}
           currentUserId={currentUserId}

@@ -1,7 +1,9 @@
 "use client"
 
+import type { Preloaded } from "convex/react"
 import { Authenticated, AuthLoading } from "convex/react"
 import { Sidebar } from "./sidebar"
+import { api } from "../../../convex/_generated/api"
 
 function SidebarSkeleton() {
   return (
@@ -16,14 +18,18 @@ function SidebarSkeleton() {
   )
 }
 
-export function SidebarWrapper() {
+interface SidebarWrapperProps {
+  preloadedUser?: Preloaded<typeof api.auth.getCurrentUser>
+}
+
+export function SidebarWrapper({ preloadedUser }: SidebarWrapperProps) {
   return (
     <aside className="hidden md:block">
       <AuthLoading>
         <SidebarSkeleton />
       </AuthLoading>
       <Authenticated>
-        <Sidebar />
+        <Sidebar preloadedUser={preloadedUser} />
       </Authenticated>
     </aside>
   )

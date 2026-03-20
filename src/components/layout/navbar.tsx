@@ -1,6 +1,7 @@
 "use client"
 
 import { LogOut, Search, UserRound } from "lucide-react"
+import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -8,14 +9,22 @@ import { SocialLogo } from "@/components/auth/social-logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { authClient } from "@/lib/auth-client"
 import { useAuthStore } from "@/stores/auth-store"
+import { api } from "../../../convex/_generated/api"
 
-export function Navbar() {
+interface NavbarProps {
+  preloadedUser?: Preloaded<typeof api.auth.getCurrentUser>
+}
+
+export function Navbar({ preloadedUser }: NavbarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [q, setQ] = useQueryState("q", { defaultValue: "" })
   const [inputValue, setInputValue] = useState(q)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { clearCachedUser } = useAuthStore()
+  const currentUser = preloadedUser
+    ? usePreloadedQuery(preloadedUser)
+    : useQuery(api.auth.getCurrentUser)
 
   useEffect(() => {
     setInputValue(q)

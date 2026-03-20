@@ -9,15 +9,13 @@ import {
   MoreHorizontal,
   Trash2,
 } from "lucide-react"
-import { useState } from "react"
+import { memo, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { CommentItem } from "@/components/feed/comment-item"
 import { PostActions } from "@/components/feed/post-actions"
-import { EditPostDialog } from "@/components/feed/edit-post-dialog"
 import { UserAvatar } from "@/components/shared/user-avatar"
-import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -28,6 +26,17 @@ import {
 import { api } from "../../../convex/_generated/api"
 import { formatRelativeTime } from "@/lib/utils"
 import type { ReactionType } from "@/types"
+import dynamic from "next/dynamic"
+
+const EditPostDialog = dynamic(
+  () => import("@/components/feed/edit-post-dialog").then((m) => ({ default: m.EditPostDialog })),
+  { ssr: false }
+)
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/shared/confirm-dialog").then((m) => ({ default: m.ConfirmDialog })),
+  { ssr: false }
+)
 
 interface PostCardProps {
   post: {
@@ -50,7 +59,7 @@ interface PostCardProps {
   currentUserId: string
 }
 
-export function PostCard({ post, currentUserId }: PostCardProps) {
+export const PostCard = memo(function PostCard({ post, currentUserId }: PostCardProps) {
   const comments = useQuery(api.comments.getCommentsByPost, { postId: post._id })
   const addComment = useMutation(api.comments.addComment)
   const toggleSaveMutation = useMutation(api.posts.toggleSave)
@@ -166,6 +175,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             alt="Post media"
             width={900}
             height={500}
+            loading="lazy"
             className="max-h-[400px] w-full object-cover"
           />
         </div>
@@ -233,23 +243,27 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         </div>
       )}
 
-      <EditPostDialog
-        post={{ _id: post._id, content: post.content }}
-        open={editOpen}
-        isSaving={isUpdating}
-        onOpenChange={setEditOpen}
-        onSave={handleSaveEdit}
-      />
-      <ConfirmDialog
-        open={deleteOpen}
-        title="Delete post"
-        description="This action cannot be undone."
-        confirmLabel="Delete"
-        confirmVariant="destructive"
-        isLoading={isDeleting}
-        onOpenChange={setDeleteOpen}
-        onConfirm={handleDeletePost}
-      />
+      {editOpen && (
+        <EditPostDialog
+          post={{ _id: post._id, content: post.content }}
+          open={editOpen}
+          isSaving={isUpdating}
+          onOpenChange={setEditOpen}
+          onSave={handleSaveEdit}
+        />
+      )}
+      {deleteOpen && (
+        <ConfirmDialog
+          open={deleteOpen}
+          title="Delete post"
+          description="This action cannot be undone."
+          confirmLabel="Delete"
+          confirmVariant="destructive"
+          isLoading={isDeleting}
+          onOpenChange={setDeleteOpen}
+          onConfirm={handleDeletePost}
+        />
+      )}
     </article>
   )
-}
+})

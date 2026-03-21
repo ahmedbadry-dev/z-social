@@ -55,7 +55,7 @@ export default async function RootLayout({
           <ConvexClientProvider initialToken={initialToken}>
             <NuqsAdapter>
               {children}
-              <Toaster position="bottom-right" richColors />
+              <Toaster position="top-center" richColors />
             </NuqsAdapter>
           </ConvexClientProvider>
         </ThemeProvider>

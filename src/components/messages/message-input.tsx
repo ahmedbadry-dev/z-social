@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 interface MessageInputProps {
   onSend: (content: string) => Promise<void>
   isSending: boolean
+  onTyping?: () => void
 }
 
-export function MessageInput({ onSend, isSending }: MessageInputProps) {
+export function MessageInput({ onSend, isSending, onTyping }: MessageInputProps) {
   const [value, setValue] = useState("")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -40,7 +41,10 @@ export function MessageInput({ onSend, isSending }: MessageInputProps) {
         placeholder="Type a message..."
         className="max-h-24 min-h-10 flex-1 resize-none rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6]"
         onInput={autoResize}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={(event) => {
+          setValue(event.target.value)
+          onTyping?.()
+        }}
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault()

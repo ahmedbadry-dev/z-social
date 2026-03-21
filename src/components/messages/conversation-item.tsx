@@ -1,6 +1,9 @@
 "use client"
+import { useQuery } from "convex/react"
 import { UserAvatar } from "@/components/shared/user-avatar"
+import { OnlineStatus } from "@/components/shared/online-status"
 import { cn, formatRelativeTime } from "@/lib/utils"
+import { api } from "../../../convex/_generated/api"
 
 interface ConversationItemProps {
   partnerId: string
@@ -31,6 +34,8 @@ export function ConversationItem({
   onClick,
 }: ConversationItemProps) {
   const displayName = partnerName?.trim() || truncatePartnerId(partnerId)
+  const presence = useQuery(api.messages.getPresence, { userId: partnerId })
+  const isOnline = presence?.isOnline ?? false
 
   return (
     <button
@@ -41,7 +46,13 @@ export function ConversationItem({
         isActive && "bg-muted"
       )}
     >
-      <UserAvatar name={displayName} imageUrl={partnerImage ?? undefined} size="md" />
+      <div className="relative">
+        <UserAvatar name={displayName} imageUrl={partnerImage ?? undefined} size="md" />
+        <OnlineStatus
+          isOnline={isOnline}
+          className="absolute -bottom-0.5 -right-0.5"
+        />
+      </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <p

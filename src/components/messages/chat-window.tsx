@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import { MessageBubble } from "@/components/messages/message-bubble"
 import { MessageInput } from "@/components/messages/message-input"
+import { OnlineStatus } from "@/components/shared/online-status"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
 
@@ -35,12 +36,16 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
     otherUserId,
     paginationOpts: { numItems: 50, cursor: null },
   })
+  const isTyping = useQuery(api.messages.getTypingStatus, { otherUserId })
+  const otherPresence = useQuery(api.messages.getPresence, { userId: otherUserId })
   const sendMessage = useMutation(api.messages.sendMessage)
   const markAsRead = useMutation(api.messages.markConversationAsRead)
+  const updatePresence = useMutation(api.messages.updatePresence)
 
   // Optimistic messages state
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     void markAsRead({ otherUserId })
@@ -60,6 +65,25 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages?.length, optimisticMessages.length])
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+      void updatePresence({ isTypingTo: undefined })
+    }
+  }, [updatePresence])
+
+  const handleTyping = () => {
+    void updatePresence({ isTypingTo: otherUserId })
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      void updatePresence({ isTypingTo: undefined })
+    }, 2000)
+  }
 
   const onSend = async (content: string) => {
     // 1. Add optimistic message instantly
@@ -89,6 +113,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   const allMessages = [...(messages ?? []), ...optimisticMessages]
 
   const displayName = truncatePartnerId(otherUserId)
+  const isOnline = otherPresence?.isOnline ?? false
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
@@ -100,16 +125,31 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
         >
           <ArrowLeft className="size-4" />
         </button>
-        <UserAvatar name={displayName} size="md" />
+        <div className="relative">
+          <UserAvatar name={displayName} size="md" />
+          <OnlineStatus isOnline={isOnline} className="absolute -bottom-0.5 -right-0.5" />
+        </div>
         <div>
           <p className="text-sm font-semibold text-foreground">{displayName}</p>
-          <p className="text-xs text-muted-foreground">Direct message</p>
+          <p className={isOnline ? "text-xs text-green-500" : "text-xs text-muted-foreground"}>
+            {isOnline ? "Online" : "Offline"}
+          </p>
         </div>
       </header>
 
       <div className="flex-1 space-y-3 overflow-y-auto bg-muted p-4">
         {allMessages.length === 0 && (
           <p className="text-sm text-muted-foreground">No messages yet. Say hello! 👋</p>
+        )}
+        {isTyping && (
+          <div className="flex items-center gap-2 px-4 py-1">
+            <div className="flex gap-1">
+              <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+            </div>
+            <span className="text-xs text-muted-foreground">typing...</span>
+          </div>
         )}
         {allMessages.map((message) => {
           const isSent = message.senderId === currentUserId
@@ -128,7 +168,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
       </div>
 
       <div className="border-t border-border p-4">
-        <MessageInput onSend={onSend} isSending={false} />
+        <MessageInput onSend={onSend} isSending={false} onTyping={handleTyping} />
       </div>
     </div>
   )

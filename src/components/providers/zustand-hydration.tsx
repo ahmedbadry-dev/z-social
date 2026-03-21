@@ -11,6 +11,7 @@ export function ZustandHydration() {
   const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount)
   const unreadMessages = useQuery(api.messages.getUnreadCount)
   const upsertUser = useMutation(api.users.upsertUser)
+  const updatePresence = useMutation(api.messages.updatePresence)
 
   const { setUnreadNotificationsCount, setUnreadMessagesCount } = useNotificationStore()
   const { setCachedUser, clearCachedUser } = useAuthStore()
@@ -28,6 +29,18 @@ export function ZustandHydration() {
       clearCachedUser()
     }
   }, [currentUser, setCachedUser, clearCachedUser, upsertUser])
+
+  useEffect(() => {
+    if (!currentUser) return
+
+    void updatePresence({ isTypingTo: undefined })
+
+    const interval = setInterval(() => {
+      void updatePresence({ isTypingTo: undefined })
+    }, 60_000)
+
+    return () => clearInterval(interval)
+  }, [currentUser, updatePresence])
 
   useEffect(() => {
     if (unreadNotifications !== undefined) {

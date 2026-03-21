@@ -7,6 +7,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { SocialLogo } from "@/components/auth/social-logo"
+import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { api } from "../../../convex/_generated/api"
 
 interface NavbarProps {
@@ -61,6 +62,10 @@ export function Navbar({ preloadedUser }: NavbarProps) {
               <Search className="size-4" />
             </button>
           </div>
+        </div>
+
+        <div className="hidden md:block">
+          <ThemeToggle />
         </div>
 
         <Link href="/notifications" className="relative md:hidden" aria-label="Notifications">

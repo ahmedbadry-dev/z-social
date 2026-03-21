@@ -1,4 +1,4 @@
-# Social Platform
+# Z-Social Platform
 
 A modern social media platform built with Next.js, Convex, and Better Auth.
 

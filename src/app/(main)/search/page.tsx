@@ -1,6 +1,6 @@
 import { SearchContent } from "@/components/search/search-content"
 
-export const metadata = { title: "Search" }
+export const metadata = { title: "Search | Z-Social" }
 
 export default function SearchPage() {
   return <SearchContent />

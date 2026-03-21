@@ -2,7 +2,7 @@ import { FeedContent } from "@/components/feed/feed-content"
 import { preloadAuthQuery } from "@/lib/auth-server"
 import { api } from "../../../../convex/_generated/api"
 
-export const metadata = { title: "Feed" }
+export const metadata = { title: "Feed | Z-Social" }
 
 export default async function FeedPage() {
   const preloadedPosts = await preloadAuthQuery(api.posts.getFeedPosts, {

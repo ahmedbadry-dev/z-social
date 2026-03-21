@@ -13,7 +13,7 @@ export async function generateMetadata({
 
   return {
     title: "Profile",
-    description: "View profile on Social",
+    description: "View profile on Z-Social",
   }
 }
 

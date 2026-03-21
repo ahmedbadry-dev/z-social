@@ -43,7 +43,7 @@ export interface CommentData {
   createdAt: number
 }
 
-export type NotificationType = "like" | "comment" | "reply" | "follow"
+export type NotificationType = "like" | "comment" | "reply" | "follow" | "mention"
 
 export interface NotificationData {
   _id: Id<"notifications">

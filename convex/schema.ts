@@ -109,7 +109,8 @@ export default defineSchema({
       v.literal("like"),
       v.literal("comment"),
       v.literal("reply"),
-      v.literal("follow")
+      v.literal("follow"),
+      v.literal("mention")
     ),
     postId: v.optional(v.id("posts")),
     commentId: v.optional(v.id("comments")),

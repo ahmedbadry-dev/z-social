@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -35,6 +36,29 @@ export default function VerifyOtpPage() {
 
     return () => clearTimeout(timer)
   }, [seconds])
+
+  useEffect(() => {
+    if (!email || seconds !== 45) {
+      return
+    }
+
+    // OTP is already sent during signup; no auto-resend on first load.
+  }, [])
+
+  if (!email) {
+    return (
+      <AuthLayoutWrapper>
+        <AuthCard className="space-y-4">
+          <p className="text-center text-sm text-muted-foreground">
+            Missing email. Please{" "}
+            <Link href="/signup" className="text-[#3B55E6] hover:underline">
+              sign up again
+            </Link>
+          </p>
+        </AuthCard>
+      </AuthLayoutWrapper>
+    )
+  }
 
   const handleVerify = async () => {
     if (!email) {

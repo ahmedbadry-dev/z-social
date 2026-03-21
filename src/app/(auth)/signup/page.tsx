@@ -63,6 +63,18 @@ export default function SignupPage() {
       return
     }
 
+    const otpResult = await authClient.$fetch("/email-otp/send-verification-otp", {
+      method: "POST",
+      body: {
+        email: data.email,
+        type: "email-verification",
+      },
+    })
+
+    if (otpResult?.error) {
+      toast.error("We couldn't send a verification code. Please resend on the next screen.")
+    }
+
     router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
   }
 

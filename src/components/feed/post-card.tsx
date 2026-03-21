@@ -210,13 +210,19 @@ export const PostCard = memo(function PostCard({ post, currentUserId }: PostCard
               imageUrl={currentUser?.image ?? undefined}
               size="sm"
             />
-            <input
+            <textarea
               value={commentText}
               placeholder="Write a comment..."
-              className="h-9 flex-1 rounded-md border border-border bg-card px-3 text-sm outline-none focus:border-[#3B55E6]"
-              onChange={(event) => setCommentText(event.target.value)}
+              rows={1}
+              className="flex-1 resize-none rounded-2xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6] max-h-24 min-h-9"
+              style={{ overflow: "hidden" }}
+              onChange={(event) => {
+                setCommentText(event.target.value)
+                event.target.style.height = "auto"
+                event.target.style.height = `${Math.min(event.target.scrollHeight, 96)}px`
+              }}
               onKeyDown={(event) => {
-                if (event.key === "Enter") {
+                if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault()
                   void handleCommentSubmit()
                 }

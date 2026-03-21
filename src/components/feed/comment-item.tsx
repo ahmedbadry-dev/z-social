@@ -1,13 +1,13 @@
 "use client"
 
-import { SendHorizontal } from "lucide-react"
-import { useState } from "react"
+import { ChevronDown, ChevronUp, Heart, SendHorizontal } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
-import { formatRelativeTime } from "@/lib/utils"
+import { cn, formatRelativeTime } from "@/lib/utils"
 
 interface CommentItemProps {
   comment: {
@@ -23,6 +23,7 @@ interface CommentItemProps {
   postAuthorId: string
   currentUserId: string
   isReply?: boolean
+  rootCommentId?: Id<"comments">
 }
 
 export function CommentItem({
@@ -31,37 +32,64 @@ export function CommentItem({
   postAuthorId,
   currentUserId,
   isReply = false,
+  rootCommentId,
 }: CommentItemProps) {
   const addComment = useMutation(api.comments.addComment)
+  const toggleLike = useMutation(api.comments.toggleCommentLike)
+  const likes = useQuery(api.comments.getCommentLikes, { commentId: comment._id })
   const replies = useQuery(
     api.comments.getRepliesByComment,
     isReply ? "skip" : { commentId: comment._id }
   )
+
   const [replyText, setReplyText] = useState("")
   const [showReplyInput, setShowReplyInput] = useState(false)
+  const [showReplies, setShowReplies] = useState(false)
+  const [hasAutoShown, setHasAutoShown] = useState(false)
   const [isReplying, setIsReplying] = useState(false)
+  const [optimisticLiked, setOptimisticLiked] = useState(false)
+  const [optimisticCount, setOptimisticCount] = useState(0)
 
-  const authorName = comment.authorName ?? comment.authorId
+  const isLikedByMe = likes?.isLikedByMe ?? optimisticLiked
+  const likesCount = likes?.count ?? optimisticCount
+
+  const authorName = comment.authorName ?? `${comment.authorId.slice(0, 8)}...`
   const isAuthor = comment.authorId === postAuthorId
+  const repliesCount = replies?.length ?? 0
+
+  useEffect(() => {
+    if (isReply || hasAutoShown || !replies || replies.length === 0) return
+    if (replies.some((reply) => reply.authorId === currentUserId)) {
+      setShowReplies(true)
+      setHasAutoShown(true)
+    }
+  }, [currentUserId, hasAutoShown, isReply, replies])
+
+  const handleLike = async () => {
+    const newLiked = !isLikedByMe
+    setOptimisticLiked(newLiked)
+    setOptimisticCount((prev) => (newLiked ? prev + 1 : prev - 1))
+    try {
+      await toggleLike({ commentId: comment._id })
+    } catch {
+      setOptimisticLiked(!newLiked)
+      setOptimisticCount((prev) => (newLiked ? prev - 1 : prev + 1))
+      toast.error("Failed to like comment")
+    }
+  }
 
   const handleReply = async () => {
     const content = replyText.trim()
-    if (!content) {
-      return
-    }
+    if (!content) return
 
     setIsReplying(true)
     try {
-      await addComment({
-        postId,
-        content,
-        parentId: comment._id,
-      })
+      await addComment({ postId, content, parentId: rootCommentId ?? comment._id })
       setReplyText("")
       setShowReplyInput(false)
+      setShowReplies(true)
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to send reply"
-      toast.error(message)
+      toast.error(error instanceof Error ? error.message : "Failed to send reply")
     } finally {
       setIsReplying(false)
     }
@@ -69,56 +97,90 @@ export function CommentItem({
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
+      <div className="flex gap-2.5">
         <UserAvatar
           name={authorName}
           imageUrl={comment.authorImage ?? undefined}
           size={isReply ? "sm" : "md"}
+          className="shrink-0 mt-0.5"
         />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-[13px] font-semibold text-foreground">{authorName}</p>
-            {isAuthor && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-[#3B55E6]">
-                Author
-              </span>
-            )}
-            <p className="ml-auto text-xs text-muted-foreground">{formatRelativeTime(comment.createdAt)}</p>
-          </div>
-          <p dir="auto" className="mt-1 whitespace-pre-wrap text-sm text-foreground">
-            {comment.content}
-          </p>
-          <div className="mt-1 flex justify-end">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[13px] font-semibold text-foreground">{authorName}</span>
+                {isAuthor && (
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-[#3B55E6]">
+                    Author
+                  </span>
+                )}
+              </div>
+              <p
+                dir="auto"
+                className="mt-0.5 whitespace-pre-wrap text-sm text-foreground leading-relaxed"
+              >
+                {comment.content}
+              </p>
+              <div className="mt-1.5 flex items-center gap-3">
+                <span className="text-[11px] text-muted-foreground">
+                  {formatRelativeTime(comment.createdAt)}
+                </span>
+                <button
+                  type="button"
+                  className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowReplyInput((prev) => !prev)}
+                >
+                  Reply
+                </button>
+              </div>
+            </div>
+
             <button
               type="button"
-              className="text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => setShowReplyInput((prev) => !prev)}
+              className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5"
+              onClick={() => void handleLike()}
             >
-              Reply
+              <Heart
+                className={cn(
+                  "size-3.5 transition-colors",
+                  isLikedByMe ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                )}
+              />
+              {likesCount > 0 && (
+                <span className="text-[10px] text-muted-foreground">{likesCount}</span>
+              )}
             </button>
           </div>
         </div>
       </div>
 
       {showReplyInput && (
-        <div className="ml-8 flex items-center gap-2">
-          <UserAvatar name={currentUserId} size="sm" />
-          <input
-            value={replyText}
-            placeholder="Write a reply..."
-            className="h-9 flex-1 rounded-md border border-border bg-card px-3 text-sm text-foreground outline-none focus:border-[#3B55E6]"
-            onChange={(event) => setReplyText(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault()
-                void handleReply()
-              }
-            }}
-          />
+        <div className={cn("flex gap-2 items-end", isReply ? "ml-8" : "ml-10")}>
+          <UserAvatar name={currentUserId} size="sm" className="shrink-0 mb-1" />
+          <div className="flex-1 relative">
+            <textarea
+              value={replyText}
+              placeholder="Write a reply..."
+              rows={1}
+              className="w-full resize-none rounded-2xl border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6] max-h-24 min-h-9"
+              style={{ overflow: "hidden" }}
+              onChange={(event) => {
+                setReplyText(event.target.value)
+                event.target.style.height = "auto"
+                event.target.style.height = `${Math.min(event.target.scrollHeight, 96)}px`
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault()
+                  void handleReply()
+                }
+              }}
+            />
+          </div>
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-muted"
-            disabled={isReplying}
+            className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3B55E6] text-white disabled:opacity-50"
+            disabled={isReplying || !replyText.trim()}
             onClick={() => void handleReply()}
           >
             <SendHorizontal className="size-4" />
@@ -126,8 +188,29 @@ export function CommentItem({
         </div>
       )}
 
-      {!isReply && replies && replies.length > 0 && (
-        <div className="ml-8 space-y-3 border-l-2 border-border pl-3">
+      {!isReply && repliesCount > 0 && (
+        <button
+          type="button"
+          className="ml-10 flex items-center gap-1.5 text-[12px] font-semibold text-[#3B55E6]"
+          onClick={() => setShowReplies((prev) => !prev)}
+        >
+          <span className="h-px w-6 bg-border" />
+          {showReplies ? (
+            <>
+              <ChevronUp className="size-3.5" />
+              Hide replies
+            </>
+          ) : (
+            <>
+              <ChevronDown className="size-3.5" />
+              View {repliesCount} {repliesCount === 1 ? "reply" : "replies"}
+            </>
+          )}
+        </button>
+      )}
+
+      {!isReply && showReplies && replies && replies.length > 0 && (
+        <div className="ml-10 space-y-3 border-l-2 border-border pl-3">
           {replies.map((reply) => (
             <CommentItem
               key={reply._id}
@@ -136,6 +219,7 @@ export function CommentItem({
               postAuthorId={postAuthorId}
               currentUserId={currentUserId}
               isReply
+              rootCommentId={comment._id}
             />
           ))}
         </div>

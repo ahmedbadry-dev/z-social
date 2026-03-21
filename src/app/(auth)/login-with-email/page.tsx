@@ -55,8 +55,8 @@ export default function LoginEmailPage() {
     <AuthLayoutWrapper showBack>
       <AuthCard className="space-y-5">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-[#0F172A]">Enter your email</h1>
-          <p className="text-sm text-[#64748B]">
+          <h1 className="text-2xl font-semibold text-foreground">Enter your email</h1>
+          <p className="text-sm text-muted-foreground">
             We&apos;ll send a secure link for instant access to your account.
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function LoginEmailPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email" className="text-[#0F172A]">
+                  <FieldLabel htmlFor="email" className="text-foreground">
                     Email
                   </FieldLabel>
                   <Input
@@ -75,9 +75,9 @@ export default function LoginEmailPage() {
                     id="email"
                     type="email"
                     aria-invalid={fieldState.invalid}
-                    className="h-10 border-neutral-200 bg-white focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                    className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
                   />
-                  <FieldDescription className="text-xs text-[#64748B]">
+                  <FieldDescription className="text-xs text-muted-foreground">
                     We&apos;ll only use this email for authentication.
                   </FieldDescription>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -88,7 +88,7 @@ export default function LoginEmailPage() {
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="h-11 w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+            className="h-11 w-full bg-foreground text-background hover:bg-foreground/90"
           >
             {form.formState.isSubmitting ? (
               <Loader2 className="size-4 animate-spin" />

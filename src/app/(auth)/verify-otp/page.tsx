@@ -126,8 +126,8 @@ export default function VerifyOtpPage() {
     <AuthLayoutWrapper>
       <AuthCard className="space-y-5">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-[#0F172A]">Enter verification code</h1>
-          <p className="text-sm text-[#64748B]">Code sent to {email || "your email"}</p>
+          <h1 className="text-2xl font-semibold text-foreground">Enter verification code</h1>
+          <p className="text-sm text-muted-foreground">Code sent to {email || "your email"}</p>
         </div>
         <div className="space-y-4">
           <InputOTP
@@ -143,10 +143,10 @@ export default function VerifyOtpPage() {
               <InputOTPSlot index={3} className="size-11 text-base" />
             </InputOTPGroup>
           </InputOTP>
-          <p className="text-center text-sm text-[#64748B]">
+          <p className="text-center text-sm text-muted-foreground">
             Resend in{" "}
             {seconds > 0 ? (
-              <span className="font-semibold text-[#0F172A]">{timerText}</span>
+              <span className="font-semibold text-foreground">{timerText}</span>
             ) : (
               <button
                 type="button"
@@ -161,7 +161,7 @@ export default function VerifyOtpPage() {
           <Button
             type="button"
             disabled={isSubmitting || otp.length !== 4}
-            className="h-11 w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+            className="h-11 w-full bg-foreground text-background hover:bg-foreground/90"
             onClick={handleVerify}
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : "Verify"}

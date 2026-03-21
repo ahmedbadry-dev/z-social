@@ -44,8 +44,8 @@ export default function ForgotPasswordPage() {
     <AuthLayoutWrapper showBack>
       <AuthCard className="space-y-5">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-[#0F172A]">Forgot password</h1>
-          <p className="text-sm text-[#64748B]">
+          <h1 className="text-2xl font-semibold text-foreground">Forgot password</h1>
+          <p className="text-sm text-muted-foreground">
             Enter your email to reset your password and access your account.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email" className="text-[#0F172A]">
+                  <FieldLabel htmlFor="email" className="text-foreground">
                     Email
                   </FieldLabel>
                   <Input
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
                     id="email"
                     type="email"
                     aria-invalid={fieldState.invalid}
-                    className="h-10 border-neutral-200 bg-white focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                    className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="h-11 w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+            className="h-11 w-full bg-foreground text-background hover:bg-foreground/90"
           >
             {form.formState.isSubmitting ? (
               <Loader2 className="size-4 animate-spin" />

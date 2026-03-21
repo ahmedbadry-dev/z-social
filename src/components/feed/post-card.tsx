@@ -57,9 +57,14 @@ interface PostCardProps {
     isOwnPost: boolean
   }
   currentUserId: string
+  defaultShowComments?: boolean
 }
 
-export const PostCard = memo(function PostCard({ post, currentUserId }: PostCardProps) {
+export const PostCard = memo(function PostCard({
+  post,
+  currentUserId,
+  defaultShowComments,
+}: PostCardProps) {
   const comments = useQuery(api.comments.getCommentsByPost, { postId: post._id })
   const currentUser = useQuery(api.auth.getCurrentUser)
   const addComment = useMutation(api.comments.addComment)
@@ -67,7 +72,7 @@ export const PostCard = memo(function PostCard({ post, currentUserId }: PostCard
   const updatePostMutation = useMutation(api.posts.updatePost)
   const deletePostMutation = useMutation(api.posts.deletePost)
 
-  const [showComments, setShowComments] = useState(false)
+  const [showComments, setShowComments] = useState(defaultShowComments ?? false)
   const [commentText, setCommentText] = useState("")
   const [saved, setSaved] = useState(post.isSavedByMe)
   const [editOpen, setEditOpen] = useState(false)

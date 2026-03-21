@@ -111,6 +111,18 @@ export const getPostsByUser = query({
   },
 })
 
+export const getPostById = query({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx)
+    const post = await ctx.db.get(args.postId)
+    if (!post) {
+      return null
+    }
+    return buildPostWithMeta(ctx, post, currentUserId)
+  },
+})
+
 export const getSavedPosts = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {

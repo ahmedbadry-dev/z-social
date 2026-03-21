@@ -84,29 +84,12 @@ export const getMessages = query({
       )
       .collect()
 
-    const sorted = [...sent, ...received].sort((a, b) => a.createdAt - b.createdAt)
-
-    return Promise.all(
-      sorted.map(async (message) => {
-        if (!message.replyToId) return { ...message, replyTo: null }
-        const replyTo = await ctx.db.get(message.replyToId)
-        return {
-          ...message,
-          replyTo: replyTo
-            ? { content: replyTo.content, senderId: replyTo.senderId }
-            : null,
-        }
-      })
-    )
+    return [...sent, ...received].sort((a, b) => a.createdAt - b.createdAt)
   },
 })
 
 export const sendMessage = mutation({
-  args: {
-    receiverId: v.string(),
-    content: v.string(),
-    replyToId: v.optional(v.id("messages")),
-  },
+  args: { receiverId: v.string(), content: v.string() },
   handler: async (ctx, args) => {
     const currentUserId = await requireAuthUserId(ctx)
     const content = args.content.trim()
@@ -121,19 +104,11 @@ export const sendMessage = mutation({
       throw new ConvexError("Message cannot exceed 1000 characters")
     }
 
-    if (args.replyToId) {
-      const replyTo = await ctx.db.get(args.replyToId)
-      if (!replyTo) {
-        throw new ConvexError("Replied message not found")
-      }
-    }
-
     return ctx.db.insert("messages", {
       content,
       senderId: currentUserId,
       receiverId: args.receiverId,
       read: false,
-      replyToId: args.replyToId,
       createdAt: Date.now(),
     })
   },

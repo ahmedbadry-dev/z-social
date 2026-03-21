@@ -11,6 +11,7 @@ import { api } from "../../../convex/_generated/api"
 interface UserResultCardProps {
   userId: string
   username?: string
+  name?: string | null
   bio?: string
   image?: string | null
   isCurrentUser: boolean
@@ -19,6 +20,7 @@ interface UserResultCardProps {
 export function UserResultCard({
   userId,
   username,
+  name,
   bio,
   image,
   isCurrentUser,
@@ -28,7 +30,7 @@ export function UserResultCard({
   const followStatus = useQuery(api.follows.getFollowStatus, { targetUserId: userId })
   const [isUpdating, setIsUpdating] = useState(false)
 
-  const displayName = username?.trim() || userId
+  const displayName = name?.trim() || username?.trim() || userId
   const displayBio = bio?.trim() || "No bio available"
   const isFollowing = followStatus?.isFollowing ?? false
 

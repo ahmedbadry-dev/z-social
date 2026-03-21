@@ -103,9 +103,9 @@ export const searchUsers = query({
           userId: profile.userId,
           username: profile.username,
           bio: profile.bio,
-          isCurrentUser: profile.userId === currentUserId,
           name: userDoc?.name ?? null,
           image: userDoc?.image ?? null,
+          isCurrentUser: profile.userId === currentUserId,
         }
       })
     )

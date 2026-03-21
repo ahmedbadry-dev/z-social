@@ -53,10 +53,14 @@ export function RightPanel() {
           <div className="space-y-3">
             {suggestions.map((item) => {
               const isFollowing = followMap[item.userId] ?? false
-              const displayName = getDisplayName(item.userId)
+              const displayName = item.name?.trim() || getDisplayName(item.userId)
               return (
                 <div key={item.userId} className="flex items-center gap-2">
-                  <UserAvatar name={displayName} size="sm" />
+                  <UserAvatar
+                    name={displayName}
+                    imageUrl={item.image ?? undefined}
+                    size="sm"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
                     <p className="truncate text-xs text-muted-foreground">Suggested for you</p>

@@ -12,10 +12,17 @@ interface UserResultCardProps {
   userId: string
   username?: string
   bio?: string
+  image?: string | null
   isCurrentUser: boolean
 }
 
-export function UserResultCard({ userId, username, bio, isCurrentUser }: UserResultCardProps) {
+export function UserResultCard({
+  userId,
+  username,
+  bio,
+  image,
+  isCurrentUser,
+}: UserResultCardProps) {
   const router = useRouter()
   const toggleFollow = useMutation(api.follows.toggleFollow)
   const followStatus = useQuery(api.follows.getFollowStatus, { targetUserId: userId })
@@ -47,16 +54,16 @@ export function UserResultCard({ userId, username, bio, isCurrentUser }: UserRes
 
   return (
     <div
-      className="flex w-full items-center gap-3 rounded-lg bg-white p-4 text-left shadow-sm cursor-pointer"
+      className="flex w-full items-center gap-3 rounded-lg bg-card p-4 text-left shadow-sm cursor-pointer"
       onClick={onOpenProfile}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onOpenProfile()}
     >
-      <UserAvatar name={displayName} size="md" />
+      <UserAvatar name={displayName} imageUrl={image ?? undefined} size="md" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-[#0F172A]">{displayName}</p>
-        <p className="truncate text-xs text-[#64748B]">{displayBio}</p>
+        <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+        <p className="truncate text-xs text-muted-foreground">{displayBio}</p>
       </div>
       {!isCurrentUser && (
         <Button
@@ -64,7 +71,7 @@ export function UserResultCard({ userId, username, bio, isCurrentUser }: UserRes
           variant="outline"
           size="sm"
           disabled={isUpdating}
-          className="border-neutral-200"
+          className="border-border"
           onClick={(event) => {
             event.stopPropagation()
             void onToggleFollow()

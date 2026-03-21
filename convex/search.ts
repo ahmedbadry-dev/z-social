@@ -92,11 +92,22 @@ export const searchUsers = query({
       .withSearchIndex("search_username", (q) => q.search("username", args.q.trim()))
       .take(5)
 
-    return byUsername.map((profile) => ({
-      userId: profile.userId,
-      username: profile.username,
-      bio: profile.bio,
-      isCurrentUser: profile.userId === currentUserId,
-    }))
+    return Promise.all(
+      byUsername.map(async (profile) => {
+        const recentPost = await ctx.db
+          .query("posts")
+          .withIndex("by_author", (q) => q.eq("authorId", profile.userId))
+          .order("desc")
+          .first()
+
+        return {
+          userId: profile.userId,
+          username: profile.username,
+          bio: profile.bio,
+          isCurrentUser: profile.userId === currentUserId,
+          image: recentPost?.authorImage ?? null,
+        }
+      })
+    )
   },
 })

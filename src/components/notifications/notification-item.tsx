@@ -11,14 +11,20 @@ interface NotificationItemProps {
     _id: Id<"notifications">
     type: "like" | "comment" | "reply" | "follow"
     actorId: string
+    actorName?: string | null
+    actorImage?: string | null
     postId?: Id<"posts">
     read: boolean
     createdAt: number
   }
 }
 
-function getNotificationText(type: string, actorId: string): string {
-  const actor = actorId.length > 10 ? `${actorId.slice(0, 8)}...` : actorId
+function getNotificationText(
+  type: string,
+  actorName: string | null | undefined,
+  actorId: string
+): string {
+  const actor = actorName?.trim() || (actorId.length > 10 ? `${actorId.slice(0, 8)}...` : actorId)
   switch (type) {
     case "like":
       return `${actor} liked your post`
@@ -35,7 +41,11 @@ function getNotificationText(type: string, actorId: string): string {
 
 export function NotificationItem({ notification }: NotificationItemProps) {
   const markAsRead = useMutation(api.notifications.markAsRead)
-  const text = getNotificationText(notification.type, notification.actorId)
+  const text = getNotificationText(
+    notification.type,
+    notification.actorName,
+    notification.actorId
+  )
 
   return (
     <button
@@ -52,7 +62,11 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           notification.read ? "bg-transparent" : "bg-[#3B55E6]"
         )}
       />
-      <UserAvatar name={notification.actorId} size="md" />
+      <UserAvatar
+        name={notification.actorName ?? notification.actorId}
+        imageUrl={notification.actorImage ?? undefined}
+        size="md"
+      />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-foreground">{text}</p>
         <p className="text-xs text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>

@@ -10,11 +10,11 @@ export default function Error({
   reset: () => void
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#F3F4F6]">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background">
       <SocialLogo />
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-[#0F172A]">Something went wrong</h1>
-        <p className="mt-2 text-sm text-[#64748B]">
+        <h1 className="text-2xl font-bold text-foreground">Something went wrong</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           An unexpected error occurred. Please try again.
         </p>
       </div>

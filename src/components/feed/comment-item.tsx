@@ -14,8 +14,8 @@ interface CommentItemProps {
     _id: Id<"comments">
     content: string
     authorId: string
-    authorName?: string
-    authorImage?: string
+    authorName?: string | null
+    authorImage?: string | null
     createdAt: number
     parentId?: Id<"comments">
   }
@@ -72,7 +72,7 @@ export function CommentItem({
       <div className="flex gap-2">
         <UserAvatar
           name={authorName}
-          imageUrl={comment.authorImage}
+          imageUrl={comment.authorImage ?? undefined}
           size={isReply ? "sm" : "md"}
         />
         <div className="min-w-0 flex-1">
@@ -131,7 +131,7 @@ export function CommentItem({
           {replies.map((reply) => (
             <CommentItem
               key={reply._id}
-              comment={{ ...reply, authorName: reply.authorId }}
+              comment={reply}
               postId={postId}
               postAuthorId={postAuthorId}
               currentUserId={currentUserId}

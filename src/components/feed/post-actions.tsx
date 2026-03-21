@@ -66,7 +66,7 @@ export function PostActions({
 
       <div className="h-px w-full bg-border" />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-3">
         <ReactionBar
           postId={postId}
           myReaction={myReaction}

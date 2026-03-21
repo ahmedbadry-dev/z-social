@@ -4,6 +4,8 @@ import { cn, formatRelativeTime } from "@/lib/utils"
 
 interface ConversationItemProps {
   partnerId: string
+  partnerName?: string | null
+  partnerImage?: string | null
   lastMessage: string
   lastMessageTime: number
   isLastMessageMine: boolean
@@ -19,6 +21,8 @@ function truncatePartnerId(partnerId: string) {
 
 export function ConversationItem({
   partnerId,
+  partnerName,
+  partnerImage,
   lastMessage,
   lastMessageTime,
   isLastMessageMine,
@@ -26,40 +30,44 @@ export function ConversationItem({
   hasUnread = false,
   onClick,
 }: ConversationItemProps) {
-  const displayName = truncatePartnerId(partnerId)
+  const displayName = partnerName?.trim() || truncatePartnerId(partnerId)
 
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full cursor-pointer items-center gap-3 rounded-md p-3 text-left transition-colors hover:bg-[#F8FAFC]",
-        isActive && "bg-[#F1F5F9]"
+        "flex w-full cursor-pointer items-center gap-3 rounded-md p-3 text-left transition-colors hover:bg-muted",
+        isActive && "bg-muted"
       )}
     >
-      <UserAvatar name={displayName} size="md" />
+      <UserAvatar name={displayName} imageUrl={partnerImage ?? undefined} size="md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className={cn(
-            "truncate text-sm text-[#0F172A]",
-            hasUnread ? "font-bold" : "font-semibold"
-          )}>
+          <p
+            className={cn(
+              "truncate text-sm text-foreground",
+              hasUnread ? "font-bold" : "font-semibold"
+            )}
+          >
             {displayName}
           </p>
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-xs text-[#64748B]">
+            <span className="text-xs text-muted-foreground">
               {formatRelativeTime(lastMessageTime)}
             </span>
-            {/* Blue dot — disappears when conversation is open */}
+            {/* Blue dot - disappears when conversation is open */}
             {hasUnread && !isActive && (
               <span className="h-2.5 w-2.5 rounded-full bg-[#3B55E6]" />
             )}
           </div>
         </div>
-        <p className={cn(
-          "truncate text-xs",
-          hasUnread ? "font-medium text-[#0F172A]" : "text-[#64748B]"
-        )}>
+        <p
+          className={cn(
+            "truncate text-xs",
+            hasUnread ? "font-medium text-foreground" : "text-muted-foreground"
+          )}
+        >
           {isLastMessageMine ? "You: " : ""}
           {lastMessage}
         </p>

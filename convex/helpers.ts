@@ -38,3 +38,10 @@ export async function requireAuthUserId(ctx: Ctx) {
   const user = await requireAuth(ctx)
   return pickUserId(user)
 }
+
+export async function getUserById(ctx: Ctx, userId: string) {
+  return ctx.db
+    .query("users")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first()
+}

@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { requireAuthUserId } from "./helpers"
+import { requireAuth, requireAuthUserId } from "./helpers"
 
 export const getCommentsByPost = query({
   args: { postId: v.id("posts") },
@@ -12,20 +12,7 @@ export const getCommentsByPost = query({
       .order("asc")
       .collect()
 
-    return Promise.all(
-      comments.map(async (comment) => {
-        const post = await ctx.db
-          .query("posts")
-          .withIndex("by_author", (q) => q.eq("authorId", comment.authorId))
-          .order("desc")
-          .first()
-        return {
-          ...comment,
-          authorName: post?.authorName ?? null,
-          authorImage: post?.authorImage ?? null,
-        }
-      })
-    )
+    return comments
   },
 })
 
@@ -38,20 +25,7 @@ export const getRepliesByComment = query({
       .order("asc")
       .collect()
 
-    return Promise.all(
-      replies.map(async (comment) => {
-        const post = await ctx.db
-          .query("posts")
-          .withIndex("by_author", (q) => q.eq("authorId", comment.authorId))
-          .order("desc")
-          .first()
-        return {
-          ...comment,
-          authorName: post?.authorName ?? null,
-          authorImage: post?.authorImage ?? null,
-        }
-      })
-    )
+    return replies
   },
 })
 
@@ -62,7 +36,8 @@ export const addComment = mutation({
     parentId: v.optional(v.id("comments")),
   },
   handler: async (ctx, args) => {
-    const currentUserId = await requireAuthUserId(ctx)
+    const currentUser = await requireAuth(ctx)
+    const currentUserId = currentUser.userId ?? String(currentUser._id)
     const content = args.content.trim()
 
     if (!content) {
@@ -77,11 +52,18 @@ export const addComment = mutation({
       throw new ConvexError("Post not found")
     }
 
+    const userDoc = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", currentUserId))
+      .first()
+
     const commentId = await ctx.db.insert("comments", {
       content,
       postId: args.postId,
       authorId: currentUserId,
       parentId: args.parentId,
+      authorName: userDoc?.name ?? currentUser.name ?? undefined,
+      authorImage: userDoc?.image ?? currentUser.image ?? undefined,
       createdAt: Date.now(),
     })
 

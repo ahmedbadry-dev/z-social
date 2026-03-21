@@ -94,10 +94,9 @@ export const searchUsers = query({
 
     return Promise.all(
       byUsername.map(async (profile) => {
-        const recentPost = await ctx.db
-          .query("posts")
-          .withIndex("by_author", (q) => q.eq("authorId", profile.userId))
-          .order("desc")
+        const userDoc = await ctx.db
+          .query("users")
+          .withIndex("by_userId", (q) => q.eq("userId", profile.userId))
           .first()
 
         return {
@@ -105,7 +104,8 @@ export const searchUsers = query({
           username: profile.username,
           bio: profile.bio,
           isCurrentUser: profile.userId === currentUserId,
-          image: recentPost?.authorImage ?? null,
+          name: userDoc?.name ?? null,
+          image: userDoc?.image ?? null,
         }
       })
     )

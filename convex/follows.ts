@@ -83,10 +83,9 @@ export const getFollowers = query({
 
     return Promise.all(
       followerDocs.map(async (doc) => {
-        const post = await ctx.db
-          .query("posts")
-          .withIndex("by_author", (q) => q.eq("authorId", doc.followerId))
-          .order("desc")
+        const userDoc = await ctx.db
+          .query("users")
+          .withIndex("by_userId", (q) => q.eq("userId", doc.followerId))
           .first()
 
         const isFollowedByMe = currentUserId
@@ -100,8 +99,8 @@ export const getFollowers = query({
 
         return {
           userId: doc.followerId,
-          name: post?.authorName ?? null,
-          image: post?.authorImage ?? null,
+          name: userDoc?.name ?? null,
+          image: userDoc?.image ?? null,
           isFollowedByMe,
         }
       })
@@ -121,10 +120,9 @@ export const getFollowing = query({
 
     return Promise.all(
       followingDocs.map(async (doc) => {
-        const post = await ctx.db
-          .query("posts")
-          .withIndex("by_author", (q) => q.eq("authorId", doc.followingId))
-          .order("desc")
+        const userDoc = await ctx.db
+          .query("users")
+          .withIndex("by_userId", (q) => q.eq("userId", doc.followingId))
           .first()
 
         const isFollowedByMe = currentUserId
@@ -138,8 +136,8 @@ export const getFollowing = query({
 
         return {
           userId: doc.followingId,
-          name: post?.authorName ?? null,
-          image: post?.authorImage ?? null,
+          name: userDoc?.name ?? null,
+          image: userDoc?.image ?? null,
           isFollowedByMe,
         }
       })

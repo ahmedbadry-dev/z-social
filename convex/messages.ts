@@ -45,16 +45,15 @@ export const getConversations = query({
       Array.from(conversationMap.entries())
         .sort(([, a], [, b]) => b.createdAt - a.createdAt)
         .map(async ([partnerId, lastMessage]) => {
-          const partnerPost = await ctx.db
-            .query("posts")
-            .withIndex("by_author", (q) => q.eq("authorId", partnerId))
-            .order("desc")
+          const partnerDoc = await ctx.db
+            .query("users")
+            .withIndex("by_userId", (q) => q.eq("userId", partnerId))
             .first()
 
           return {
             partnerId,
-            partnerName: partnerPost?.authorName ?? null,
-            partnerImage: partnerPost?.authorImage ?? null,
+            partnerName: partnerDoc?.name ?? null,
+            partnerImage: partnerDoc?.image ?? null,
             lastMessage: lastMessage.content,
             lastMessageTime: lastMessage.createdAt,
             isLastMessageMine: lastMessage.senderId === currentUserId,

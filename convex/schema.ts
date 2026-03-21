@@ -21,6 +21,8 @@ export default defineSchema({
     content: v.string(),
     postId: v.id("posts"),
     authorId: v.string(),
+    authorName: v.optional(v.string()),
+    authorImage: v.optional(v.string()),
     parentId: v.optional(v.id("comments")),
     createdAt: v.number(),
   })
@@ -89,6 +91,17 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_read", ["userId", "read"]),
+
+  users: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    email: v.string(),
+    image: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_email", ["email"]),
 
   userProfiles: defineTable({
     userId: v.string(),

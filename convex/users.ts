@@ -2,6 +2,50 @@ import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { getCurrentUserId, requireAuth, requireAuthUserId } from "./helpers"
 
+export const upsertUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const authUser = await requireAuth(ctx)
+    const userId = authUser.userId ?? String(authUser._id)
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first()
+
+    const now = Date.now()
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        name: authUser.name ?? existing.name,
+        image: authUser.image ?? existing.image,
+        updatedAt: now,
+      })
+    } else {
+      await ctx.db.insert("users", {
+        userId,
+        name: authUser.name ?? "User",
+        email: authUser.email,
+        image: authUser.image ?? undefined,
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+
+    return userId
+  },
+})
+
+export const getUserById = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first()
+  },
+})
+
 export const getSuggestedUsers = query({
   args: {},
   handler: async (ctx) => {
@@ -20,7 +64,7 @@ export const getSuggestedUsers = query({
       .query("posts")
       .withIndex("by_created")
       .order("desc")
-      .take(20)
+      .take(50)
 
     const seen = new Set<string>()
     const suggestedIds: string[] = []
@@ -33,14 +77,19 @@ export const getSuggestedUsers = query({
       if (suggestedIds.length >= 4) break
     }
 
-    return suggestedIds.map((userId) => {
-      const post = recentPosts.find((p) => p.authorId === userId)
-      return {
-        userId,
-        name: post?.authorName ?? null,
-        image: post?.authorImage ?? null,
-      }
-    })
+    return Promise.all(
+      suggestedIds.map(async (userId) => {
+        const userDoc = await ctx.db
+          .query("users")
+          .withIndex("by_userId", (q) => q.eq("userId", userId))
+          .first()
+        return {
+          userId,
+          name: userDoc?.name ?? null,
+          image: userDoc?.image ?? null,
+        }
+      })
+    )
   },
 })
 
@@ -48,6 +97,11 @@ export const getUserProfile = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
     const currentUserId = await getCurrentUserId(ctx)
+
+    const userDoc = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first()
 
     const posts = await ctx.db
       .query("posts")
@@ -80,6 +134,8 @@ export const getUserProfile = query({
 
     return {
       userId: args.userId,
+      name: userDoc?.name ?? posts[0]?.authorName ?? null,
+      image: userDoc?.image ?? posts[0]?.authorImage ?? null,
       postsCount: posts.length,
       followersCount: followers.length,
       followingCount: following.length,

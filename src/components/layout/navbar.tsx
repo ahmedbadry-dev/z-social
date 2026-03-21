@@ -1,17 +1,12 @@
 "use client"
 
-import { LogOut, Search, UserRound } from "lucide-react"
+import { Bell, Search } from "lucide-react"
 import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
-import { usePathname, useRouter } from "next/navigation"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { SocialLogo } from "@/components/auth/social-logo"
-import { ThemeToggle } from "@/components/shared/theme-toggle"
-import { authClient } from "@/lib/auth-client"
-import { useAuthStore } from "@/stores/auth-store"
-import { useNotificationStore } from "@/stores/notification-store"
-import { useUIStore } from "@/stores/ui-store"
 import { api } from "../../../convex/_generated/api"
 
 interface NavbarProps {
@@ -20,16 +15,13 @@ interface NavbarProps {
 
 export function Navbar({ preloadedUser }: NavbarProps) {
   const router = useRouter()
-  const pathname = usePathname()
   const [q, setQ] = useQueryState("q", { defaultValue: "" })
   const [inputValue, setInputValue] = useState(q)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const { clearCachedUser } = useAuthStore()
-  const { reset: resetNotifications } = useNotificationStore()
-  const { closeModal, closeMobileSidebar } = useUIStore()
   const currentUser = preloadedUser
     ? usePreloadedQuery(preloadedUser)
     : useQuery(api.auth.getCurrentUser)
+  const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount) ?? 0
+  void currentUser
 
   useEffect(() => {
     setInputValue(q)
@@ -39,21 +31,6 @@ export function Navbar({ preloadedUser }: NavbarProps) {
     const value = inputValue.trim()
     await setQ(value)
     router.push(`/search?q=${encodeURIComponent(value)}`)
-  }
-
-  const onLogout = async () => {
-    setIsLoggingOut(true)
-    try {
-      clearCachedUser()
-      resetNotifications()
-      closeModal()
-      closeMobileSidebar()
-      await authClient.signOut()
-      window.location.href = "/login"
-    } catch {
-      toast.error("Failed to log out")
-      setIsLoggingOut(false)
-    }
   }
 
   return (
@@ -86,18 +63,14 @@ export function Navbar({ preloadedUser }: NavbarProps) {
           </div>
         </div>
 
-        <ThemeToggle />
-
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-[#3B55E6] disabled:opacity-60"
-          disabled={isLoggingOut}
-          onClick={() => void onLogout()}
-        >
-          <UserRound className="size-4" />
-          <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
-          <LogOut className="size-4 sm:hidden" />
-        </button>
+        <Link href="/notifications" className="relative md:hidden" aria-label="Notifications">
+          <Bell className="size-5 text-foreground" />
+          {unreadNotifications > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+              {unreadNotifications > 9 ? "9+" : unreadNotifications}
+            </span>
+          )}
+        </Link>
       </div>
     </header>
   )

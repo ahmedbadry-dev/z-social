@@ -136,6 +136,8 @@ export default defineSchema({
     bio: v.optional(v.string()),
     username: v.optional(v.string()),
     coverImageUrl: v.optional(v.string()),
+    isPrivate: v.optional(v.boolean()),
+    showOnlineStatus: v.optional(v.boolean()),
   })
     .index("by_user", ["userId"])
     .searchIndex("search_username", { searchField: "username" }),

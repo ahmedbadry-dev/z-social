@@ -81,7 +81,7 @@ export function GeneralSettings() {
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
       <div
-        className="cursor-pointer rounded-lg border-2 border-dashed border-[#E2E8F0] p-4 text-center"
+        className="cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center"
         onClick={() => fileRef.current?.click()}
       >
         <input
@@ -109,8 +109,8 @@ export function GeneralSettings() {
           />
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <ImageUp className="size-6 text-[#64748B]" />
-            <p className="text-sm text-[#64748B]">Choose an image for avatar</p>
+            <ImageUp className="size-6 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Choose an image for avatar</p>
           </div>
         )}
       </div>
@@ -159,7 +159,7 @@ export function GeneralSettings() {
 
       <Button
         type="submit"
-        className="w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+        className="w-full bg-foreground text-white hover:bg-foreground/90"
         disabled={form.formState.isSubmitting || isUploading}
       >
         {form.formState.isSubmitting || isUploading ? (

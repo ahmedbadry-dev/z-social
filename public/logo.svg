@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="400" viewBox="0 0 4001 4001">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.5 2911.359375 L 4000.5 2911.359375 L 4000.5 4000.5 L 0.5 4000.5 Z M 0.5 2911.359375 "/>
+</clipPath>
+<linearGradient id="linear-pattern-0" gradientUnits="userSpaceOnUse" x1="0.0126415" y1="0" x2="0.976141" y2="0" gradientTransform="matrix(-0.00004941, 1130.4, -1130.4, -0.00004941, 2000.5, 2897.07)">
+<stop offset="0" stop-color="rgb(96.316528%, 96.444702%, 96.434021%)" stop-opacity="1"/>
+<stop offset="0.0625" stop-color="rgb(96.316528%, 96.444702%, 96.434021%)" stop-opacity="1"/>
+<stop offset="0.078125" stop-color="rgb(96.421814%, 96.478271%, 96.440125%)" stop-opacity="1"/>
+<stop offset="0.09375" stop-color="rgb(96.62323%, 96.636963%, 96.585083%)" stop-opacity="1"/>
+<stop offset="0.125" stop-color="rgb(96.725464%, 96.867371%, 96.868896%)" stop-opacity="1"/>
+<stop offset="0.15625" stop-color="rgb(96.731567%, 96.968079%, 97.007751%)" stop-opacity="1"/>
+<stop offset="0.171875" stop-color="rgb(96.777344%, 96.983337%, 97.010803%)" stop-opacity="1"/>
+<stop offset="0.1875" stop-color="rgb(96.97113%, 97.044373%, 97.021484%)" stop-opacity="1"/>
+<stop offset="0.203125" stop-color="rgb(97.123718%, 97.117615%, 97.065735%)" stop-opacity="1"/>
+<stop offset="0.21875" stop-color="rgb(97.137451%, 97.319031%, 97.343445%)" stop-opacity="1"/>
+<stop offset="0.25" stop-color="rgb(97.148132%, 97.494507%, 97.58606%)" stop-opacity="1"/>
+<stop offset="0.28125" stop-color="rgb(97.319031%, 97.547913%, 97.595215%)" stop-opacity="1"/>
+<stop offset="0.3125" stop-color="rgb(97.514343%, 97.610474%, 97.605896%)" stop-opacity="1"/>
+<stop offset="0.34375" stop-color="rgb(97.538757%, 97.618103%, 97.607422%)" stop-opacity="1"/>
+<stop offset="0.359375" stop-color="rgb(97.547913%, 97.741699%, 97.77832%)" stop-opacity="1"/>
+<stop offset="0.375" stop-color="rgb(97.669983%, 97.97821%, 98.06366%)" stop-opacity="1"/>
+<stop offset="0.4375" stop-color="rgb(97.871399%, 98.120117%, 98.182678%)" stop-opacity="1"/>
+<stop offset="0.46875" stop-color="rgb(98.007202%, 98.162842%, 98.190308%)" stop-opacity="1"/>
+<stop offset="0.484375" stop-color="rgb(98.204041%, 98.265076%, 98.258972%)" stop-opacity="1"/>
+<stop offset="0.5" stop-color="rgb(98.364258%, 98.51532%, 98.547363%)" stop-opacity="1"/>
+<stop offset="0.5625" stop-color="rgb(98.374939%, 98.678589%, 98.771667%)" stop-opacity="1"/>
+<stop offset="0.578125" stop-color="rgb(98.550415%, 98.733521%, 98.782349%)" stop-opacity="1"/>
+<stop offset="0.59375" stop-color="rgb(98.745728%, 98.796082%, 98.794556%)" stop-opacity="1"/>
+<stop offset="0.625" stop-color="rgb(98.76709%, 98.802185%, 98.796082%)" stop-opacity="1"/>
+<stop offset="0.640625" stop-color="rgb(98.776245%, 98.942566%, 98.988342%)" stop-opacity="1"/>
+<stop offset="0.65625" stop-color="rgb(98.789978%, 99.147034%, 99.272156%)" stop-opacity="1"/>
+<stop offset="0.671875" stop-color="rgb(98.908997%, 99.247742%, 99.36676%)" stop-opacity="1"/>
+<stop offset="0.6875" stop-color="rgb(99.104309%, 99.310303%, 99.378967%)" stop-opacity="1"/>
+<stop offset="0.75" stop-color="rgb(99.186707%, 99.336243%, 99.383545%)" stop-opacity="1"/>
+<stop offset="0.765625" stop-color="rgb(99.243164%, 99.409485%, 99.464417%)" stop-opacity="1"/>
+<stop offset="0.78125" stop-color="rgb(99.455261%, 99.67804%, 99.760437%)" stop-opacity="1"/>
+<stop offset="0.8125" stop-color="rgb(99.607849%, 99.873352%, 99.97406%)" stop-opacity="1"/>
+<stop offset="0.84375" stop-color="rgb(99.610901%, 99.873352%, 99.975586%)" stop-opacity="1"/>
+<stop offset="0.875" stop-color="rgb(99.807739%, 99.937439%, 99.987793%)" stop-opacity="1"/>
+<stop offset="1" stop-color="rgb(100%, 100%, 100%)" stop-opacity="1"/>
+</linearGradient>
+</defs>
+<path fill-rule="nonzero" fill="rgb(6.266785%, 5.734253%, 5.047607%)" fill-opacity="1" d="M 2571.480469 2468.5 L 1356.550781 2468.5 L 1936.03125 1812.449219 L 1973.511719 1845.550781 L 1467.421875 2418.5 L 2462.488281 2418.5 L 2357.519531 2296.5 L 1712.210938 2296.5 L 2182.351562 1754.5 L 1637 1754.5 L 1433.25 1532.5 L 2644.449219 1532.5 L 2080.800781 2188.03125 L 2042.890625 2155.429688 L 2535.519531 1582.5 L 1547.011719 1582.5 L 1658.96875 1704.5 L 2291.910156 1704.5 L 1821.769531 2246.5 L 2380.460938 2246.5 L 2571.480469 2468.5 "/>
+</svg>

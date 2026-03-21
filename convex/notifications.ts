@@ -16,16 +16,15 @@ export const getNotifications = query({
 
     const enrichedPage = await Promise.all(
       result.page.map(async (notification) => {
-        const actorPost = await ctx.db
-          .query("posts")
-          .withIndex("by_author", (q) => q.eq("authorId", notification.actorId))
-          .order("desc")
+        const actorDoc = await ctx.db
+          .query("users")
+          .withIndex("by_userId", (q) => q.eq("userId", notification.actorId))
           .first()
 
         return {
           ...notification,
-          actorName: actorPost?.authorName ?? null,
-          actorImage: actorPost?.authorImage ?? null,
+          actorName: actorDoc?.name ?? null,
+          actorImage: actorDoc?.image ?? null,
         }
       })
     )

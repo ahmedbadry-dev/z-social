@@ -154,13 +154,18 @@ export const createPost = mutation({
       throw new ConvexError("Post cannot exceed 500 characters")
     }
 
+    const userDoc = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", currentUserId))
+      .first()
+
     return ctx.db.insert("posts", {
       content,
       mediaUrl: args.mediaUrl,
       mediaType: args.mediaType,
       authorId: currentUserId,
-      authorName: currentUser.name ?? "User",
-      authorImage: currentUser.image ?? undefined,
+      authorName: userDoc?.name ?? currentUser.name ?? "User",
+      authorImage: userDoc?.image ?? currentUser.image ?? undefined,
       createdAt: Date.now(),
     })
   },

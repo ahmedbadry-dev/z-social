@@ -69,11 +69,29 @@ export default defineSchema({
     senderId: v.string(),
     receiverId: v.string(),
     read: v.boolean(),
+    replyToId: v.optional(v.id("messages")),
     createdAt: v.number(),
   })
     .index("by_sender", ["senderId"])
     .index("by_receiver", ["receiverId"])
     .index("by_conversation", ["senderId", "receiverId"]),
+
+  messageReactions: defineTable({
+    messageId: v.id("messages"),
+    userId: v.string(),
+    reactionType: v.union(
+      v.literal("like"),
+      v.literal("love"),
+      v.literal("haha"),
+      v.literal("wow"),
+      v.literal("sad"),
+      v.literal("angry")
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_message", ["messageId"])
+    .index("by_user", ["userId"])
+    .index("by_message_user", ["messageId", "userId"]),
 
   notifications: defineTable({
     userId: v.string(),
@@ -111,4 +129,10 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .searchIndex("search_username", { searchField: "username" }),
+
+  userPresence: defineTable({
+    userId: v.string(),
+    lastSeen: v.number(),
+    isTypingTo: v.optional(v.string()),
+  }).index("by_userId", ["userId"]),
 })

@@ -150,3 +150,62 @@ export const getUnreadCount = query({
     return unread.length
   },
 })
+
+export const updatePresence = mutation({
+  args: {
+    isTypingTo: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const currentUserId = await requireAuthUserId(ctx)
+    const existing = await ctx.db
+      .query("userPresence")
+      .withIndex("by_userId", (q) => q.eq("userId", currentUserId))
+      .first()
+
+    const now = Date.now()
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        lastSeen: now,
+        isTypingTo: args.isTypingTo,
+      })
+    } else {
+      await ctx.db.insert("userPresence", {
+        userId: currentUserId,
+        lastSeen: now,
+        isTypingTo: args.isTypingTo,
+      })
+    }
+  },
+})
+
+export const getPresence = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const presence = await ctx.db
+      .query("userPresence")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first()
+
+    if (!presence) return { isOnline: false, isTyping: false }
+
+    const TWO_MINUTES = 2 * 60 * 1000
+    const isOnline = Date.now() - presence.lastSeen < TWO_MINUTES
+
+    return { isOnline, isTyping: false }
+  },
+})
+
+export const getTypingStatus = query({
+  args: { otherUserId: v.string() },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx)
+    if (!currentUserId) return false
+
+    const presence = await ctx.db
+      .query("userPresence")
+      .withIndex("by_userId", (q) => q.eq("userId", args.otherUserId))
+      .first()
+
+    return presence?.isTypingTo === currentUserId
+  },
+})

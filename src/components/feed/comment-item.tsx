@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
+import { MentionText } from "@/components/shared/mention-text"
+import { MentionTextarea } from "@/components/shared/mention-textarea"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
 import { cn, formatRelativeTime } from "@/lib/utils"
@@ -115,12 +117,10 @@ export function CommentItem({
                   </span>
                 )}
               </div>
-              <p
-                dir="auto"
-                className="mt-0.5 whitespace-pre-wrap text-sm text-foreground leading-relaxed"
-              >
-                {comment.content}
-              </p>
+              <MentionText
+                content={comment.content}
+                className="mt-0.5 text-sm text-foreground leading-relaxed"
+              />
               <div className="mt-1.5 flex items-center gap-3">
                 <span className="text-[11px] text-muted-foreground">
                   {formatRelativeTime(comment.createdAt)}
@@ -158,17 +158,13 @@ export function CommentItem({
         <div className={cn("flex gap-2 items-end", isReply ? "ml-8" : "ml-10")}>
           <UserAvatar name={currentUserId} size="sm" className="shrink-0 mb-1" />
           <div className="flex-1 relative">
-            <textarea
+            <MentionTextarea
               value={replyText}
               placeholder="Write a reply..."
               rows={1}
-              className="w-full resize-none rounded-2xl border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6] max-h-24 min-h-9"
-              style={{ overflow: "hidden" }}
-              onChange={(event) => {
-                setReplyText(event.target.value)
-                event.target.style.height = "auto"
-                event.target.style.height = `${Math.min(event.target.scrollHeight, 96)}px`
-              }}
+              dir="auto"
+              className="w-full rounded-2xl border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6] max-h-24 min-h-9"
+              onChange={setReplyText}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault()

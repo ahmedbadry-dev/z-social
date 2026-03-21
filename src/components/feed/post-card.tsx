@@ -15,6 +15,8 @@ import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { CommentItem } from "@/components/feed/comment-item"
 import { PostActions } from "@/components/feed/post-actions"
+import { MentionText } from "@/components/shared/mention-text"
+import { MentionTextarea } from "@/components/shared/mention-textarea"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -170,7 +172,7 @@ export const PostCard = memo(function PostCard({
       </header>
 
       <div className="mt-3 space-y-2">
-        <p dir="auto" className="whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+        <MentionText content={post.content} className="text-sm text-foreground" />
         {post.isEdited && <p className="text-xs text-muted-foreground">(edited)</p>}
       </div>
 
@@ -215,17 +217,13 @@ export const PostCard = memo(function PostCard({
               imageUrl={currentUser?.image ?? undefined}
               size="sm"
             />
-            <textarea
+            <MentionTextarea
               value={commentText}
               placeholder="Write a comment..."
               rows={1}
-              className="flex-1 resize-none rounded-2xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6] max-h-24 min-h-9"
-              style={{ overflow: "hidden" }}
-              onChange={(event) => {
-                setCommentText(event.target.value)
-                event.target.style.height = "auto"
-                event.target.style.height = `${Math.min(event.target.scrollHeight, 96)}px`
-              }}
+              dir="auto"
+              className="flex-1 rounded-2xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#3B55E6] max-h-24 min-h-9"
+              onChange={setCommentText}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault()

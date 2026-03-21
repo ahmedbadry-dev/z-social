@@ -8,9 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
+import { MentionTextarea } from "@/components/shared/mention-textarea"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Textarea } from "@/components/ui/textarea"
 import { usePostMediaUpload } from "@/hooks/use-post-media-upload"
 import { api } from "../../../convex/_generated/api"
 import { createPostSchema, type CreatePostInput } from "@/lib/validations"
@@ -100,9 +100,10 @@ export function PostComposer() {
                     <FieldLabel htmlFor="post-content" className="sr-only">
                       Post content
                     </FieldLabel>
-                    <Textarea
-                      {...field}
+                    <MentionTextarea
                       id="post-content"
+                      value={field.value}
+                      onChange={field.onChange}
                       rows={3}
                       maxLength={500}
                       placeholder="What's on your mind?"

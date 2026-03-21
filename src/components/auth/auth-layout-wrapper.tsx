@@ -34,7 +34,7 @@ export function AuthLayoutWrapper({
           <Button
             type="button"
             variant="ghost"
-            className="h-auto px-0 text-sm text-[#64748B] hover:bg-transparent hover:text-[#0F172A]"
+            className="h-auto px-0 text-sm text-muted-foreground hover:bg-transparent hover:text-foreground"
             onClick={handleBack}
           >
             <ArrowLeft className="mr-1 size-4" />

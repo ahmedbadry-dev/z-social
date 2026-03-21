@@ -5,6 +5,7 @@ interface NotificationStore {
   unreadMessagesCount: number
   setUnreadNotificationsCount: (count: number) => void
   setUnreadMessagesCount: (count: number) => void
+  reset: () => void
 }
 
 export const useNotificationStore = create<NotificationStore>((set) => ({
@@ -16,4 +17,6 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
 
   setUnreadMessagesCount: (count) =>
     set({ unreadMessagesCount: count }),
+
+  reset: () => set({ unreadNotificationsCount: 0, unreadMessagesCount: 0 }),
 }))

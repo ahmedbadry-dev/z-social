@@ -5,10 +5,13 @@ import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { SocialLogo } from "@/components/auth/social-logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { authClient } from "@/lib/auth-client"
 import { useAuthStore } from "@/stores/auth-store"
+import { useNotificationStore } from "@/stores/notification-store"
+import { useUIStore } from "@/stores/ui-store"
 import { api } from "../../../convex/_generated/api"
 
 interface NavbarProps {
@@ -22,6 +25,8 @@ export function Navbar({ preloadedUser }: NavbarProps) {
   const [inputValue, setInputValue] = useState(q)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { clearCachedUser } = useAuthStore()
+  const { reset: resetNotifications } = useNotificationStore()
+  const { closeModal, closeMobileSidebar } = useUIStore()
   const currentUser = preloadedUser
     ? usePreloadedQuery(preloadedUser)
     : useQuery(api.auth.getCurrentUser)
@@ -40,14 +45,13 @@ export function Navbar({ preloadedUser }: NavbarProps) {
     setIsLoggingOut(true)
     try {
       clearCachedUser()
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            router.replace("/login")
-          },
-        },
-      })
-    } finally {
+      resetNotifications()
+      closeModal()
+      closeMobileSidebar()
+      await authClient.signOut()
+      window.location.href = "/login"
+    } catch {
+      toast.error("Failed to log out")
       setIsLoggingOut(false)
     }
   }

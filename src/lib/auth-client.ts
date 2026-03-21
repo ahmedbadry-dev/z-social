@@ -2,13 +2,24 @@ import { createAuthClient } from "better-auth/react"
 import { convexClient } from "@convex-dev/better-auth/client/plugins"
 import { magicLinkClient, emailOTPClient } from "better-auth/client/plugins"
 
-const baseURL =
-  process.env.NEXT_PUBLIC_BETTER_AUTH_URL ||
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (typeof window !== "undefined" ? window.location.origin : "")
+function getBaseURL(): string {
+  if (typeof window === "undefined") {
+    return (
+      process.env.NEXT_PUBLIC_BETTER_AUTH_URL ??
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      ""
+    )
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    window.location.origin
+  )
+}
 
 export const authClient = createAuthClient({
-  baseURL: baseURL,
+  baseURL: getBaseURL(),
   plugins: [convexClient(), magicLinkClient(), emailOTPClient()],
 })
 

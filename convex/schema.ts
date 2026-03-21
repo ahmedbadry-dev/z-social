@@ -69,6 +69,7 @@ export default defineSchema({
     senderId: v.string(),
     receiverId: v.string(),
     read: v.boolean(),
+    replyToId: v.optional(v.id("messages")),
     createdAt: v.number(),
   })
     .index("by_sender", ["senderId"])

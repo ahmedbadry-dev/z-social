@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function ProfileLoading() {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <div className="rounded-lg bg-card p-6 shadow-sm">
         <Skeleton className="h-[120px] w-full rounded-lg" />
         <div className="mt-4 space-y-2">
           <Skeleton className="h-6 w-40" />

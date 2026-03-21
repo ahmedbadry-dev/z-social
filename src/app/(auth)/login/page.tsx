@@ -75,7 +75,7 @@ export default function LoginPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="email" className="text-[#0F172A]">
+                    <FieldLabel htmlFor="email" className="text-foreground">
                       Email
                     </FieldLabel>
                     <Input
@@ -83,7 +83,7 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-neutral-200 bg-white focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -94,7 +94,7 @@ export default function LoginPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="password" className="text-[#0F172A]">
+                    <FieldLabel htmlFor="password" className="text-foreground">
                       Password
                     </FieldLabel>
                     <div className="relative">
@@ -103,12 +103,12 @@ export default function LoginPage() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         aria-invalid={fieldState.invalid}
-                        className="h-10 border-neutral-200 bg-white pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                        className="h-10 border-border bg-card pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
                       />
                       <button
                         type="button"
                         aria-label={showPassword ? "Hide password" : "Show password"}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 text-[#64748B]"
+                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                         onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? (
@@ -126,7 +126,7 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
-                className="text-xs text-[#64748B] transition-colors hover:text-[#0F172A]"
+                className="text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 Forget Password?
               </Link>
@@ -134,7 +134,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="h-11 w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+              className="h-11 w-full bg-foreground text-background hover:bg-foreground/90"
             >
               {form.formState.isSubmitting ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -143,7 +143,7 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <p className="text-center text-sm text-[#64748B]">
+          <p className="text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="font-medium text-[#3B55E6] hover:underline">
               Sign up

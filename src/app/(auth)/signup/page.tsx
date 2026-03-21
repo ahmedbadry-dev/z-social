@@ -108,14 +108,14 @@ export default function SignupPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="name" className="text-[#0F172A]">
+                    <FieldLabel htmlFor="name" className="text-foreground">
                       Name
                     </FieldLabel>
                     <Input
                       {...field}
                       id="name"
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-neutral-200 bg-white focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -126,7 +126,7 @@ export default function SignupPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="email" className="text-[#0F172A]">
+                    <FieldLabel htmlFor="email" className="text-foreground">
                       Email
                     </FieldLabel>
                     <Input
@@ -134,7 +134,7 @@ export default function SignupPage() {
                       id="email"
                       type="email"
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-neutral-200 bg-white focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -145,14 +145,14 @@ export default function SignupPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="username" className="text-[#0F172A]">
+                    <FieldLabel htmlFor="username" className="text-foreground">
                       Username
                     </FieldLabel>
                     <Input
                       {...field}
                       id="username"
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-neutral-200 bg-white focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -163,7 +163,7 @@ export default function SignupPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="password" className="text-[#0F172A]">
+                    <FieldLabel htmlFor="password" className="text-foreground">
                       Password
                     </FieldLabel>
                     <div className="relative">
@@ -172,12 +172,12 @@ export default function SignupPage() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         aria-invalid={fieldState.invalid}
-                        className="h-10 border-neutral-200 bg-white pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                        className="h-10 border-border bg-card pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
                       />
                       <button
                         type="button"
                         aria-label={showPassword ? "Hide password" : "Show password"}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 text-[#64748B]"
+                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                         onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? (
@@ -203,7 +203,7 @@ export default function SignupPage() {
                       aria-invalid={fieldState.invalid}
                     />
                     <div className="space-y-1">
-                      <FieldLabel htmlFor="terms" className="text-sm text-[#0F172A]">
+                      <FieldLabel htmlFor="terms" className="text-sm text-foreground">
                         I agree to the{" "}
                         <Link href="#" className="text-[#3B55E6] hover:underline">
                           Terms
@@ -223,7 +223,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="h-11 w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+              className="h-11 w-full bg-foreground text-background hover:bg-foreground/90"
             >
               {form.formState.isSubmitting ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -232,7 +232,7 @@ export default function SignupPage() {
               )}
             </Button>
           </form>
-          <p className="text-center text-sm text-[#64748B]">
+          <p className="text-center text-sm text-muted-foreground">
             Have an account?{" "}
             <Link href="/login" className="font-medium text-[#3B55E6] hover:underline">
               Log In

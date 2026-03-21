@@ -22,7 +22,7 @@ export function SocialLogo({ className }: SocialLogoProps) {
         <path d="M12 5L19 12L12 19L5 12L12 5Z" fill="currentColor" />
         <path d="M7.5 12L12 7.5L16.5 12L12 16.5L7.5 12Z" fill="white" />
       </svg>
-      <span className="text-xl font-bold text-[#0F172A]">Social</span>
+      <span className="text-xl font-bold text-foreground">Social</span>
     </div>
   )
 }

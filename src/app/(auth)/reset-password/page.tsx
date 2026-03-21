@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
   return (
     <AuthLayoutWrapper>
       <AuthCard className="space-y-5">
-        <h1 className="text-2xl font-semibold text-[#0F172A]">Reset Password</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Reset Password</h1>
         <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <Controller
@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password" className="text-[#0F172A]">
+                  <FieldLabel htmlFor="password" className="text-foreground">
                     New password
                   </FieldLabel>
                   <div className="relative">
@@ -85,12 +85,12 @@ export default function ResetPasswordPage() {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-neutral-200 bg-white pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className="h-10 border-border bg-card pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
                     />
                     <button
                       type="button"
                       aria-label={showPassword ? "Hide password" : "Show password"}
-                      className="absolute top-1/2 right-3 -translate-y-1/2 text-[#64748B]"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                       onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -105,7 +105,7 @@ export default function ResetPasswordPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="confirmPassword" className="text-[#0F172A]">
+                  <FieldLabel htmlFor="confirmPassword" className="text-foreground">
                     Confirm password
                   </FieldLabel>
                   <div className="relative">
@@ -114,12 +114,12 @@ export default function ResetPasswordPage() {
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-neutral-200 bg-white pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className="h-10 border-border bg-card pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
                     />
                     <button
                       type="button"
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                      className="absolute top-1/2 right-3 -translate-y-1/2 text-[#64748B]"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                       onClick={() => setShowConfirmPassword((prev) => !prev)}
                     >
                       {showConfirmPassword ? (
@@ -137,7 +137,7 @@ export default function ResetPasswordPage() {
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="h-11 w-full bg-[#0F172A] text-white hover:bg-[#1E293B]"
+            className="h-11 w-full bg-foreground text-background hover:bg-foreground/90"
           >
             {form.formState.isSubmitting ? (
               <Loader2 className="size-4 animate-spin" />

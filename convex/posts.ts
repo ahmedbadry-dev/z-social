@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server"
 import { ConvexError, v } from "convex/values"
 import type { Doc } from "./_generated/dataModel"
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server"
-import { getCurrentUserId, requireAuth, requireAuthUserId } from "./helpers"
+import { getCurrentUserId, requireAuth, requireAuthUserId, sendMentionNotifications } from "./helpers"
 
 type PostDoc = Doc<"posts">
 
@@ -171,7 +171,7 @@ export const createPost = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", currentUserId))
       .first()
 
-    return ctx.db.insert("posts", {
+    const postId = await ctx.db.insert("posts", {
       content,
       mediaUrl: args.mediaUrl,
       mediaType: args.mediaType,
@@ -180,6 +180,9 @@ export const createPost = mutation({
       authorImage: userDoc?.image ?? currentUser.image ?? undefined,
       createdAt: Date.now(),
     })
+
+    await sendMentionNotifications(ctx, content, currentUserId, postId)
+    return postId
   },
 })
 

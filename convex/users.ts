@@ -250,3 +250,35 @@ export const deleteUserData = mutation({
     return null
   },
 })
+
+export const searchUsersByUsername = query({
+  args: { query: v.string() },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx)
+    if (args.query.trim().length < 1) return []
+
+    const profiles = await ctx.db
+      .query("userProfiles")
+      .withSearchIndex("search_username", (q) =>
+        q.search("username", args.query.trim())
+      )
+      .take(5)
+
+    return Promise.all(
+      profiles.map(async (profile) => {
+        const userDoc = await ctx.db
+          .query("users")
+          .withIndex("by_userId", (q) => q.eq("userId", profile.userId))
+          .first()
+
+        return {
+          userId: profile.userId,
+          username: profile.username ?? "",
+          name: userDoc?.name ?? null,
+          image: userDoc?.image ?? null,
+          isCurrentUser: profile.userId === currentUserId,
+        }
+      })
+    )
+  },
+})

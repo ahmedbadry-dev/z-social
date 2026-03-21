@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { getCurrentUserId, requireAuthUserId } from "./helpers"
+import { getCurrentUserId, requireAuthUserId, sendMentionNotifications } from "./helpers"
 
 export const getCommentsByPost = query({
   args: { postId: v.id("posts") },
@@ -65,6 +65,8 @@ export const addComment = mutation({
       authorImage: userDoc?.image ?? undefined,
       createdAt: Date.now(),
     })
+
+    await sendMentionNotifications(ctx, content, currentUserId, args.postId, commentId)
 
     if (args.parentId) {
       const parent = await ctx.db.get(args.parentId)

@@ -144,6 +144,8 @@ export const getUserProfile = query({
       bio: profileDoc?.bio ?? "",
       username: profileDoc?.username ?? "",
       coverImageUrl: profileDoc?.coverImageUrl ?? null,
+      isPrivate: profileDoc?.isPrivate ?? false,
+      showOnlineStatus: profileDoc?.showOnlineStatus ?? true,
     }
   },
 })
@@ -178,6 +180,35 @@ export const updateUserProfile = mutation({
         bio: args.bio?.trim() || undefined,
         username: args.username?.trim() || undefined,
         coverImageUrl: args.coverImageUrl || undefined,
+      })
+    }
+  },
+})
+
+export const updatePrivacySettings = mutation({
+  args: {
+    isPrivate: v.optional(v.boolean()),
+    showOnlineStatus: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const currentUser = await requireAuth(ctx)
+    const currentUserId = currentUser.userId ?? String(currentUser._id)
+
+    const existing = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", currentUserId))
+      .first()
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        isPrivate: args.isPrivate,
+        showOnlineStatus: args.showOnlineStatus,
+      })
+    } else {
+      await ctx.db.insert("userProfiles", {
+        userId: currentUserId,
+        isPrivate: args.isPrivate,
+        showOnlineStatus: args.showOnlineStatus,
       })
     }
   },

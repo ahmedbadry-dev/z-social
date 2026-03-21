@@ -4,8 +4,8 @@ import { FileText } from "lucide-react"
 import { usePaginatedQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
 import { EmptyState } from "@/components/shared/empty-state"
+import { useInfiniteScroll } from "@/components/shared/use-infinite-scroll"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
-import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 
 interface MyPostsTabProps {
@@ -17,6 +17,10 @@ export function MyPostsTab({ userId }: MyPostsTabProps) {
     api.posts.getPostsByUser,
     { userId },
     { initialNumItems: 10 }
+  )
+  const loaderRef = useInfiniteScroll(
+    () => loadMore(10),
+    status === "CanLoadMore"
   )
 
   if (status === "LoadingFirstPage") {
@@ -60,10 +64,14 @@ export function MyPostsTab({ userId }: MyPostsTabProps) {
         />
       ))}
       {status === "CanLoadMore" && (
-        <div className="flex justify-center">
-          <Button type="button" variant="outline" onClick={() => loadMore(10)}>
-            Load more
-          </Button>
+        <div ref={loaderRef} className="py-2">
+          <PostSkeleton />
+        </div>
+      )}
+
+      {status === "LoadingMore" && (
+        <div className="space-y-4">
+          <PostSkeleton />
         </div>
       )}
     </div>

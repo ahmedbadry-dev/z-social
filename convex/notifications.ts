@@ -8,11 +8,29 @@ export const getNotifications = query({
   handler: async (ctx, args) => {
     const currentUserId = await getCurrentUserId(ctx)
     if (!currentUserId) return { page: [], isDone: true, continueCursor: "" }
-    return ctx.db
+    const result = await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", currentUserId))
       .order("desc")
       .paginate(args.paginationOpts)
+
+    const enrichedPage = await Promise.all(
+      result.page.map(async (notification) => {
+        const actorPost = await ctx.db
+          .query("posts")
+          .withIndex("by_author", (q) => q.eq("authorId", notification.actorId))
+          .order("desc")
+          .first()
+
+        return {
+          ...notification,
+          actorName: actorPost?.authorName ?? null,
+          actorImage: actorPost?.authorImage ?? null,
+        }
+      })
+    )
+
+    return { ...result, page: enrichedPage }
   },
 })
 

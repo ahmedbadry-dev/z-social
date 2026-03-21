@@ -41,15 +41,27 @@ export const getConversations = query({
 
     const unreadPartners = new Set(allUnread.map((msg) => msg.senderId))
 
-    return Array.from(conversationMap.entries())
-      .sort(([, a], [, b]) => b.createdAt - a.createdAt)
-      .map(([partnerId, lastMessage]) => ({
-        partnerId,
-        lastMessage: lastMessage.content,
-        lastMessageTime: lastMessage.createdAt,
-        isLastMessageMine: lastMessage.senderId === currentUserId,
-        hasUnread: unreadPartners.has(partnerId), // ← أضف هذا السطر
-      }))
+    return await Promise.all(
+      Array.from(conversationMap.entries())
+        .sort(([, a], [, b]) => b.createdAt - a.createdAt)
+        .map(async ([partnerId, lastMessage]) => {
+          const partnerPost = await ctx.db
+            .query("posts")
+            .withIndex("by_author", (q) => q.eq("authorId", partnerId))
+            .order("desc")
+            .first()
+
+          return {
+            partnerId,
+            partnerName: partnerPost?.authorName ?? null,
+            partnerImage: partnerPost?.authorImage ?? null,
+            lastMessage: lastMessage.content,
+            lastMessageTime: lastMessage.createdAt,
+            isLastMessageMine: lastMessage.senderId === currentUserId,
+            hasUnread: unreadPartners.has(partnerId),
+          }
+        })
+    )
   },
 })
 

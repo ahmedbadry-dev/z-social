@@ -12,18 +12,46 @@ export const getCommentsByPost = query({
       .order("asc")
       .collect()
 
-    return comments
+    return Promise.all(
+      comments.map(async (comment) => {
+        const post = await ctx.db
+          .query("posts")
+          .withIndex("by_author", (q) => q.eq("authorId", comment.authorId))
+          .order("desc")
+          .first()
+        return {
+          ...comment,
+          authorName: post?.authorName ?? null,
+          authorImage: post?.authorImage ?? null,
+        }
+      })
+    )
   },
 })
 
 export const getRepliesByComment = query({
   args: { commentId: v.id("comments") },
   handler: async (ctx, args) => {
-    return ctx.db
+    const replies = await ctx.db
       .query("comments")
       .withIndex("by_parent", (q) => q.eq("parentId", args.commentId))
       .order("asc")
       .collect()
+
+    return Promise.all(
+      replies.map(async (comment) => {
+        const post = await ctx.db
+          .query("posts")
+          .withIndex("by_author", (q) => q.eq("authorId", comment.authorId))
+          .order("desc")
+          .first()
+        return {
+          ...comment,
+          authorName: post?.authorName ?? null,
+          authorImage: post?.authorImage ?? null,
+        }
+      })
+    )
   },
 })
 

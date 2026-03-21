@@ -30,6 +30,15 @@ export default defineSchema({
     .index("by_parent", ["parentId"])
     .index("by_author", ["authorId"]),
 
+  commentLikes: defineTable({
+    commentId: v.id("comments"),
+    userId: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_comment", ["commentId"])
+    .index("by_user", ["userId"])
+    .index("by_comment_user", ["commentId", "userId"]),
+
   likes: defineTable({
     postId: v.id("posts"),
     userId: v.string(),

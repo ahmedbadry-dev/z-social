@@ -61,6 +61,7 @@ interface PostCardProps {
 
 export const PostCard = memo(function PostCard({ post, currentUserId }: PostCardProps) {
   const comments = useQuery(api.comments.getCommentsByPost, { postId: post._id })
+  const currentUser = useQuery(api.auth.getCurrentUser)
   const addComment = useMutation(api.comments.addComment)
   const toggleSaveMutation = useMutation(api.posts.toggleSave)
   const updatePostMutation = useMutation(api.posts.updatePost)
@@ -204,7 +205,11 @@ export const PostCard = memo(function PostCard({ post, currentUserId }: PostCard
       {showComments && (
         <div className="mt-3 space-y-3 rounded-lg bg-muted p-3">
           <div className="flex items-center gap-2">
-            <UserAvatar name={currentUserId} size="sm" />
+            <UserAvatar
+              name={currentUser?.name ?? currentUserId}
+              imageUrl={currentUser?.image ?? undefined}
+              size="sm"
+            />
             <input
               value={commentText}
               placeholder="Write a comment..."
@@ -230,7 +235,7 @@ export const PostCard = memo(function PostCard({ post, currentUserId }: PostCard
             {comments?.map((comment) => (
               <CommentItem
                 key={comment._id}
-                comment={{ ...comment, authorName: comment.authorId }}
+                comment={comment}
                 postId={post._id}
                 postAuthorId={post.authorId}
                 currentUserId={currentUserId}

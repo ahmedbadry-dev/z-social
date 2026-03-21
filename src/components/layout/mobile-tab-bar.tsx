@@ -2,7 +2,7 @@
 
 import { Authenticated } from "convex/react"
 import { useQuery } from "convex/react"
-import { Bell, House, Search, Send, User } from "lucide-react"
+import { House, Search, Send, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -12,23 +12,20 @@ const tabs = [
   { href: "/feed", label: "Home", icon: House, key: "home" },
   { href: "/search", label: "Search", icon: Search, key: "search" },
   { href: "/messages", label: "Messages", icon: Send, key: "messages" },
-  { href: "/notifications", label: "Alerts", icon: Bell, key: "notifications" },
   { href: "/profile", label: "Profile", icon: User, key: "profile" },
 ] as const
 
 function TabBarContent() {
   const pathname = usePathname()
   const unreadMessages = useQuery(api.messages.getUnreadCount)
-  const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount)
 
   const getBadge = (key: (typeof tabs)[number]["key"]) => {
     if (key === "messages" && unreadMessages && unreadMessages > 0) return unreadMessages
-    if (key === "notifications" && unreadNotifications && unreadNotifications > 0) return unreadNotifications
     return 0
   }
 
   return (
-    <div className="grid h-full grid-cols-5">
+    <div className="grid h-full grid-cols-4">
       {tabs.map((tab) => {
         const Icon = tab.icon
         const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`)

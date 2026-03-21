@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { requireAuth, requireAuthUserId } from "./helpers"
+import { getCurrentUserId, requireAuthUserId } from "./helpers"
 
 export const getCommentsByPost = query({
   args: { postId: v.id("posts") },
@@ -36,15 +36,14 @@ export const addComment = mutation({
     parentId: v.optional(v.id("comments")),
   },
   handler: async (ctx, args) => {
-    const currentUser = await requireAuth(ctx)
-    const currentUserId = currentUser.userId ?? String(currentUser._id)
+    const currentUserId = await requireAuthUserId(ctx)
     const content = args.content.trim()
 
     if (!content) {
       throw new ConvexError("Comment cannot be empty")
     }
-    if (content.length > 300) {
-      throw new ConvexError("Comment cannot exceed 300 characters")
+    if (content.length > 500) {
+      throw new ConvexError("Comment cannot exceed 500 characters")
     }
 
     const post = await ctx.db.get(args.postId)
@@ -62,8 +61,8 @@ export const addComment = mutation({
       postId: args.postId,
       authorId: currentUserId,
       parentId: args.parentId,
-      authorName: userDoc?.name ?? currentUser.name ?? undefined,
-      authorImage: userDoc?.image ?? currentUser.image ?? undefined,
+      authorName: userDoc?.name ?? undefined,
+      authorImage: userDoc?.image ?? undefined,
       createdAt: Date.now(),
     })
 
@@ -93,6 +92,48 @@ export const addComment = mutation({
     }
 
     return commentId
+  },
+})
+
+export const toggleCommentLike = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const currentUserId = await requireAuthUserId(ctx)
+
+    const existing = await ctx.db
+      .query("commentLikes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", currentUserId)
+      )
+      .unique()
+
+    if (existing) {
+      await ctx.db.delete(existing._id)
+      return { liked: false }
+    }
+
+    await ctx.db.insert("commentLikes", {
+      commentId: args.commentId,
+      userId: currentUserId,
+      createdAt: Date.now(),
+    })
+    return { liked: true }
+  },
+})
+
+export const getCommentLikes = query({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx)
+
+    const likes = await ctx.db
+      .query("commentLikes")
+      .withIndex("by_comment", (q) => q.eq("commentId", args.commentId))
+      .collect()
+
+    const isLikedByMe = userId ? likes.some((like) => like.userId === userId) : false
+
+    return { count: likes.length, isLikedByMe }
   },
 })
 

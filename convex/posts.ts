@@ -29,11 +29,11 @@ async function buildPostWithMeta(
     .sort((a, b) => b.count - a.count)
     .slice(0, 3)
 
-  const commentsCount = await ctx.db
+  const allComments = await ctx.db
     .query("comments")
     .withIndex("by_post", (q) => q.eq("postId", post._id))
     .collect()
-    .then((rows: Doc<"comments">[]) => rows.length)
+  const commentsCount = allComments.filter((comment) => !comment.parentId).length
 
   const myReactionDoc = currentUserId
     ? await ctx.db

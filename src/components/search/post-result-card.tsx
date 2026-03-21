@@ -25,7 +25,7 @@ export function PostResultCard({ post, currentUserId }: PostResultCardProps) {
         mediaUrl: post.mediaUrl,
         mediaType: post.mediaType,
         authorId: post.authorId,
-        authorName: post.authorName ?? post.authorId,
+        authorName: post.authorName ?? "Unknown",
         authorImage: post.authorImage,
         createdAt: post.createdAt,
         isEdited: post.isEdited,

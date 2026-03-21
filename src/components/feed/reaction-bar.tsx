@@ -43,6 +43,9 @@ export function ReactionBar({
   const [hoveredType, setHoveredType] = useState<ReactionType | null>(null)
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pickerRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
   const currentReaction = optimisticReaction !== undefined ? optimisticReaction : myReaction
   const currentCount = optimisticCount ?? reactionsCount
@@ -82,12 +85,55 @@ export function ReactionBar({
     }, 500)
   }
 
+  const handleTouchStart = (): void => {
+    longPressTimer.current = setTimeout(() => {
+      setOpen(true)
+      setIsVisible(true)
+    }, 500)
+  }
+
+  const handleTouchEnd = (): void => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+  }
+
+  const handleTouchMove = (): void => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+  }
+
   useEffect(() => {
     return () => {
       clearOpenTimeout()
       clearCloseTimeout()
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current)
+      }
     }
   }, [])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const handleTouchOutside = (event: TouchEvent): void => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsVisible(false)
+        setTimeout(() => {
+          setOpen(false)
+          setHoveredType(null)
+        }, 500)
+      }
+    }
+
+    document.addEventListener("touchstart", handleTouchOutside)
+    return () => document.removeEventListener("touchstart", handleTouchOutside)
+  }, [open])
 
   const handleReact = async (type: ReactionType): Promise<void> => {
     const previous = currentReaction
@@ -130,6 +176,10 @@ export function ReactionBar({
       className="relative"
       onMouseEnter={scheduleOpen}
       onMouseLeave={scheduleClose}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
+      ref={wrapperRef}
     >
       <div
         style={{
@@ -145,7 +195,7 @@ export function ReactionBar({
         type="button"
         variant="ghost"
         size="sm"
-        className="h-8 gap-2 px-2"
+        className="h-8 gap-2 px-2 touch-none"
         disabled={isUpdating}
         onClick={() => void handleButtonClick()}
       >
@@ -164,6 +214,7 @@ export function ReactionBar({
 
       {open && (
         <div
+          ref={pickerRef}
           className={`absolute left-0 z-20 flex w-fit items-center gap-1 rounded-full border border-border bg-card p-1.5 shadow-lg ${
             isVisible ? "reaction-picker-in" : "reaction-picker-out"
           }`}

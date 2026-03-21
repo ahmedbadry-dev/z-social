@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
@@ -20,6 +21,21 @@ export default function ResetPasswordPage() {
   const token = searchParams.get("token") ?? ""
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  if (!token) {
+    return (
+      <AuthLayoutWrapper>
+        <AuthCard className="space-y-4">
+          <p className="text-center text-sm text-muted-foreground">
+            Invalid or expired reset link.{" "}
+            <Link href="/forgot-password" className="text-[#3B55E6] hover:underline">
+              Request a new one
+            </Link>
+          </p>
+        </AuthCard>
+      </AuthLayoutWrapper>
+    )
+  }
 
   const form = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),

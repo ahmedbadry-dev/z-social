@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, isAfter, subDays } from "date-fns"
+import { format, formatDistanceToNowStrict, isAfter, subDays } from "date-fns"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -11,7 +11,23 @@ export function formatRelativeTime(timestamp: number): string {
   const sevenDaysAgo = subDays(new Date(), 7)
 
   if (isAfter(date, sevenDaysAgo)) {
-    return formatDistanceToNow(date, { addSuffix: true })
+    const distance = formatDistanceToNowStrict(date, { roundingMethod: "floor" })
+    if (distance.includes("less than a minute")) {
+      return "now"
+    }
+    return distance
+      .replace(" seconds", "s")
+      .replace(" second", "s")
+      .replace(" minutes", "m")
+      .replace(" minute", "m")
+      .replace(" hours", "h")
+      .replace(" hour", "h")
+      .replace(" days", "d")
+      .replace(" day", "d")
+      .replace(" months", "mo")
+      .replace(" month", "mo")
+      .replace(" years", "y")
+      .replace(" year", "y")
   }
 
   return format(date, "d MMMM, yyyy")

@@ -1,14 +1,12 @@
 "use client"
-import { ArrowLeft, Reply } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { toast } from "sonner"
 import { MessageBubble } from "@/components/messages/message-bubble"
 import { MessageInput } from "@/components/messages/message-input"
 import { UserAvatar } from "@/components/shared/user-avatar"
-import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
-import type { Id } from "../../../convex/_generated/dataModel"
 
 interface ChatWindowProps {
   otherUserId: string
@@ -24,7 +22,6 @@ interface OptimisticMessage {
   senderId: string
   receiverId: string
   read: boolean
-  replyTo: null
   isOptimistic: true
 }
 
@@ -43,10 +40,6 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
 
   // Optimistic messages state
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([])
-  const [replyingTo, setReplyingTo] = useState<{
-    id: Id<"messages">
-    content: string
-  } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -68,7 +61,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages?.length, optimisticMessages.length])
 
-  const onSend = async (content: string, replyToId?: Id<"messages">) => {
+  const onSend = async (content: string) => {
     // 1. Add optimistic message instantly
     const optimisticId = `optimistic-${Date.now()}`
     const optimisticMsg: OptimisticMessage = {
@@ -78,15 +71,13 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
       senderId: currentUserId,
       receiverId: otherUserId,
       read: false,
-      replyTo: null,
       isOptimistic: true,
     }
     setOptimisticMessages((prev) => [...prev, optimisticMsg])
 
     // 2. Send to server in background
     try {
-      await sendMessage({ receiverId: otherUserId, content, replyToId })
-      setReplyingTo(null)
+      await sendMessage({ receiverId: otherUserId, content })
     } catch (error) {
       // Remove optimistic message on failure
       setOptimisticMessages((prev) => prev.filter((m) => m._id !== optimisticId))
@@ -122,44 +113,22 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
         )}
         {allMessages.map((message) => {
           const isSent = message.senderId === currentUserId
-          const replyTo = "replyTo" in message ? message.replyTo : null
 
           return (
-            <div key={message._id} className="group relative">
-              <MessageBubble
-                content={message.content}
-                createdAt={message.createdAt}
-                isSent={isSent}
-                isOptimistic={"isOptimistic" in message}
-                replyTo={replyTo}
-                currentUserId={currentUserId}
-              />
-              {"isOptimistic" in message ? null : (
-                <button
-                  type="button"
-                  className={cn(
-                    "absolute top-1/2 -translate-y-1/2 rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm transition opacity-100 md:opacity-0 md:group-hover:opacity-100",
-                    isSent ? "-right-9" : "-left-9"
-                  )}
-                  onClick={() => setReplyingTo({ id: message._id, content: message.content })}
-                  aria-label="Reply to message"
-                >
-                  <Reply className="size-3.5" />
-                </button>
-              )}
-            </div>
+            <MessageBubble
+              key={message._id}
+              content={message.content}
+              createdAt={message.createdAt}
+              isSent={isSent}
+              isOptimistic={"isOptimistic" in message}
+            />
           )
         })}
         <div ref={messagesEndRef} />
       </div>
 
       <div className="border-t border-border p-4">
-        <MessageInput
-          onSend={onSend}
-          isSending={false}
-          replyTo={replyingTo}
-          onCancelReply={() => setReplyingTo(null)}
-        />
+        <MessageInput onSend={onSend} isSending={false} />
       </div>
     </div>
   )

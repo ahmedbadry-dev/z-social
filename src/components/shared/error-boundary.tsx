@@ -24,9 +24,11 @@ export class ErrorBoundary extends Component<Props, State> {
     render() {
         if (this.state.hasError) {
             return (
-                <div className="flex flex-col items-center justify-center rounded-lg bg-white p-8 text-center shadow-sm">
-                    <p className="mb-4 text-base font-semibold text-[#0F172A]">Something went wrong</p>
-                    <p className="mb-6 text-sm text-[#64748B]">An unexpected error occurred. Please try again.</p>
+                <div className="flex flex-col items-center justify-center rounded-lg bg-card p-8 text-center shadow-sm">
+                    <p className="mb-4 text-base font-semibold text-foreground">Something went wrong</p>
+                    <p className="mb-6 text-sm text-muted-foreground">
+                        An unexpected error occurred. Please try again.
+                    </p>
                     <Button
                         type="button"
                         variant="outline"

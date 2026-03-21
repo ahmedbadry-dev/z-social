@@ -9,11 +9,13 @@ import { PostResultCard } from "@/components/search/post-result-card"
 import { UserResultCard } from "@/components/search/user-result-card"
 import { SuggestedUserRow } from "@/components/search/suggested-user-row"
 import { useDebounce } from "@/hooks/use-debounce"
+import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
 import type { ReactionType } from "@/types"
 
 export function SearchMain() {
   const [query, setQuery] = useQueryState("q", { defaultValue: "" })
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "all" })
   const debouncedQuery = useDebounce(query.trim(), 300)
   const currentUser = useQuery(api.auth.getCurrentUser)
 
@@ -35,6 +37,24 @@ export function SearchMain() {
           placeholder="Search"
           className="h-12 w-full rounded-full bg-muted py-2 pr-4 pl-12 text-sm text-foreground outline-none placeholder:text-muted-foreground"
         />
+      </div>
+
+      <div className="flex gap-2">
+        {["all", "people", "posts"].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => void setFilter(tab)}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors capitalize",
+              filter === tab
+                ? "bg-[#3B55E6] text-white"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {!isReadyToSearch && (
@@ -62,48 +82,53 @@ export function SearchMain() {
 
       {isReadyToSearch && !isLoadingResults && (
         <div className="space-y-6">
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">People</h2>
-            {users && users.length > 0 ? (
-              users.map((user) => (
-                <UserResultCard
-                  key={user.userId}
-                  userId={user.userId}
-                  username={user.username}
-                  bio={user.bio}
-                  image={user.image}
-                  isCurrentUser={user.isCurrentUser}
-                />
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No people found for "{debouncedQuery}"
-              </p>
-            )}
-          </section>
+          {(filter === "all" || filter === "people") && (
+            <section className="space-y-3">
+              <h2 className="text-sm font-semibold text-foreground">People</h2>
+              {users && users.length > 0 ? (
+                users.map((user) => (
+                  <UserResultCard
+                    key={user.userId}
+                    userId={user.userId}
+                    username={user.username}
+                    name={user.name}
+                    bio={user.bio}
+                    image={user.image}
+                    isCurrentUser={user.isCurrentUser}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No people found for "{debouncedQuery}"
+                </p>
+              )}
+            </section>
+          )}
 
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">Posts</h2>
-            {posts && posts.length > 0 ? (
-              posts.map((post) => (
-                <PostResultCard
-                  key={post._id}
-                  post={{
-                    ...post,
-                    reactionsSummary: (post.reactionsSummary ?? []).map((reaction) => ({
-                      ...reaction,
-                      type: reaction.type as ReactionType,
-                    })),
-                  }}
-                  currentUserId={currentUserId}
-                />
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No posts found for "{debouncedQuery}"
-              </p>
-            )}
-          </section>
+          {(filter === "all" || filter === "posts") && (
+            <section className="space-y-3">
+              <h2 className="text-sm font-semibold text-foreground">Posts</h2>
+              {posts && posts.length > 0 ? (
+                posts.map((post) => (
+                  <PostResultCard
+                    key={post._id}
+                    post={{
+                      ...post,
+                      reactionsSummary: (post.reactionsSummary ?? []).map((reaction) => ({
+                        ...reaction,
+                        type: reaction.type as ReactionType,
+                      })),
+                    }}
+                    currentUserId={currentUserId}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No posts found for "{debouncedQuery}"
+                </p>
+              )}
+            </section>
+          )}
         </div>
       )}
     </div>

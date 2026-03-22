@@ -77,6 +77,7 @@ export function ProfileContent({ targetUserId }: ProfileContentProps) {
         image={displayImage}
         username={profile.username ?? undefined}
         bio={profile.bio ?? undefined}
+        coverImageUrl={profile.coverImageUrl ?? undefined}
         postsCount={profile.postsCount}
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}

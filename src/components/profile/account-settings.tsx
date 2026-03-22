@@ -56,7 +56,7 @@ export function AccountSettings() {
           Log out
         </Button>
       </div>
-      <h3 className="text-lg font-semibold text-[#0F172A]">Delete Account</h3>
+      <h3 className="text-lg font-semibold text-foreground">Delete Account</h3>
       <p className="text-sm text-[#64748B]">
         This action is irreversible and will permanently delete all your data.
       </p>

@@ -158,6 +158,7 @@ export default defineSchema({
     showOnlineStatus: v.optional(v.boolean()),
   })
     .index("by_user", ["userId"])
+    .index("by_username", ["username"])
     .searchIndex("search_username", { searchField: "username" }),
 
   userPresence: defineTable({

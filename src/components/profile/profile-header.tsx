@@ -43,6 +43,7 @@ export function ProfileHeader({
   followingCount,
   isFollowing,
   isOwnProfile,
+  isPrivate,
   hasRequestedFollow,
   isFollowedByMe,
 }: ProfileHeaderProps) {
@@ -54,6 +55,7 @@ export function ProfileHeader({
   const coverInputRef = useRef<HTMLInputElement>(null)
   const { startUpload, isUploading } = useUploadThing("avatar")
   const updateProfile = useMutation(api.users.updateUserProfile)
+  const shouldHideStats = !isOwnProfile && (isPrivate ?? false) && !following
 
   if (prevUserIdRef.current !== userId) {
     prevUserIdRef.current = userId
@@ -208,26 +210,34 @@ export function ProfileHeader({
         </div>
 
         <div className="mt-5 flex items-center gap-8">
-          <div className="text-center">
-            <p className="text-lg font-bold text-foreground">{postsCount}</p>
-            <p className="text-xs text-muted-foreground">Posts</p>
-          </div>
+          {shouldHideStats ? (
+            <p className="text-sm text-muted-foreground italic">
+              Follow this account to see their posts and activity.
+            </p>
+          ) : (
+            <>
+              <div className="text-center">
+                <p className="text-lg font-bold text-foreground">{postsCount}</p>
+                <p className="text-xs text-muted-foreground">Posts</p>
+              </div>
 
-          <Link
-            href={`/profile/followers?userId=${userId}`}
-            className="text-center hover:opacity-75 transition-opacity"
-          >
-            <p className="text-lg font-bold text-foreground">{followers}</p>
-            <p className="text-xs text-muted-foreground">Followers</p>
-          </Link>
+              <Link
+                href={`/profile/followers?userId=${userId}`}
+                className="text-center hover:opacity-75 transition-opacity"
+              >
+                <p className="text-lg font-bold text-foreground">{followers}</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
+              </Link>
 
-          <Link
-            href={`/profile/following?userId=${userId}`}
-            className="text-center hover:opacity-75 transition-opacity"
-          >
-            <p className="text-lg font-bold text-foreground">{followingCount}</p>
-            <p className="text-xs text-muted-foreground">Following</p>
-          </Link>
+              <Link
+                href={`/profile/following?userId=${userId}`}
+                className="text-center hover:opacity-75 transition-opacity"
+              >
+                <p className="text-lg font-bold text-foreground">{followingCount}</p>
+                <p className="text-xs text-muted-foreground">Following</p>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

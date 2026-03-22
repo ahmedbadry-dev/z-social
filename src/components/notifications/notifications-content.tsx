@@ -6,7 +6,7 @@ import { NotificationsMain } from "@/components/notifications/notifications-main
 
 export function NotificationsContent() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 py-4">
       <AuthLoading>
         <PostSkeleton />
         <PostSkeleton />

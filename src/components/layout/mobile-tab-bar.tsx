@@ -57,7 +57,7 @@ function TabBarContent() {
 
 export function MobileTabBar() {
   return (
-    <nav className="fixed right-0 bottom-0 left-0 z-50 h-14 border-t border-border bg-card md:hidden">
+    <nav className="tab-bar fixed right-0 bottom-0 left-0 z-50 h-14 border-t border-border bg-card md:hidden">
       <Authenticated>
         <TabBarContent />
       </Authenticated>

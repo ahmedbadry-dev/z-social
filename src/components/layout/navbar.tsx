@@ -35,7 +35,7 @@ export function Navbar({ preloadedUser }: NavbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
+    <header className="navbar sticky top-0 z-50 border-b border-border bg-card">
       <div className="mx-auto flex h-14 max-w-[960px] items-center justify-between gap-4 px-4">
         <SocialLogo />
 

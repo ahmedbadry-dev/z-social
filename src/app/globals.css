@@ -197,3 +197,26 @@
 .reaction-picker-out {
   animation: reaction-picker-out 150ms ease-in forwards;
 }
+
+@media (max-width: 767px) {
+  html.chat-open header.navbar {
+    display: none;
+  }
+
+  html.chat-open nav.tab-bar {
+    display: none;
+  }
+
+  html.notifications-open header.navbar {
+    display: none;
+  }
+
+  html.notifications-open nav.tab-bar {
+    display: none;
+  }
+
+  html.notifications-open main {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}

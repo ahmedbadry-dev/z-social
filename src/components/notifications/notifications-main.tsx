@@ -1,7 +1,8 @@
 "use client"
 
-import { Bell } from "lucide-react"
+import { ArrowLeft, Bell } from "lucide-react"
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
 import { NotificationItem } from "@/components/notifications/notification-item"
@@ -14,6 +15,7 @@ export function NotificationsMain() {
     {},
     { initialNumItems: 20 }
   )
+  const router = useRouter()
   const unreadCount = useQuery(api.notifications.getUnreadNotificationsCount)
   const markAllAsRead = useMutation(api.notifications.markAllAsRead)
 
@@ -21,8 +23,20 @@ export function NotificationsMain() {
   const isInitialLoading = status === "LoadingFirstPage"
 
   return (
-    <div className="rounded-lg bg-card shadow-sm">
-      <div className="flex items-center justify-between border-b border-border p-4">
+    <div className="min-h-[calc(100vh-32px)] rounded-lg bg-card shadow-sm">
+      <div className="flex items-center gap-3 border-b border-border p-4 md:hidden">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back
+        </button>
+        <h1 className="text-base font-semibold text-foreground">Notifications</h1>
+      </div>
+
+      <div className="hidden items-center justify-between border-b border-border p-4 md:flex">
         <h2 className="text-base font-semibold text-foreground">Notifications</h2>
         {hasUnread && (
           <Button

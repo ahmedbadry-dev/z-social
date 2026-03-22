@@ -34,10 +34,11 @@ export function PostDetailClient({ postId }: PostDetailClientProps) {
             router.push("/feed")
           }
         }}
-        className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="inline-flex items-center gap-2 rounded-md p-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        aria-label="Go back"
       >
         <ArrowLeft className="size-4" />
-        Back
+        <span className="hidden sm:inline">Back</span>
       </button>
 
       {post === undefined && <PostSkeleton />}

@@ -163,7 +163,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
       <header className="flex items-center gap-3 border-b border-border p-4">
         <button
           type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted md:hidden"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors md:hidden"
           onClick={onBack}
         >
           <ArrowLeft className="size-4" />

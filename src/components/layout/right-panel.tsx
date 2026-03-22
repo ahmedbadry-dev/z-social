@@ -4,6 +4,7 @@ import { Plus } from "lucide-react"
 import { useMutation, useQuery } from "convex/react"
 import { useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
+import Link from "next/link"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
 
@@ -86,15 +87,20 @@ export function RightPanel() {
               const displayName = item.name?.trim() || getDisplayName(item.userId)
               return (
                 <div key={item.userId} className="flex items-center gap-2">
-                  <UserAvatar
-                    name={displayName}
-                    imageUrl={item.image ?? undefined}
-                    size="sm"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
-                    <p className="truncate text-xs text-muted-foreground">Suggested for you</p>
-                  </div>
+                  <Link
+                    href={`/profile?userId=${item.userId}`}
+                    className="flex min-w-0 flex-1 items-center gap-2"
+                  >
+                    <UserAvatar
+                      name={displayName}
+                      imageUrl={item.image ?? undefined}
+                      size="sm"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+                      <p className="truncate text-xs text-muted-foreground">Suggested for you</p>
+                    </div>
+                  </Link>
                   <button
                     type="button"
                     className="inline-flex h-7 items-center justify-center rounded-full border border-border px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"

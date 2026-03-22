@@ -66,31 +66,28 @@ export const getFeedPosts = query({
   handler: async (ctx, args) => {
     const currentUserId = await getCurrentUserId(ctx)
 
-    let authorIds: string[] = []
+    const result = await ctx.db
+      .query("posts")
+      .withIndex("by_created")
+      .order("desc")
+      .paginate(args.paginationOpts)
+
+    let authorIds = new Set<string>()
     if (currentUserId) {
       const follows = await ctx.db
         .query("follows")
         .withIndex("by_follower", (q) => q.eq("followerId", currentUserId))
         .collect()
-      authorIds = [currentUserId, ...follows.map((f) => f.followingId)]
+      authorIds = new Set([currentUserId, ...follows.map((f) => f.followingId)])
     }
 
-    const result = await ctx.db
-      .query("posts")
-      .withIndex("by_created")
-      .order("desc")
-      .filter((q) => {
-        if (authorIds.length === 0) {
-          return q.eq(q.field("authorId"), "")
-        }
-        if (authorIds.length === 1) {
-          return q.eq(q.field("authorId"), authorIds[0])
-        }
-        return q.or(...authorIds.map((id) => q.eq(q.field("authorId"), id)))
-      })
-      .paginate(args.paginationOpts)
+    const filteredPage = result.page.filter((post) =>
+      authorIds.size === 0 ? false : authorIds.has(post.authorId)
+    )
 
-    const page = await Promise.all(result.page.map((post) => buildPostWithMeta(ctx, post, currentUserId)))
+    const page = await Promise.all(
+      filteredPage.map((post) => buildPostWithMeta(ctx, post, currentUserId))
+    )
     return { ...result, page }
   },
 })

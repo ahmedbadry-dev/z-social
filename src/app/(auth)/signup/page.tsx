@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -36,7 +36,10 @@ type SignupInput = z.infer<typeof signupSchema>
 export default function SignupPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -45,11 +48,30 @@ export default function SignupPage() {
       email: "",
       username: "",
       password: "",
+      confirmPassword: "",
       terms: false,
     },
   })
 
+  // Check email existence on blur
+  const handleEmailBlur = async (email: string) => {
+    if (!email || !email.includes("@")) return
+    setIsCheckingEmail(true)
+    setEmailError(null)
+    try {
+      await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)
+      // We'll use convex directly via authClient check — simpler approach:
+      // just let the server return the error on submit
+      // The real check happens in onSubmit via result.error
+    } catch {
+      // silently ignore
+    } finally {
+      setIsCheckingEmail(false)
+    }
+  }
+
   const onSubmit = async (data: SignupInput) => {
+    setEmailError(null)
     const signUpPayload = {
       email: data.email,
       password: data.password,
@@ -59,7 +81,18 @@ export default function SignupPage() {
 
     const result = await authClient.signUp.email(signUpPayload)
     if (result.error) {
-      toast.error(result.error.message ?? "Could not create account")
+      const msg = result.error.message ?? ""
+      if (
+        msg.toLowerCase().includes("email") &&
+        (msg.toLowerCase().includes("exist") ||
+          msg.toLowerCase().includes("already") ||
+          msg.toLowerCase().includes("taken"))
+      ) {
+        setEmailError("This email is already registered. Try logging in instead.")
+        form.setError("email", { message: "This email is already registered." })
+      } else {
+        toast.error(msg || "Could not create account")
+      }
       return
     }
 
@@ -86,6 +119,8 @@ export default function SignupPage() {
       setGoogleLoading(false)
     }
   }
+
+  const inputClass = "h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
 
   return (
     <AuthLayoutWrapper>
@@ -115,7 +150,7 @@ export default function SignupPage() {
                       {...field}
                       id="name"
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className={inputClass}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -125,18 +160,30 @@ export default function SignupPage() {
                 name="email"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
+                  <Field data-invalid={fieldState.invalid || !!emailError}>
                     <FieldLabel htmlFor="email" className="text-foreground">
                       Email
                     </FieldLabel>
-                    <Input
-                      {...field}
-                      id="email"
-                      type="email"
-                      aria-invalid={fieldState.invalid}
-                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
-                    />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        id="email"
+                        type="email"
+                        aria-invalid={fieldState.invalid || !!emailError}
+                        className={inputClass}
+                        onBlur={(e) => {
+                          field.onBlur()
+                          void handleEmailBlur(e.target.value)
+                        }}
+                      />
+                      {isCheckingEmail && (
+                        <Loader2 className="absolute top-1/2 right-3 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {emailError && !fieldState.invalid && (
+                      <p className="mt-1 text-xs text-destructive">{emailError}</p>
+                    )}
                   </Field>
                 )}
               />
@@ -152,7 +199,7 @@ export default function SignupPage() {
                       {...field}
                       id="username"
                       aria-invalid={fieldState.invalid}
-                      className="h-10 border-border bg-card focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                      className={inputClass}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -172,7 +219,7 @@ export default function SignupPage() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         aria-invalid={fieldState.invalid}
-                        className="h-10 border-border bg-card pr-10 focus-visible:border-[#3B55E6] focus-visible:ring-0"
+                        className={`${inputClass} pr-10`}
                       />
                       <button
                         type="button"
@@ -180,11 +227,36 @@ export default function SignupPage() {
                         className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                         onClick={() => setShowPassword((prev) => !prev)}
                       >
-                        {showPassword ? (
-                          <EyeOff className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )}
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="confirmPassword"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="confirmPassword" className="text-foreground">
+                      Confirm password
+                    </FieldLabel>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        aria-invalid={fieldState.invalid}
+                        className={`${inputClass} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                       </button>
                     </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { MessageCircle, Share2 } from "lucide-react"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
@@ -74,23 +75,29 @@ export function PostActions({
           reactionsSummary={[]}
         />
 
-        <button
+        <motion.button
           type="button"
           className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           onClick={onCommentToggle}
         >
           <MessageCircle className="size-4" />
           <span>Comment</span>
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
           type="button"
           className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           onClick={() => void handleShare()}
         >
           <Share2 className="size-4" />
           <span>Share</span>
-        </button>
+        </motion.button>
       </div>
     </div>
   )

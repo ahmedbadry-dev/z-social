@@ -1,5 +1,6 @@
 "use client"
 
+import { motion, useMotionValueEvent, useScroll } from "motion/react"
 import { Bell, Search } from "lucide-react"
 import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
@@ -16,6 +17,9 @@ interface NavbarProps {
 
 export function Navbar({ preloadedUser }: NavbarProps) {
   const router = useRouter()
+  const [hidden, setHidden] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const { scrollY } = useScroll()
   const [q, setQ] = useQueryState("q", { defaultValue: "" })
   const [inputValue, setInputValue] = useState(q)
   const currentUser = preloadedUser
@@ -28,6 +32,22 @@ export function Navbar({ preloadedUser }: NavbarProps) {
     setInputValue(q)
   }, [q])
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0
+    if (latest > previous && latest > 100) {
+      setHidden(true)
+    } else {
+      setHidden(false)
+    }
+  })
+
   const submitSearch = async () => {
     const value = inputValue.trim()
     await setQ(value)
@@ -35,7 +55,15 @@ export function Navbar({ preloadedUser }: NavbarProps) {
   }
 
   return (
-    <header className="navbar sticky top-0 z-50 border-b border-border bg-card">
+    <motion.header
+      variants={{
+        visible: { y: 0 },
+        hidden: { y: "-100%" },
+      }}
+      animate={hidden && isMobile ? "hidden" : "visible"}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="navbar sticky top-0 z-50 border-b border-border bg-card"
+    >
       <div className="mx-auto flex h-14 max-w-[960px] items-center justify-between gap-4 px-4">
         <SocialLogo />
 
@@ -77,6 +105,6 @@ export function Navbar({ preloadedUser }: NavbarProps) {
           )}
         </Link>
       </div>
-    </header>
+    </motion.header>
   )
 }

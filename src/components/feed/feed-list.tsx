@@ -1,7 +1,8 @@
 "use client"
 
-import { motion } from "motion/react"
+import { motion, useInView } from "motion/react"
 import { Newspaper } from "lucide-react"
+import { useRef } from "react"
 import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
 import { EmptyState } from "@/components/shared/empty-state"
@@ -11,6 +12,28 @@ import { api } from "../../../convex/_generated/api"
 
 interface FeedListProps {
   preloadedPosts?: Preloaded<typeof api.posts.getFeedPosts>
+}
+
+function AnimatedPost({
+  children,
+  index: _index,
+}: {
+  children: React.ReactNode
+  index: number
+}) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const isInView = useInView(ref, { once: true, margin: "-50px" })
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+    >
+      {children}
+    </motion.div>
+  )
 }
 
 export function FeedList({ preloadedPosts }: FeedListProps) {
@@ -55,15 +78,9 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
   return (
     <div className="space-y-4">
       {resolvedResults.map((post, index) => (
-        <motion.div
+        <AnimatedPost
           key={post._id}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.3,
-            delay: Math.min(index * 0.05, 0.3),
-            ease: "easeOut",
-          }}
+          index={index}
         >
           <PostCard
             currentUserId={currentUserId}
@@ -85,7 +102,7 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
               isOwnPost: currentUserId === post.authorId,
             }}
           />
-        </motion.div>
+        </AnimatedPost>
       ))}
 
       {status === "CanLoadMore" && (

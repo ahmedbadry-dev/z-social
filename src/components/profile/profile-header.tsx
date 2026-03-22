@@ -1,5 +1,6 @@
 "use client"
 
+import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
 import { useMutation } from "convex/react"
 import { Camera, MessageCircle } from "lucide-react"
@@ -9,6 +10,7 @@ import { UserAvatar } from "@/components/shared/user-avatar"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { useUploadThing } from "@/lib/uploadthing"
+import { cn } from "@/lib/utils"
 
 interface ProfileHeaderProps {
   userId: string
@@ -130,14 +132,31 @@ export function ProfileHeader({
           </div>
           {!isOwnProfile && (
             <div className="flex items-center gap-2">
-              <Button
+              <motion.button
                 type="button"
-                variant={following ? "default" : "outline"}
-                className={following ? "bg-foreground text-background" : ""}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 onClick={() => void onToggleFollow()}
+                className={cn(
+                  "rounded-full px-5 py-2 text-sm font-semibold transition-colors",
+                  following
+                    ? "bg-muted text-foreground border border-border"
+                    : "bg-[#3B55E6] text-white"
+                )}
               >
-                {following ? "Following" : "Follow"}
-              </Button>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={following ? "following" : "follow"}
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {following ? "Following" : "Follow"}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.button>
 
               <Link href={`/messages?userId=${userId}`}>
                 <Button type="button" variant="outline" size="icon">

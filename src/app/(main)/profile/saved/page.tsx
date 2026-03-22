@@ -1,12 +1,9 @@
-"use client"
+import { SavedPostsClient } from "@/components/profile/saved-posts-client"
 
-import { Authenticated } from "convex/react"
-import { SavedPostsTab } from "@/components/profile/saved-posts-tab"
+export const metadata = { title: "Saved Posts | Z-Social" }
 
 export default function SavedPostsPage() {
   return (
-    <Authenticated>
-      <SavedPostsTab />
-    </Authenticated>
+    <SavedPostsClient />
   )
 }

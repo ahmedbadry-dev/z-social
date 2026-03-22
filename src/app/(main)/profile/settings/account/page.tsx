@@ -1,12 +1,9 @@
-"use client"
+import { AccountSettingsClient } from "@/components/profile/account-settings-client"
 
-import { Authenticated } from "convex/react"
-import { AccountSettings } from "@/components/profile/account-settings"
+export const metadata = { title: "Account Settings | Z-Social" }
 
 export default function AccountSettingsPage() {
   return (
-    <Authenticated>
-      <AccountSettings />
-    </Authenticated>
+    <AccountSettingsClient />
   )
 }

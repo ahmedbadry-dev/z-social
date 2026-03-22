@@ -1,12 +1,9 @@
-"use client"
+import { GeneralSettingsClient } from "@/components/profile/general-settings-client"
 
-import { Authenticated } from "convex/react"
-import { GeneralSettings } from "@/components/profile/general-settings"
+export const metadata = { title: "General Settings | Z-Social" }
 
 export default function GeneralSettingsPage() {
   return (
-    <Authenticated>
-      <GeneralSettings />
-    </Authenticated>
+    <GeneralSettingsClient />
   )
 }

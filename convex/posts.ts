@@ -148,6 +148,31 @@ export const getSavedPosts = query({
   },
 })
 
+export const getTrendingPosts = query({
+  args: {},
+  handler: async (ctx) => {
+    const currentUserId = await getCurrentUserId(ctx)
+
+    const recentPosts = await ctx.db
+      .query("posts")
+      .withIndex("by_created")
+      .order("desc")
+      .take(100)
+
+    const postsWithMeta = await Promise.all(
+      recentPosts.map((post) => buildPostWithMeta(ctx, post, currentUserId))
+    )
+
+    return postsWithMeta
+      .map((post) => ({
+        ...post,
+        trendingScore: post.reactionsCount + post.commentsCount * 2,
+      }))
+      .sort((a, b) => b.trendingScore - a.trendingScore)
+      .slice(0, 20)
+  },
+})
+
 export const createPost = mutation({
   args: {
     content: v.string(),

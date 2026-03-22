@@ -2,7 +2,7 @@
 
 import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { Authenticated, AuthLoading } from "convex/react"
-import { Bell, Home, Send, User } from "lucide-react"
+import { Bell, Compass, Home, Send, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { api } from "../../../convex/_generated/api"
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { href: "/feed", label: "Home", icon: Home },
   { href: "/profile", label: "Profile", icon: User },
+  { href: "/explore", label: "Explore", icon: Compass },
   { href: "/messages", label: "Messages", icon: Send },
   { href: "/notifications", label: "Notifications", icon: Bell },
 ]

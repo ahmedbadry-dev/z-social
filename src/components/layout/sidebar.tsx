@@ -43,7 +43,7 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
   const unreadMessages = useQuery(api.messages.getUnreadCount)
   const userProfile = useQuery(
     api.users.getUserProfile,
-    currentUser?._id ? { userId: String(currentUser._id) } : "skip"
+    currentUser?.userId ? { userId: currentUser.userId } : "skip"
   )
   const displayName =
     currentUser?.name?.trim() ||

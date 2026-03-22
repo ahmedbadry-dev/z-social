@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     siteName: "Z-Social",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og",
         width: 1200,
         height: 630,
         alt: "Z-Social — Connect with people",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Z-Social — Connect with people",
     description: "A modern social platform to share posts, connect with friends, and stay updated.",
-    images: ["/og-image.png"],
+    images: ["/og"],
   },
 }
 

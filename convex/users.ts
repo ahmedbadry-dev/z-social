@@ -358,3 +358,14 @@ export const searchUsersByUsername = query({
     )
   },
 })
+
+export const checkEmailExists = query({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase().trim()))
+      .first()
+    return { exists: !!user }
+  },
+})

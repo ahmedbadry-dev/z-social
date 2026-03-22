@@ -36,6 +36,7 @@ export function ConversationItem({
   const displayName = partnerName?.trim() || truncatePartnerId(partnerId)
   const presence = useQuery(api.messages.getPresence, { userId: partnerId })
   const isOnline = presence?.isOnline ?? false
+  const isStatusHidden = presence?.isHidden ?? false
 
   return (
     <button
@@ -48,10 +49,12 @@ export function ConversationItem({
     >
       <div className="relative">
         <UserAvatar name={displayName} imageUrl={partnerImage ?? undefined} size="md" />
-        <OnlineStatus
-          isOnline={isOnline}
-          className="absolute -bottom-0.5 -right-0.5"
-        />
+        {!isStatusHidden && (
+          <OnlineStatus
+            isOnline={isOnline}
+            className="absolute -bottom-0.5 -right-0.5"
+          />
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">

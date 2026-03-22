@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { useQuery } from "convex/react"
 import { Compass } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
@@ -14,26 +15,6 @@ export function ExploreContent() {
   const trendingPosts = useQuery(api.posts.getTrendingPosts)
 
   const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
-  const rankConfig = [
-    {
-      emoji: "👑",
-      gradient: "from-yellow-400 to-amber-500",
-      textColor: "text-yellow-900",
-      ring: "ring-yellow-400/50",
-    },
-    {
-      emoji: "🥈",
-      gradient: "from-slate-300 to-slate-400",
-      textColor: "text-slate-800",
-      ring: "ring-slate-400/50",
-    },
-    {
-      emoji: "🥉",
-      gradient: "from-orange-400 to-amber-600",
-      textColor: "text-orange-900",
-      ring: "ring-orange-400/50",
-    },
-  ]
 
   return (
     <div className="space-y-4">
@@ -44,7 +25,7 @@ export function ExploreContent() {
 
       <section className="space-y-4">
         <h2 className="text-sm font-medium text-muted-foreground">
-          {trendingPosts && trendingPosts.length > 0 ? "🔥 Trending posts" : "Trending posts"}
+          {trendingPosts && trendingPosts.length > 0 ? "?? Trending posts" : "Trending posts"}
         </h2>
 
         {trendingPosts === undefined && (
@@ -64,28 +45,66 @@ export function ExploreContent() {
         )}
 
         {trendingPosts?.map((post, index) => (
-          <div
+          <motion.div
             key={post._id}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.4,
+              delay: index * 0.08,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
             className={cn(
               "relative",
-              index === 0 && "ring-2 ring-yellow-400/30 rounded-lg",
-              index === 1 && "ring-2 ring-slate-400/30 rounded-lg",
-              index === 2 && "ring-2 ring-orange-400/30 rounded-lg"
+              index === 0 && "ring-2 ring-yellow-400/30 rounded-xl",
+              index === 1 && "ring-2 ring-slate-400/20 rounded-xl",
+              index === 2 && "ring-2 ring-orange-400/20 rounded-xl"
             )}
           >
-            {index < 3 ? (
-              <div
-                className={cn(
-                  "absolute -top-3 -left-3 z-10",
-                  "flex h-9 w-9 items-center justify-center rounded-full",
-                  "bg-gradient-to-br shadow-lg ring-2",
-                  rankConfig[index].gradient,
-                  rankConfig[index].ring
-                )}
+            {index === 0 && (
+              <motion.div
+                className="absolute -top-3 -left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 shadow-lg ring-2 ring-yellow-400/50"
+                animate={{
+                  y: [0, -4, 0],
+                  boxShadow: [
+                    "0 0 0 0 rgba(251,191,36,0.4)",
+                    "0 0 0 8px rgba(251,191,36,0)",
+                    "0 0 0 0 rgba(251,191,36,0)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
-                <span className="text-lg">{rankConfig[index].emoji}</span>
-              </div>
-            ) : index < 5 ? (
+                <span className="text-lg">??</span>
+              </motion.div>
+            )}
+
+            {index === 1 && (
+              <motion.div
+                className="absolute -top-3 -left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-400 shadow-lg ring-2 ring-slate-400/50"
+                animate={{ scale: [1, 1.08, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="text-lg">??</span>
+              </motion.div>
+            )}
+
+            {index === 2 && (
+              <motion.div
+                className="absolute -top-3 -left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-600 shadow-lg ring-2 ring-orange-400/50"
+                animate={{
+                  rotate: [0, 5, -5, 0],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="text-lg">??</span>
+              </motion.div>
+            )}
+
+            {index >= 3 && index < 5 ? (
               <div className="absolute -top-2 -left-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-muted border border-border shadow-sm">
                 <span className="text-[10px] font-bold text-muted-foreground">
                   #{index + 1}
@@ -115,7 +134,7 @@ export function ExploreContent() {
                 isOwnPost: currentUserId === post.authorId,
               }}
             />
-          </div>
+          </motion.div>
         ))}
       </section>
     </div>

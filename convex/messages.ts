@@ -89,7 +89,11 @@ export const getMessages = query({
 })
 
 export const sendMessage = mutation({
-  args: { receiverId: v.string(), content: v.string() },
+  args: {
+    receiverId: v.string(),
+    content: v.string(),
+    imageUrl: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const currentUserId = await requireAuthUserId(ctx)
     const content = args.content.trim()
@@ -97,7 +101,7 @@ export const sendMessage = mutation({
     if (currentUserId === args.receiverId) {
       throw new ConvexError("You cannot message yourself")
     }
-    if (!content) {
+    if (!content && !args.imageUrl) {
       throw new ConvexError("Message cannot be empty")
     }
     if (content.length > 1000) {
@@ -109,6 +113,7 @@ export const sendMessage = mutation({
       senderId: currentUserId,
       receiverId: args.receiverId,
       read: false,
+      imageUrl: args.imageUrl,
       createdAt: Date.now(),
     })
   },

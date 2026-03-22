@@ -78,6 +78,7 @@ export default defineSchema({
     senderId: v.string(),
     receiverId: v.string(),
     read: v.boolean(),
+    imageUrl: v.optional(v.string()),
     replyToId: v.optional(v.id("messages")),
     createdAt: v.number(),
   })

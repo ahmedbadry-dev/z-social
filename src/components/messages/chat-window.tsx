@@ -178,7 +178,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{displayName}</p>
-            <p className={isOnline ? "text-xs text-green-500" : "text-xs text-muted-foreground"}>
+            <p className={isOnline ? "text-xs text-[#22C55E]" : "text-xs text-muted-foreground"}>
               {isOnline ? "Online" : "Offline"}
             </p>
           </div>

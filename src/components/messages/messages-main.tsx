@@ -38,7 +38,7 @@ export function MessagesMain() {
     >
       <div className="flex h-full">
 
-        <div className={`${selectedUserId ? "hidden md:block" : "block"} w-full md:w-[280px] md:shrink-0`}>
+        <div className={`${selectedUserId ? "hidden md:block" : "block"} w-full md:w-[320px] md:shrink-0`}>
           <ConversationList
             selectedUserId={selectedUserId}
             onSelect={(userId) => setSelectedUserId(userId)}

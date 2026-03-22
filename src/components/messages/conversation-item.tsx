@@ -43,12 +43,17 @@ export function ConversationItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full cursor-pointer items-center gap-3 rounded-md p-3 text-left transition-colors hover:bg-muted",
-        isActive && "bg-muted"
+        "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted",
+        isActive && "bg-[#3B55E6]/8 hover:bg-[#3B55E6]/10"
       )}
     >
       <div className="relative">
-        <UserAvatar name={displayName} imageUrl={partnerImage ?? undefined} size="md" />
+        <UserAvatar
+          name={displayName}
+          imageUrl={partnerImage ?? undefined}
+          size="md"
+          className="h-11 w-11"
+        />
         {!isStatusHidden && (
           <OnlineStatus
             isOnline={isOnline}
@@ -72,7 +77,7 @@ export function ConversationItem({
             </span>
             {/* Blue dot - disappears when conversation is open */}
             {hasUnread && !isActive && (
-              <span className="h-2.5 w-2.5 rounded-full bg-[#3B55E6]" />
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[#3B55E6]" />
             )}
           </div>
         </div>

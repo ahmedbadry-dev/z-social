@@ -7,6 +7,7 @@ export const upsertUser = mutation({
   handler: async (ctx) => {
     const authUser = await requireAuth(ctx)
     const userId = authUser.userId ?? String(authUser._id)
+    const email = authUser.email
 
     const existing = await ctx.db
       .query("users")
@@ -25,11 +26,59 @@ export const upsertUser = mutation({
       await ctx.db.insert("users", {
         userId,
         name: authUser.name ?? "User",
-        email: authUser.email,
+        email,
         image: authUser.image ?? undefined,
         createdAt: now,
         updatedAt: now,
       })
+    }
+
+    const profileDoc = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first()
+
+    if (!profileDoc?.username && email) {
+      const baseUsername = email
+        .split("@")[0]
+        .replace(/[^a-zA-Z0-9_]/g, "_")
+        .slice(0, 20)
+
+      if (baseUsername) {
+        const isUsernameTaken = async (username: string) => {
+          const existingProfile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_username", (q) => q.eq("username", username))
+            .first()
+          return !!existingProfile
+        }
+
+        let selectedUsername: string | null = null
+        const maxAttempts = 5
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+          const candidate =
+            attempt === 0
+              ? baseUsername
+              : `${baseUsername}_${Math.floor(1000 + Math.random() * 9000)}`
+
+          const taken = await isUsernameTaken(candidate)
+          if (!taken) {
+            selectedUsername = candidate
+            break
+          }
+        }
+
+        if (selectedUsername) {
+          if (profileDoc) {
+            await ctx.db.patch(profileDoc._id, { username: selectedUsername })
+          } else {
+            await ctx.db.insert("userProfiles", {
+              userId,
+              username: selectedUsername,
+            })
+          }
+        }
+      }
     }
 
     return userId
@@ -230,35 +279,6 @@ export const updateUserProfile = mutation({
   },
 })
 
-export const setUsernameIfMissing = mutation({
-  args: { username: v.string() },
-  handler: async (ctx, args) => {
-    const currentUser = await requireAuth(ctx)
-    const currentUserId = currentUser.userId ?? String(currentUser._id)
-    const username = args.username.trim()
-    if (!username) return { status: "skipped" as const }
-
-    const existing = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", currentUserId))
-      .first()
-
-    if (existing?.username && existing.username.trim().length > 0) {
-      return { status: "skipped" as const }
-    }
-
-    if (existing) {
-      await ctx.db.patch(existing._id, { username })
-    } else {
-      await ctx.db.insert("userProfiles", {
-        userId: currentUserId,
-        username,
-      })
-    }
-
-    return { status: "updated" as const }
-  },
-})
 
 export const updatePrivacySettings = mutation({
   args: {

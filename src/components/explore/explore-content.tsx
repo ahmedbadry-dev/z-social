@@ -18,15 +18,20 @@ export function ExploreContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Compass className="size-5 text-[#3B55E6]" />
-        <h1 className="text-lg font-semibold text-foreground">Explore</h1>
+      <div className="rounded-lg bg-card px-5 py-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3B55E6]/10">
+            <Compass className="size-5 text-[#3B55E6]" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-foreground">Explore</h1>
+            <p className="text-xs text-muted-foreground">Discover trending posts</p>
+          </div>
+        </div>
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          {trendingPosts && trendingPosts.length > 0 ? "?? Trending posts" : "Trending posts"}
-        </h2>
+        <h2 className="text-sm font-semibold text-foreground">Trending posts</h2>
 
         {trendingPosts === undefined && (
           <div className="space-y-4">
@@ -55,7 +60,7 @@ export function ExploreContent() {
               ease: [0.25, 0.46, 0.45, 0.94],
             }}
             className={cn(
-              "relative",
+              "relative overflow-hidden",
               index === 0 && "ring-2 ring-yellow-400/30 rounded-xl",
               index === 1 && "ring-2 ring-slate-400/20 rounded-xl",
               index === 2 && "ring-2 ring-orange-400/20 rounded-xl"
@@ -78,7 +83,7 @@ export function ExploreContent() {
                   ease: "easeInOut",
                 }}
               >
-                <span className="text-lg">??</span>
+                <span className="text-xs font-bold text-amber-700">#1</span>
               </motion.div>
             )}
 
@@ -88,7 +93,7 @@ export function ExploreContent() {
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span className="text-lg">??</span>
+                <span className="text-xs font-bold text-slate-600">#2</span>
               </motion.div>
             )}
 
@@ -100,7 +105,7 @@ export function ExploreContent() {
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span className="text-lg">??</span>
+                <span className="text-xs font-bold text-orange-700">#3</span>
               </motion.div>
             )}
 

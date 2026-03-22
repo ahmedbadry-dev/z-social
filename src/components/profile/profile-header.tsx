@@ -155,7 +155,7 @@ export function ProfileHeader({
             </p>
           </div>
           {!isOwnProfile && (
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               {!isOwnProfile && !following && isFollowedByMe && (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                   Follows you
@@ -240,6 +240,56 @@ export function ProfileHeader({
             </>
           )}
         </div>
+
+        {!isOwnProfile && (
+          <div className="mt-4 flex items-center gap-2 sm:hidden">
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              onClick={() => void onToggleFollow()}
+              className={cn(
+                "flex-1 rounded-full py-2 text-sm font-semibold transition-colors",
+                following || requested
+                  ? "bg-muted text-foreground border border-border"
+                  : "bg-[#3B55E6] text-white"
+              )}
+            >
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={
+                    following
+                      ? "following"
+                      : requested
+                        ? "requested"
+                        : isFollowedByMe
+                          ? "follow_back"
+                          : "follow"
+                  }
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {following
+                    ? "Following"
+                    : requested
+                      ? "Requested"
+                      : isFollowedByMe
+                        ? "Follow back"
+                        : "Follow"}
+                </motion.span>
+              </AnimatePresence>
+            </motion.button>
+
+            <Link href={`/messages?userId=${userId}`}>
+              <Button type="button" variant="outline" size="icon">
+                <MessageCircle className="size-4" />
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -83,10 +83,28 @@ export const getSuggestedUsers = query({
           .query("users")
           .withIndex("by_userId", (q) => q.eq("userId", userId))
           .first()
+
+        const isFollowing = !!(await ctx.db
+          .query("follows")
+          .withIndex("by_pair", (q) =>
+            q.eq("followerId", currentUserId).eq("followingId", userId)
+          )
+          .first())
+
+        const pendingRequest = await ctx.db
+          .query("followRequests")
+          .withIndex("by_pair", (q) =>
+            q.eq("fromUserId", currentUserId).eq("toUserId", userId)
+          )
+          .filter((q) => q.eq(q.field("status"), "pending"))
+          .first()
+
         return {
           userId,
           name: userDoc?.name ?? null,
           image: userDoc?.image ?? null,
+          isFollowing,
+          hasRequestedFollow: !!pendingRequest,
         }
       })
     )
@@ -129,7 +147,28 @@ export const getUserProfile = query({
           .withIndex("by_pair", (q) =>
             q.eq("followerId", currentUserId).eq("followingId", args.userId)
           )
-          .unique())
+          .first())
+      : false
+
+    const pendingRequest = currentUserId
+      ? await ctx.db
+          .query("followRequests")
+          .withIndex("by_pair", (q) =>
+            q.eq("fromUserId", currentUserId).eq("toUserId", args.userId)
+          )
+          .filter((q) => q.eq(q.field("status"), "pending"))
+          .first()
+      : null
+
+    const hasRequestedFollow = !!pendingRequest
+
+    const isFollowedByMe = currentUserId
+      ? !!(await ctx.db
+          .query("follows")
+          .withIndex("by_pair", (q) =>
+            q.eq("followerId", args.userId).eq("followingId", currentUserId)
+          )
+          .first())
       : false
 
     return {
@@ -146,6 +185,12 @@ export const getUserProfile = query({
       coverImageUrl: profileDoc?.coverImageUrl ?? null,
       isPrivate: profileDoc?.isPrivate ?? false,
       showOnlineStatus: profileDoc?.showOnlineStatus ?? true,
+      canViewPosts:
+        currentUserId === args.userId ||
+        !(profileDoc?.isPrivate ?? false) ||
+        isFollowing,
+      hasRequestedFollow,
+      isFollowedByMe,
     }
   },
 })

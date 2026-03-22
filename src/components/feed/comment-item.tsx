@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { ChevronDown, ChevronUp, Heart, SendHorizontal } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
@@ -99,7 +100,12 @@ export function CommentItem({
   }
 
   return (
-    <div className="space-y-2">
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="space-y-2"
+    >
       <div className="flex gap-2.5">
         <UserAvatar
           name={authorName}
@@ -225,6 +231,6 @@ export function CommentItem({
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

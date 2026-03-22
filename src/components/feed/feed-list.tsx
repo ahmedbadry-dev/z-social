@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { Newspaper } from "lucide-react"
 import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
@@ -53,28 +54,38 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
 
   return (
     <div className="space-y-4">
-      {resolvedResults.map((post) => (
-        <PostCard
+      {resolvedResults.map((post, index) => (
+        <motion.div
           key={post._id}
-          currentUserId={currentUserId}
-          post={{
-            _id: post._id,
-            content: post.content,
-            mediaUrl: post.mediaUrl,
-            mediaType: post.mediaType,
-            authorId: post.authorId,
-            authorName: post.authorName ?? "Unknown",
-            authorImage: post.authorImage,
-            createdAt: post.createdAt,
-            isEdited: post.isEdited,
-            myReaction: post.myReaction,
-            reactionsCount: post.reactionsCount,
-            reactionsSummary: post.reactionsSummary,
-            commentsCount: post.commentsCount,
-            isSavedByMe: post.isSavedByMe,
-            isOwnPost: currentUserId === post.authorId,
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.3,
+            delay: Math.min(index * 0.05, 0.3),
+            ease: "easeOut",
           }}
-        />
+        >
+          <PostCard
+            currentUserId={currentUserId}
+            post={{
+              _id: post._id,
+              content: post.content,
+              mediaUrl: post.mediaUrl,
+              mediaType: post.mediaType,
+              authorId: post.authorId,
+              authorName: post.authorName ?? "Unknown",
+              authorImage: post.authorImage,
+              createdAt: post.createdAt,
+              isEdited: post.isEdited,
+              myReaction: post.myReaction,
+              reactionsCount: post.reactionsCount,
+              reactionsSummary: post.reactionsSummary,
+              commentsCount: post.commentsCount,
+              isSavedByMe: post.isSavedByMe,
+              isOwnPost: currentUserId === post.authorId,
+            }}
+          />
+        </motion.div>
       ))}
 
       {status === "CanLoadMore" && (

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useQueryState } from "nuqs"
 import { Authenticated, useQuery } from "convex/react"
 import { MyPostsTab } from "@/components/profile/my-posts-tab"
@@ -11,17 +12,37 @@ import { RightPanel } from "@/components/layout/right-panel"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { api } from "../../../convex/_generated/api"
 
-export function ProfileContent() {
+interface ProfileContentProps {
+  targetUserId?: string
+}
+
+export function ProfileContent({ targetUserId }: ProfileContentProps) {
   const currentUser = useQuery(api.auth.getCurrentUser)
+  const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
+  const profileUserId = targetUserId ?? currentUserId
+  const isViewingOwnProfile = !targetUserId || targetUserId === currentUserId
   const profile = useQuery(
     api.users.getUserProfile,
-    currentUser?._id ? { userId: String(currentUser._id) } : "skip"
+    profileUserId ? { userId: profileUserId } : "skip"
+  )
+  const targetUser = useQuery(
+    api.users.getUserById,
+    targetUserId && !isViewingOwnProfile ? { userId: targetUserId } : "skip"
   )
   const [activeTab, setActiveTab] = useQueryState("tab", {
     defaultValue: "posts",
   })
 
-  if (currentUser === undefined || profile === undefined) {
+  useEffect(() => {
+    if (!isViewingOwnProfile && activeTab !== "posts") {
+      void setActiveTab("posts")
+    }
+  }, [activeTab, isViewingOwnProfile, setActiveTab])
+
+  const isTargetLoading =
+    targetUserId && !isViewingOwnProfile && targetUser === undefined
+
+  if (currentUser === undefined || profile === undefined || isTargetLoading) {
     return (
       <div className="space-y-4">
         <PostSkeleton />
@@ -34,25 +55,32 @@ export function ProfileContent() {
     return null
   }
 
-  const userId = String(currentUser._id)
-  const canViewSettings = profile.isOwnProfile
-  const normalizedTab = activeTab === "settings" && !canViewSettings ? "posts" : activeTab
+  const userId = profileUserId
+  const canViewSettings = isViewingOwnProfile
+  const normalizedTab = canViewSettings ? activeTab : "posts"
   const isSettingsTab = normalizedTab === "settings"
+  const displayName = isViewingOwnProfile
+    ? currentUser.name ?? "User"
+    : targetUser?.name ?? profile.name ?? profile.username ?? "User"
+  const displayEmail = isViewingOwnProfile ? currentUser.email ?? "" : ""
+  const displayImage = isViewingOwnProfile
+    ? currentUser.image ?? undefined
+    : targetUser?.image ?? profile.image ?? undefined
 
   return (
     <div className="space-y-4">
       <ProfileHeader
         userId={userId}
-        name={currentUser.name ?? "User"}
-        email={currentUser.email}
-        image={currentUser.image ?? undefined}
+        name={displayName}
+        email={displayEmail}
+        image={displayImage}
         username={profile.username ?? undefined}
         bio={profile.bio ?? undefined}
         postsCount={profile.postsCount}
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}
         isFollowing={profile.isFollowing}
-        isOwnProfile={profile.isOwnProfile}
+        isOwnProfile={isViewingOwnProfile}
       />
 
       <div className="rounded-lg bg-white shadow-sm">
@@ -69,7 +97,7 @@ export function ProfileContent() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="min-w-0">
             {normalizedTab === "posts" && <MyPostsTab userId={userId} />}
-            {normalizedTab === "saved" && <SavedPostsTab />}
+            {normalizedTab === "saved" && canViewSettings && <SavedPostsTab />}
           </div>
           <aside className="hidden lg:block">
             <Authenticated>

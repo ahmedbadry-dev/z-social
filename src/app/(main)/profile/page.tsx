@@ -17,6 +17,11 @@ export async function generateMetadata({
   }
 }
 
-export default function ProfilePage() {
-  return <ProfilePageClient />
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ userId?: string; tab?: string }>
+}) {
+  const { userId } = await searchParams
+  return <ProfilePageClient targetUserId={userId} />
 }

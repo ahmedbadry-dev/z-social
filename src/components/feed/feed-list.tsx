@@ -3,12 +3,13 @@
 import { motion, useInView } from "motion/react"
 import { Newspaper } from "lucide-react"
 import { useRef } from "react"
-import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
+import { type Preloaded, usePaginatedQuery, usePreloadedQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
 import { EmptyState } from "@/components/shared/empty-state"
 import { useInfiniteScroll } from "@/components/shared/use-infinite-scroll"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { api } from "../../../convex/_generated/api"
+import { useAuthStore } from "@/stores/auth-store"
 
 interface FeedListProps {
   preloadedPosts?: Preloaded<typeof api.posts.getFeedPosts>
@@ -37,7 +38,7 @@ function AnimatedPost({
 }
 
 export function FeedList({ preloadedPosts }: FeedListProps) {
-  const currentUser = useQuery(api.auth.getCurrentUser)
+  const { cachedUser } = useAuthStore()
   const preloaded = preloadedPosts
     ? usePreloadedQuery(preloadedPosts)
     : null
@@ -73,7 +74,7 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
     )
   }
 
-  const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
+  const currentUserId = cachedUser?.userId ?? ""
 
   return (
     <div className="space-y-4">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Lock, Eye, Moon } from "lucide-react"
 import { useMutation, useQuery } from "convex/react"
+import { toast } from "sonner"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
@@ -57,14 +58,28 @@ export function PrivacySettings() {
     }
   }, [profile])
 
-  const handlePrivateToggle = (value: boolean) => {
+  const handlePrivateToggle = async (value: boolean) => {
+    const previous = isPrivate
     setIsPrivate(value)
-    void updatePrivacySettings({ isPrivate: value })
+    try {
+      await updatePrivacySettings({ isPrivate: value })
+    } catch (error) {
+      setIsPrivate(previous)
+      const message = error instanceof Error ? error.message : "Failed to update privacy settings"
+      toast.error(message)
+    }
   }
 
-  const handleOnlineStatusToggle = (value: boolean) => {
+  const handleOnlineStatusToggle = async (value: boolean) => {
+    const previous = showOnlineStatus
     setShowOnlineStatus(value)
-    void updatePrivacySettings({ showOnlineStatus: value })
+    try {
+      await updatePrivacySettings({ showOnlineStatus: value })
+    } catch (error) {
+      setShowOnlineStatus(previous)
+      const message = error instanceof Error ? error.message : "Failed to update online status"
+      toast.error(message)
+    }
   }
 
   const isDisabled = !currentUser

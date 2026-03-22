@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react"
 import { useMutation } from "convex/react"
+import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { cn, formatRelativeTime } from "@/lib/utils"
@@ -54,6 +55,15 @@ export function NotificationItem({ notification }: NotificationItemProps) {
     notification.actorId
   )
 
+  const handleMarkAsRead = async () => {
+    try {
+      await markAsRead({ notificationId: notification._id })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update notification"
+      toast.error(message)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 16 }}
@@ -66,7 +76,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           "flex w-full items-center gap-3 border-b border-border p-4 text-left transition-colors",
           notification.read ? "bg-card" : "bg-muted"
         )}
-        onClick={() => void markAsRead({ notificationId: notification._id })}
+        onClick={() => void handleMarkAsRead()}
       >
         <span
           className={cn(

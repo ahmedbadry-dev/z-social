@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { cn } from "@/lib/utils"
 
 interface OnlineStatusProps {
@@ -5,7 +6,7 @@ interface OnlineStatusProps {
   className?: string
 }
 
-export function OnlineStatus({ isOnline, className }: OnlineStatusProps) {
+export const OnlineStatus = memo(function OnlineStatus({ isOnline, className }: OnlineStatusProps) {
   return (
     <span
       className={cn(
@@ -15,4 +16,4 @@ export function OnlineStatus({ isOnline, className }: OnlineStatusProps) {
       )}
     />
   )
-}
+})

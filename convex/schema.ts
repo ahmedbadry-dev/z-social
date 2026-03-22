@@ -135,6 +135,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
+    .index("by_user_created", ["userId", "createdAt"])
     .index("by_user_read", ["userId", "read"]),
 
   users: defineTable({
@@ -157,6 +158,7 @@ export default defineSchema({
     showOnlineStatus: v.optional(v.boolean()),
   })
     .index("by_user", ["userId"])
+    .index("by_username", ["username"])
     .searchIndex("search_username", { searchField: "username" }),
 
   userPresence: defineTable({

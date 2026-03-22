@@ -19,13 +19,18 @@ export async function generateMetadata({
 
     if (!post) {
       return {
-        title: "Post not found | Z-Social",
+        title: "Post not found",
       }
     }
 
     const authorName = post.authorName ?? "Someone"
     const description = post.content.slice(0, 160)
     const title = `${authorName} on Z-Social`
+    const ogFallback = `${siteUrl}/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(
+      description
+    )}&type=post`
+    const usePostImage = post.mediaType === "image" && !!post.mediaUrl
+    const ogImageUrl = usePostImage ? post.mediaUrl! : ogFallback
 
     return {
       title,
@@ -36,31 +41,15 @@ export async function generateMetadata({
         type: "article",
         url: `${siteUrl}/post/${id}`,
         siteName: "Z-Social",
-        images: post.authorImage
-          ? [
-              {
-                url: post.authorImage,
-                width: 400,
-                height: 400,
-                alt: authorName,
-              },
-            ]
-          : [
-              {
-                url: `${siteUrl}/og-image.png`,
-                width: 1200,
-                height: 630,
-                alt: "Z-Social",
-              },
-            ],
+        images: usePostImage
+          ? [{ url: ogImageUrl, alt: `${authorName}'s post` }]
+          : [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
       },
       twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title,
         description,
-        images: post.authorImage
-          ? [post.authorImage]
-          : [`${siteUrl}/og-image.png`],
+        images: [ogImageUrl],
       },
     }
   } catch {

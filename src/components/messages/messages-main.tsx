@@ -2,19 +2,18 @@
 
 import { MessageSquare } from "lucide-react"
 import { useEffect, useState } from "react"
-import { useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
 import { ChatWindow } from "@/components/messages/chat-window"
 import { ConversationList } from "@/components/messages/conversation-list"
 import { EmptyState } from "@/components/shared/empty-state"
 import { cn } from "@/lib/utils"
-import { api } from "../../../convex/_generated/api"
+import { useAuthStore } from "@/stores/auth-store"
 
 export function MessagesMain() {
   const [userIdParam] = useQueryState("userId")
   const [selectedUserId, setSelectedUserId] = useState<string | null>(userIdParam)
-  const currentUser = useQuery(api.auth.getCurrentUser)
-  const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
+  const { cachedUser } = useAuthStore()
+  const currentUserId = cachedUser?.userId ?? ""
 
   useEffect(() => {
     if (selectedUserId) {

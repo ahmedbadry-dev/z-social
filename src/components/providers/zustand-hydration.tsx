@@ -21,6 +21,7 @@ export function ZustandHydration() {
       void upsertUser()
       setCachedUser({
         id: String(currentUser._id),
+        userId: currentUser.userId ?? String(currentUser._id),
         name: currentUser.name ?? "",
         email: currentUser.email,
         image: currentUser.image ?? undefined,

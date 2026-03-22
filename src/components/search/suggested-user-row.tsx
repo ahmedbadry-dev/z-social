@@ -3,6 +3,7 @@
 import { Check, Plus } from "lucide-react"
 import { useState } from "react"
 import { useMutation, useQuery } from "convex/react"
+import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
 
@@ -57,8 +58,10 @@ export function SuggestedUserRow({ user }: SuggestedUserRowProps) {
       } else if (result.action === "request_cancelled") {
         setOptimisticState("none")
       }
-    } catch {
+    } catch (error) {
       setOptimisticState(null)
+      const message = error instanceof Error ? error.message : "Failed to update follow status"
+      toast.error(message)
     }
   }
 

@@ -9,12 +9,13 @@ import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { EmptyState } from "@/components/shared/empty-state"
 import type { ReactionType } from "@/types"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/stores/auth-store"
 
 export function ExploreContent() {
-  const currentUser = useQuery(api.auth.getCurrentUser)
+  const { cachedUser } = useAuthStore()
   const trendingPosts = useQuery(api.posts.getTrendingPosts)
 
-  const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
+  const currentUserId = cachedUser?.userId ?? ""
 
   return (
     <div className="space-y-4">

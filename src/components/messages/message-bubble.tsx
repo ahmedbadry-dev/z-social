@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "motion/react"
-import { AlertCircle, Check, CheckCheck, RotateCcw, X } from "lucide-react"
+import { AlertCircle, Check, CheckCheck, Loader2, RotateCcw, X } from "lucide-react"
 import { cn, formatRelativeTime } from "@/lib/utils"
 
 interface MessageBubbleProps {
@@ -118,9 +118,13 @@ export function MessageBubble({
               isSent ? "justify-end" : "justify-start"
             )}
           >
-            <p className="text-[11px] text-muted-foreground">
-              {isOptimistic ? "Sending..." : formatRelativeTime(createdAt)}
-            </p>
+            {isOptimistic ? (
+              <Loader2 className="size-3 animate-spin text-muted-foreground" />
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                {formatRelativeTime(createdAt)}
+              </p>
+            )}
             {isSent && showReadReceipt && !isOptimistic && (
               isRead ? (
                 <CheckCheck className="size-3 text-[#3B55E6]" />

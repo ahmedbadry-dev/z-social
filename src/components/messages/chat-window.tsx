@@ -27,6 +27,7 @@ interface OptimisticMessage {
   receiverId: string
   read: boolean
   imageUrl?: string
+  remoteUrl?: string
   isUploading?: boolean
   uploadFailed?: boolean
   isOptimistic: true
@@ -54,6 +55,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const canceledUploadsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     void markAsRead({ otherUserId })
@@ -64,7 +66,14 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
     if (!messages) return
     setOptimisticMessages((prev) =>
       prev.filter((opt) => {
-        if (opt.imageUrl) return true
+        if (opt.imageUrl || opt.remoteUrl) {
+          return !messages.some(
+            (m) =>
+              "imageUrl" in m &&
+              (m.imageUrl === opt.remoteUrl || m.imageUrl === opt.imageUrl) &&
+              m.senderId === currentUserId
+          )
+        }
         return !messages.some((m) => m.content === opt.content && m.senderId === currentUserId)
       })
     )
@@ -115,14 +124,31 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
       let uploadedImageUrl: string | undefined
       if (imageFile) {
         const result = await startUpload([imageFile])
-        uploadedImageUrl = result?.[0]?.ufsUrl
+        uploadedImageUrl =
+          result?.[0]?.serverData?.url ?? result?.[0]?.url ?? result?.[0]?.ufsUrl
+
+        if (canceledUploadsRef.current.has(optimisticId)) {
+          canceledUploadsRef.current.delete(optimisticId)
+          return
+        }
+
         setOptimisticMessages((prev) =>
           prev.map((message) =>
             message._id === optimisticId
-              ? { ...message, isUploading: false }
+              ? {
+                  ...message,
+                  isUploading: false,
+                  remoteUrl: uploadedImageUrl,
+                  imageUrl: uploadedImageUrl ?? message.imageUrl,
+                }
               : message
           )
         )
+      }
+
+      if (canceledUploadsRef.current.has(optimisticId)) {
+        canceledUploadsRef.current.delete(optimisticId)
+        return
       }
 
       await sendMessage({
@@ -130,8 +156,6 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
         content,
         imageUrl: uploadedImageUrl,
       })
-
-      setOptimisticMessages((prev) => prev.filter((m) => m._id !== optimisticId))
     } catch {
       setOptimisticMessages((prev) =>
         prev.map((message) =>
@@ -144,12 +168,43 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   }
 
   const handleCancelMessage = (optimisticId: string) => {
+    canceledUploadsRef.current.add(optimisticId)
     setOptimisticMessages((prev) => prev.filter((message) => message._id !== optimisticId))
   }
 
   const handleRetryMessage = async (failedMsg: OptimisticMessage) => {
     setOptimisticMessages((prev) => prev.filter((message) => message._id !== failedMsg._id))
-    await onSend(failedMsg.content)
+    if (failedMsg.remoteUrl) {
+      const optimisticId = `optimistic-${Date.now()}`
+      const retryMsg: OptimisticMessage = {
+        _id: optimisticId,
+        content: failedMsg.content,
+        createdAt: Date.now(),
+        senderId: currentUserId,
+        receiverId: otherUserId,
+        read: false,
+        imageUrl: failedMsg.remoteUrl,
+        remoteUrl: failedMsg.remoteUrl,
+        isUploading: false,
+        uploadFailed: false,
+        isOptimistic: true,
+      }
+      setOptimisticMessages((prev) => [...prev, retryMsg])
+      try {
+        await sendMessage({
+          receiverId: otherUserId,
+          content: failedMsg.content,
+          imageUrl: failedMsg.remoteUrl,
+        })
+        setOptimisticMessages((prev) => prev.filter((m) => m._id !== optimisticId))
+      } catch {
+        setOptimisticMessages((prev) =>
+          prev.map((m) => (m._id === optimisticId ? { ...m, uploadFailed: true } : m))
+        )
+      }
+    } else {
+      await onSend(failedMsg.content)
+    }
   }
 
   // Merge real + optimistic messages
@@ -284,6 +339,3 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
     </div>
   )
 }
-
-
-

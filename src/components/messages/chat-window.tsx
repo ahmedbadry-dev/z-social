@@ -2,6 +2,7 @@
 import { ArrowLeft } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { MessageBubble } from "@/components/messages/message-bubble"
 import { MessageInput } from "@/components/messages/message-input"
@@ -42,6 +43,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   })
   const isTyping = useQuery(api.messages.getTypingStatus, { otherUserId })
   const otherPresence = useQuery(api.messages.getPresence, { userId: otherUserId })
+  const otherUser = useQuery(api.users.getUserById, { userId: otherUserId })
   const sendMessage = useMutation(api.messages.sendMessage)
   const markAsRead = useMutation(api.messages.markConversationAsRead)
   const updatePresence = useMutation(api.messages.updatePresence)
@@ -152,7 +154,8 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   // Merge real + optimistic messages
   const allMessages = [...(messages ?? []), ...optimisticMessages]
 
-  const displayName = truncatePartnerId(otherUserId)
+  const displayName = otherUser?.name?.trim() || truncatePartnerId(otherUserId)
+  const otherUserImage = otherUser?.image ?? undefined
   const isOnline = otherPresence?.isOnline ?? false
 
   return (
@@ -165,16 +168,21 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
         >
           <ArrowLeft className="size-4" />
         </button>
-        <div className="relative">
-          <UserAvatar name={displayName} size="md" />
-          <OnlineStatus isOnline={isOnline} className="absolute -bottom-0.5 -right-0.5" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{displayName}</p>
-          <p className={isOnline ? "text-xs text-green-500" : "text-xs text-muted-foreground"}>
-            {isOnline ? "Online" : "Offline"}
-          </p>
-        </div>
+        <Link
+          href={`/profile?userId=${otherUserId}`}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <div className="relative">
+            <UserAvatar name={displayName} imageUrl={otherUserImage} size="md" />
+            <OnlineStatus isOnline={isOnline} className="absolute -bottom-0.5 -right-0.5" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">{displayName}</p>
+            <p className={isOnline ? "text-xs text-green-500" : "text-xs text-muted-foreground"}>
+              {isOnline ? "Online" : "Offline"}
+            </p>
+          </div>
+        </Link>
       </header>
 
       <div className="flex-1 space-y-3 overflow-y-auto bg-muted p-4">

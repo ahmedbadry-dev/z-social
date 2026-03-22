@@ -12,6 +12,8 @@ interface UserListItemProps {
   name: string | null
   image: string | null
   isFollowedByMe: boolean
+  hasRequestedFollow?: boolean
+  isCurrentUser?: boolean
   showFollowButton: boolean
 }
 
@@ -26,31 +28,56 @@ export const UserListItem = memo(function UserListItem({
   name,
   image,
   isFollowedByMe,
+  hasRequestedFollow = false,
+  isCurrentUser = false,
   showFollowButton,
 }: UserListItemProps) {
   const followUser = useMutation(api.follows.followUser)
-  const [optimisticFollow, setOptimisticFollow] = useState<boolean | null>(null)
+  const [optimisticState, setOptimisticState] = useState<
+    "following" | "requested" | "none" | null
+  >(null)
   const [isUpdating, setIsUpdating] = useState(false)
 
   const displayName = getDisplayName(userId, name)
-  const isFollowing = optimisticFollow ?? isFollowedByMe
+
+  const isFollowing =
+    optimisticState === "following"
+      ? true
+      : optimisticState === "none"
+        ? false
+        : isFollowedByMe
+
+  const hasRequested =
+    optimisticState === "requested"
+      ? true
+      : optimisticState === "none"
+        ? false
+        : hasRequestedFollow
 
   const handleToggle = async (): Promise<void> => {
     if (isUpdating) return
-    const next = !isFollowing
-    setOptimisticFollow(next)
     setIsUpdating(true)
     try {
-      await followUser({ targetUserId: userId })
-      setOptimisticFollow(null)
+      const result = await followUser({ targetUserId: userId })
+      if (result.action === "followed") {
+        setOptimisticState("following")
+      } else if (result.action === "unfollowed") {
+        setOptimisticState("none")
+      } else if (result.action === "request_sent") {
+        setOptimisticState("requested")
+      } else if (result.action === "request_cancelled") {
+        setOptimisticState("none")
+      }
     } catch (error) {
-      setOptimisticFollow(null)
+      setOptimisticState(null)
       const message = error instanceof Error ? error.message : "Failed to update follow status"
       toast.error(message)
     } finally {
       setIsUpdating(false)
     }
   }
+
+  const buttonLabel = isFollowing ? "Following" : hasRequested ? "Requested" : "Follow"
 
   return (
     <div className="flex items-center gap-3 p-4">
@@ -59,16 +86,20 @@ export const UserListItem = memo(function UserListItem({
         <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
         <p className="truncate text-xs text-muted-foreground">{userId}</p>
       </div>
-      {showFollowButton && (
+      {showFollowButton && !isCurrentUser && (
         <Button
           type="button"
           size="sm"
-          variant={isFollowing ? "default" : "outline"}
-          className={isFollowing ? "bg-[#0F172A] text-white" : ""}
+          variant={isFollowing || hasRequested ? "outline" : "default"}
+          className={
+            isFollowing || hasRequested
+              ? "border-border"
+              : "bg-[#3B55E6] text-white hover:bg-[#2D46D6]"
+          }
           disabled={isUpdating}
           onClick={() => void handleToggle()}
         >
-          {isFollowing ? "Following" : "Follow"}
+          {buttonLabel}
         </Button>
       )}
     </div>

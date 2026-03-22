@@ -230,6 +230,36 @@ export const updateUserProfile = mutation({
   },
 })
 
+export const setUsernameIfMissing = mutation({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const currentUser = await requireAuth(ctx)
+    const currentUserId = currentUser.userId ?? String(currentUser._id)
+    const username = args.username.trim()
+    if (!username) return { status: "skipped" as const }
+
+    const existing = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", currentUserId))
+      .first()
+
+    if (existing?.username && existing.username.trim().length > 0) {
+      return { status: "skipped" as const }
+    }
+
+    if (existing) {
+      await ctx.db.patch(existing._id, { username })
+    } else {
+      await ctx.db.insert("userProfiles", {
+        userId: currentUserId,
+        username,
+      })
+    }
+
+    return { status: "updated" as const }
+  },
+})
+
 export const updatePrivacySettings = mutation({
   args: {
     isPrivate: v.optional(v.boolean()),

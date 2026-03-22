@@ -96,6 +96,14 @@ export default function SignupPage() {
       return
     }
 
+    if (typeof window !== "undefined") {
+      const trimmedUsername = data.username.trim()
+      if (trimmedUsername) {
+        localStorage.setItem("pending-username", trimmedUsername)
+        localStorage.setItem("pending-email", data.email.trim().toLowerCase())
+      }
+    }
+
     const otpResult = await authClient.$fetch("/email-otp/send-verification-otp", {
       method: "POST",
       body: {

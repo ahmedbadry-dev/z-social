@@ -10,7 +10,7 @@ import { api } from "../../../convex/_generated/api"
 interface NotificationItemProps {
   notification: {
     _id: Id<"notifications">
-    type: "like" | "comment" | "reply" | "follow" | "mention"
+    type: "like" | "comment" | "reply" | "follow" | "mention" | "follow_request" | "follow_accept"
     actorId: string
     actorName?: string | null
     actorImage?: string | null
@@ -37,6 +37,10 @@ function getNotificationText(
       return `${actor} started following you`
     case "mention":
       return `${actor} mentioned you in a post`
+    case "follow_request":
+      return `${actor} requested to follow you`
+    case "follow_accept":
+      return `${actor} accepted your follow request`
     default:
       return "New notification"
   }

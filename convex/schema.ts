@@ -73,6 +73,20 @@ export default defineSchema({
     .index("by_following", ["followingId"])
     .index("by_pair", ["followerId", "followingId"]),
 
+  followRequests: defineTable({
+    fromUserId: v.string(),
+    toUserId: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("rejected")
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_from", ["fromUserId"])
+    .index("by_to", ["toUserId"])
+    .index("by_pair", ["fromUserId", "toUserId"]),
+
   messages: defineTable({
     content: v.string(),
     senderId: v.string(),
@@ -111,7 +125,9 @@ export default defineSchema({
       v.literal("comment"),
       v.literal("reply"),
       v.literal("follow"),
-      v.literal("mention")
+      v.literal("mention"),
+      v.literal("follow_request"),
+      v.literal("follow_accept")
     ),
     postId: v.optional(v.id("posts")),
     commentId: v.optional(v.id("comments")),

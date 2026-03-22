@@ -3,6 +3,7 @@
 import { ArrowLeft, Bell } from "lucide-react"
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
 import { NotificationItem } from "@/components/notifications/notification-item"
@@ -26,6 +27,33 @@ export function NotificationsMain() {
   const hasUnread = (unreadCount ?? 0) > 0
   const isInitialLoading = status === "LoadingFirstPage"
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead({})
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to mark all as read"
+      toast.error(message)
+    }
+  }
+
+  const handleAcceptRequest = async (fromUserId: string) => {
+    try {
+      await acceptRequest({ fromUserId })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to accept request"
+      toast.error(message)
+    }
+  }
+
+  const handleRejectRequest = async (fromUserId: string) => {
+    try {
+      await rejectRequest({ fromUserId })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to reject request"
+      toast.error(message)
+    }
+  }
+
   return (
     <div className="min-h-[calc(100vh-32px)] rounded-lg bg-card shadow-sm">
       <div className="flex items-center gap-3 border-b border-border p-4 md:hidden">
@@ -47,7 +75,7 @@ export function NotificationsMain() {
             type="button"
             variant="ghost"
             className="text-sm text-[#3B55E6] hover:text-[#2E46C4]"
-            onClick={() => void markAllAsRead({})}
+            onClick={() => void handleMarkAllAsRead()}
           >
             Mark all as read
           </Button>
@@ -87,14 +115,14 @@ export function NotificationsMain() {
                   <button
                     type="button"
                     className="rounded-full bg-[#3B55E6] px-3 py-1 text-xs font-medium text-white hover:bg-[#2D46D6]"
-                    onClick={() => void acceptRequest({ fromUserId: req.fromUserId })}
+                    onClick={() => void handleAcceptRequest(req.fromUserId)}
                   >
                     Accept
                   </button>
                   <button
                     type="button"
                     className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
-                    onClick={() => void rejectRequest({ fromUserId: req.fromUserId })}
+                    onClick={() => void handleRejectRequest(req.fromUserId)}
                   >
                     Reject
                   </button>

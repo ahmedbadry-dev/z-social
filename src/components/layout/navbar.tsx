@@ -64,7 +64,7 @@ export function Navbar({ preloadedUser }: NavbarProps) {
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="navbar sticky top-0 z-50 border-b border-border bg-card"
     >
-      <div className="mx-auto flex h-14 max-w-[960px] items-center justify-between gap-4 px-4">
+      <div className="mx-auto flex h-14 max-w-[1128px] items-center justify-between gap-4 px-4">
         <Link href="/feed" aria-label="Go to home feed">
           <SocialLogo />
         </Link>

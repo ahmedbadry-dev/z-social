@@ -28,13 +28,13 @@ export function AuthLayoutWrapper({
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[960px] flex-col items-center justify-center px-4 py-10">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1128px] flex-col items-center justify-center px-4 py-10">
       <div className="mb-8 flex w-full max-w-[400px] items-center justify-start">
         {showBack ? (
           <Button
             type="button"
             variant="ghost"
-            className="h-auto px-0 text-sm text-muted-foreground hover:bg-transparent hover:text-foreground"
+            className="h-auto px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={handleBack}
           >
             <ArrowLeft className="mr-1 size-4" />

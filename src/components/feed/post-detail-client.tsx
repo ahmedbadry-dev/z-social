@@ -9,6 +9,7 @@ import type { Id } from "../../../convex/_generated/dataModel"
 import { PostCard } from "@/components/feed/post-card"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { EmptyState } from "@/components/shared/empty-state"
+import { useAuthStore } from "@/stores/auth-store"
 
 interface PostDetailClientProps {
   postId: string
@@ -16,12 +17,12 @@ interface PostDetailClientProps {
 
 export function PostDetailClient({ postId }: PostDetailClientProps) {
   const router = useRouter()
-  const currentUser = useQuery(api.auth.getCurrentUser)
+  const { cachedUser } = useAuthStore()
   const post = useQuery(api.posts.getPostById, {
     postId: postId as Id<"posts">,
   })
 
-  const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
+  const currentUserId = cachedUser?.userId ?? ""
 
   return (
     <div className="mx-auto max-w-[640px] space-y-4">

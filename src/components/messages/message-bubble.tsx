@@ -1,13 +1,17 @@
 "use client"
 
 import { motion } from "motion/react"
-import { AlertCircle, Loader2, RotateCcw, X } from "lucide-react"
+import { AlertCircle, Check, CheckCheck, RotateCcw, X } from "lucide-react"
 import { cn, formatRelativeTime } from "@/lib/utils"
 
 interface MessageBubbleProps {
   content: string
   createdAt: number
   isSent: boolean
+  isRead?: boolean
+  isLastInGroup?: boolean
+  isFirstInGroup?: boolean
+  showReadReceipt?: boolean
   isOptimistic?: boolean
   imageUrl?: string | null
   isUploading?: boolean
@@ -20,6 +24,10 @@ export function MessageBubble({
   content,
   createdAt,
   isSent,
+  isRead = false,
+  isLastInGroup = true,
+  isFirstInGroup = true,
+  showReadReceipt = false,
   isOptimistic,
   imageUrl,
   isUploading,
@@ -27,20 +35,35 @@ export function MessageBubble({
   onCancel,
   onRetry,
 }: MessageBubbleProps) {
+  const sentRadius = cn(
+    "rounded-2xl",
+    !isFirstInGroup && "rounded-tr-md",
+    !isLastInGroup && "rounded-br-md"
+  )
+  const receivedRadius = cn(
+    "rounded-2xl",
+    !isFirstInGroup && "rounded-tl-md",
+    !isLastInGroup && "rounded-bl-md"
+  )
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.92, y: 8 }}
+      initial={{ opacity: 0, scale: 0.95, y: 6 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.15, ease: "easeOut" }}
-      className={cn("flex", isSent ? "justify-end" : "justify-start")}
+      transition={{ duration: 0.12, ease: "easeOut" }}
+      className={cn(
+        "flex",
+        isSent ? "justify-end" : "justify-start",
+        isLastInGroup ? "mb-1" : "mb-0.5"
+      )}
     >
-      <div className={cn("max-w-[70%]", isOptimistic && "opacity-60")}>
+      <div className={cn("max-w-[70%]", isOptimistic && "opacity-70")}>
         <div
           className={cn(
-            "rounded-2xl px-4 py-2 text-sm",
+            "px-3.5 py-2 text-sm",
             isSent
-              ? "rounded-br-sm bg-[#3B55E6] text-white"
-              : "rounded-bl-sm border border-border bg-card text-foreground"
+              ? cn(sentRadius, "bg-[#3B55E6] text-white")
+              : cn(receivedRadius, "border border-border bg-card text-foreground")
           )}
         >
           {imageUrl && (
@@ -79,7 +102,7 @@ export function MessageBubble({
               )}
             </div>
           )}
-          {content && <p className="text-sm">{content}</p>}
+          {content && <p className="text-sm leading-relaxed">{content}</p>}
           {uploadFailed && !imageUrl && (
             <div className="flex items-center gap-1 text-xs text-destructive">
               <AlertCircle className="size-3" />
@@ -87,19 +110,26 @@ export function MessageBubble({
             </div>
           )}
         </div>
-        {isUploading && (
-          <p className={cn("mt-1 text-xs text-muted-foreground", isSent ? "text-right" : "text-left")}>
-            Uploading...
-          </p>
+
+        {isLastInGroup && (
+          <div
+            className={cn(
+              "mt-0.5 flex items-center gap-1",
+              isSent ? "justify-end" : "justify-start"
+            )}
+          >
+            <p className="text-[11px] text-muted-foreground">
+              {isOptimistic ? "Sending..." : formatRelativeTime(createdAt)}
+            </p>
+            {isSent && showReadReceipt && !isOptimistic && (
+              isRead ? (
+                <CheckCheck className="size-3 text-[#3B55E6]" />
+              ) : (
+                <Check className="size-3 text-muted-foreground" />
+              )
+            )}
+          </div>
         )}
-        <p
-          className={cn(
-            "mt-1 text-xs text-muted-foreground",
-            isSent ? "text-right" : "text-left"
-          )}
-        >
-          {isOptimistic ? "Sending..." : formatRelativeTime(createdAt)}
-        </p>
       </div>
     </motion.div>
   )

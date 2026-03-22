@@ -9,11 +9,13 @@ interface ProfileTabsProps {
 }
 
 export function ProfileTabs({ activeTab, onTabChange, isOwnProfile }: ProfileTabsProps) {
-  const tabs = [
-    { key: "posts", label: "My Posts" },
-    { key: "saved", label: "Saved Posts" },
-    ...(isOwnProfile ? [{ key: "settings", label: "Settings" }] : []),
-  ]
+  const tabs = isOwnProfile
+    ? [
+        { key: "posts", label: "My Posts" },
+        { key: "saved", label: "Saved Posts" },
+        { key: "settings", label: "Settings" },
+      ]
+    : [{ key: "posts", label: "Posts" }]
 
   return (
     <div className="border-b border-border bg-card px-6">

@@ -28,7 +28,7 @@ export const UserListItem = memo(function UserListItem({
   isFollowedByMe,
   showFollowButton,
 }: UserListItemProps) {
-  const toggleFollow = useMutation(api.follows.toggleFollow)
+  const followUser = useMutation(api.follows.followUser)
   const [optimisticFollow, setOptimisticFollow] = useState<boolean | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
 
@@ -41,7 +41,7 @@ export const UserListItem = memo(function UserListItem({
     setOptimisticFollow(next)
     setIsUpdating(true)
     try {
-      await toggleFollow({ targetUserId: userId })
+      await followUser({ targetUserId: userId })
       setOptimisticFollow(null)
     } catch (error) {
       setOptimisticFollow(null)

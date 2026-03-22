@@ -25,6 +25,9 @@ interface ProfileHeaderProps {
   followingCount: number
   isFollowing: boolean
   isOwnProfile: boolean
+  isPrivate?: boolean
+  hasRequestedFollow?: boolean
+  isFollowedByMe?: boolean
 }
 
 export function ProfileHeader({
@@ -40,24 +43,42 @@ export function ProfileHeader({
   followingCount,
   isFollowing,
   isOwnProfile,
+  hasRequestedFollow,
+  isFollowedByMe,
 }: ProfileHeaderProps) {
-  const toggleFollow = useMutation(api.follows.toggleFollow)
+  const followUser = useMutation(api.follows.followUser)
   const [following, setFollowing] = useState(isFollowing)
   const [followers, setFollowers] = useState(followersCount)
+  const [requested, setRequested] = useState(hasRequestedFollow ?? false)
+  const prevUserIdRef = useRef(userId)
   const coverInputRef = useRef<HTMLInputElement>(null)
   const { startUpload, isUploading } = useUploadThing("avatar")
   const updateProfile = useMutation(api.users.updateUserProfile)
 
+  if (prevUserIdRef.current !== userId) {
+    prevUserIdRef.current = userId
+    setFollowing(isFollowing)
+    setFollowers(followersCount)
+    setRequested(hasRequestedFollow ?? false)
+  }
+
   const onToggleFollow = async () => {
-    const next = !following
-    setFollowing(next)
-    setFollowers((prev) => (next ? prev + 1 : prev - 1))
     try {
-      await toggleFollow({ targetUserId: userId })
+      const result = await followUser({ targetUserId: userId })
+      if (result.action === "followed") {
+        setFollowing(true)
+        setFollowers((prev) => prev + 1)
+        setRequested(false)
+      } else if (result.action === "unfollowed") {
+        setFollowing(false)
+        setFollowers((prev) => Math.max(0, prev - 1))
+      } else if (result.action === "request_sent") {
+        setRequested(true)
+      } else if (result.action === "request_cancelled") {
+        setRequested(false)
+      }
     } catch (error) {
-      setFollowing(!next)
-      setFollowers((prev) => (next ? prev - 1 : prev + 1))
-      toast.error("Failed to follow user")
+      toast.error("Action failed")
     }
   }
 
@@ -132,6 +153,11 @@ export function ProfileHeader({
           </div>
           {!isOwnProfile && (
             <div className="flex items-center gap-2">
+              {!isOwnProfile && !following && isFollowedByMe && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                  Follows you
+                </span>
+              )}
               <motion.button
                 type="button"
                 whileHover={{ scale: 1.03 }}
@@ -140,20 +166,34 @@ export function ProfileHeader({
                 onClick={() => void onToggleFollow()}
                 className={cn(
                   "rounded-full px-5 py-2 text-sm font-semibold transition-colors",
-                  following
+                  following || requested
                     ? "bg-muted text-foreground border border-border"
                     : "bg-[#3B55E6] text-white"
                 )}
               >
                 <AnimatePresence mode="wait">
                   <motion.span
-                    key={following ? "following" : "follow"}
+                    key={
+                      following
+                        ? "following"
+                        : requested
+                          ? "requested"
+                          : isFollowedByMe
+                            ? "follow_back"
+                            : "follow"
+                    }
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
                   >
-                    {following ? "Following" : "Follow"}
+                    {following
+                      ? "Following"
+                      : requested
+                        ? "Requested"
+                        : isFollowedByMe
+                          ? "Follow back"
+                          : "Follow"}
                   </motion.span>
                 </AnimatePresence>
               </motion.button>

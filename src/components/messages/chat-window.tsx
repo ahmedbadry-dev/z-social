@@ -8,6 +8,7 @@ import { MessageInput } from "@/components/messages/message-input"
 import { OnlineStatus } from "@/components/shared/online-status"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
+import { useUploadThing } from "@/lib/uploadthing"
 
 interface ChatWindowProps {
   otherUserId: string
@@ -23,6 +24,9 @@ interface OptimisticMessage {
   senderId: string
   receiverId: string
   read: boolean
+  imageUrl?: string
+  isUploading?: boolean
+  uploadFailed?: boolean
   isOptimistic: true
 }
 
@@ -41,6 +45,7 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   const sendMessage = useMutation(api.messages.sendMessage)
   const markAsRead = useMutation(api.messages.markConversationAsRead)
   const updatePresence = useMutation(api.messages.updatePresence)
+  const { startUpload } = useUploadThing("chatImage")
 
   // Optimistic messages state
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([])
@@ -55,9 +60,10 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   useEffect(() => {
     if (!messages) return
     setOptimisticMessages((prev) =>
-      prev.filter(
-        (opt) => !messages.some((m) => m.content === opt.content && m.senderId === currentUserId)
-      )
+      prev.filter((opt) => {
+        if (opt.imageUrl) return true
+        return !messages.some((m) => m.content === opt.content && m.senderId === currentUserId)
+      })
     )
   }, [messages, currentUserId])
 
@@ -85,9 +91,9 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
     }, 2000)
   }
 
-  const onSend = async (content: string) => {
-    // 1. Add optimistic message instantly
+  const onSend = async (content: string, imageFile?: File, localPreviewUrl?: string) => {
     const optimisticId = `optimistic-${Date.now()}`
+
     const optimisticMsg: OptimisticMessage = {
       _id: optimisticId,
       content,
@@ -95,18 +101,52 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
       senderId: currentUserId,
       receiverId: otherUserId,
       read: false,
+      imageUrl: localPreviewUrl,
+      isUploading: !!imageFile,
+      uploadFailed: false,
       isOptimistic: true,
     }
     setOptimisticMessages((prev) => [...prev, optimisticMsg])
 
-    // 2. Send to server in background
     try {
-      await sendMessage({ receiverId: otherUserId, content })
-    } catch (error) {
-      // Remove optimistic message on failure
+      let uploadedImageUrl: string | undefined
+      if (imageFile) {
+        const result = await startUpload([imageFile])
+        uploadedImageUrl = result?.[0]?.ufsUrl
+        setOptimisticMessages((prev) =>
+          prev.map((message) =>
+            message._id === optimisticId
+              ? { ...message, isUploading: false }
+              : message
+          )
+        )
+      }
+
+      await sendMessage({
+        receiverId: otherUserId,
+        content,
+        imageUrl: uploadedImageUrl,
+      })
+
       setOptimisticMessages((prev) => prev.filter((m) => m._id !== optimisticId))
-      toast.error(error instanceof Error ? error.message : "Failed to send message")
+    } catch {
+      setOptimisticMessages((prev) =>
+        prev.map((message) =>
+          message._id === optimisticId
+            ? { ...message, isUploading: false, uploadFailed: true }
+            : message
+        )
+      )
     }
+  }
+
+  const handleCancelMessage = (optimisticId: string) => {
+    setOptimisticMessages((prev) => prev.filter((message) => message._id !== optimisticId))
+  }
+
+  const handleRetryMessage = async (failedMsg: OptimisticMessage) => {
+    setOptimisticMessages((prev) => prev.filter((message) => message._id !== failedMsg._id))
+    await onSend(failedMsg.content)
   }
 
   // Merge real + optimistic messages
@@ -161,6 +201,19 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
               createdAt={message.createdAt}
               isSent={isSent}
               isOptimistic={"isOptimistic" in message}
+              imageUrl={"imageUrl" in message ? message.imageUrl : null}
+              isUploading={"isUploading" in message ? message.isUploading : false}
+              uploadFailed={"uploadFailed" in message ? message.uploadFailed : false}
+              onCancel={
+                "isOptimistic" in message && message.isUploading
+                  ? () => handleCancelMessage(message._id)
+                  : undefined
+              }
+              onRetry={
+                "isOptimistic" in message && message.uploadFailed
+                  ? () => void handleRetryMessage(message)
+                  : undefined
+              }
             />
           )
         })}

@@ -1,12 +1,13 @@
 "use client"
 
 import { MessageSquare } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
 import { ChatWindow } from "@/components/messages/chat-window"
 import { ConversationList } from "@/components/messages/conversation-list"
 import { EmptyState } from "@/components/shared/empty-state"
+import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
 
 export function MessagesMain() {
@@ -15,8 +16,26 @@ export function MessagesMain() {
   const currentUser = useQuery(api.auth.getCurrentUser)
   const currentUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
 
+  useEffect(() => {
+    if (selectedUserId) {
+      document.documentElement.classList.add("chat-open")
+    } else {
+      document.documentElement.classList.remove("chat-open")
+    }
+    return () => {
+      document.documentElement.classList.remove("chat-open")
+    }
+  }, [selectedUserId])
+
   return (
-    <div className="overflow-hidden rounded-lg bg-card shadow-sm" style={{ height: "calc(100vh - 161px)" }}>
+    <div
+      className={cn(
+        "overflow-hidden bg-card md:rounded-lg md:shadow-sm md:h-[calc(100vh-161px)]",
+        selectedUserId
+          ? "fixed inset-0 z-40 md:static md:inset-auto"
+          : "h-[calc(100vh-161px)] rounded-lg shadow-sm"
+      )}
+    >
       <div className="flex h-full">
 
         <div className={`${selectedUserId ? "hidden md:block" : "block"} w-full md:w-[280px] md:shrink-0`}>

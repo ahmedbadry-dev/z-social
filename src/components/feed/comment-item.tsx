@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronUp, Heart, SendHorizontal } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useMutation, useQuery } from "convex/react"
+import Link from "next/link"
 import { toast } from "sonner"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { MentionText } from "@/components/shared/mention-text"
@@ -110,7 +111,11 @@ export function CommentItem({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[13px] font-semibold text-foreground">{authorName}</span>
+                <Link href={`/profile?userId=${comment.authorId}`}>
+                  <span className="text-[13px] font-semibold text-foreground hover:underline">
+                    {authorName}
+                  </span>
+                </Link>
                 {isAuthor && (
                   <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-[#3B55E6]">
                     Author

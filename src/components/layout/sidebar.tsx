@@ -41,9 +41,10 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
     : useQuery(api.auth.getCurrentUser)
   const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount)
   const unreadMessages = useQuery(api.messages.getUnreadCount)
+  const profileUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
   const userProfile = useQuery(
     api.users.getUserProfile,
-    currentUser?.userId ? { userId: currentUser.userId } : "skip"
+    profileUserId ? { userId: profileUserId } : "skip"
   )
   const displayName =
     currentUser?.name?.trim() ||
@@ -55,28 +56,25 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
       <AuthLoading><SidebarSkeleton /></AuthLoading>
       <Authenticated>
     <div className="overflow-hidden rounded-lg bg-card shadow-sm">
-      <div className="relative h-20 bg-muted">
-        {/* Cover */}
-        <div
-          className="relative h-20"
-          style={
-            userProfile?.coverImageUrl
-              ? {
-                backgroundImage: `url(${userProfile.coverImageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-              : undefined
-          }
-        >
-          <UserAvatar
-            name={displayName}
-            imageUrl={currentUser?.image ?? undefined}
-            size="lg"
-            clickable
-            className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-white"
-          />
-        </div>
+      <div
+        className="relative h-20 bg-muted"
+        style={
+          userProfile?.coverImageUrl
+            ? {
+              backgroundImage: `url(${userProfile.coverImageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+            : undefined
+        }
+      >
+        <UserAvatar
+          name={displayName}
+          imageUrl={currentUser?.image ?? undefined}
+          size="lg"
+          clickable
+          className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-card"
+        />
       </div>
       <div className="border-b border-border px-4 pt-8 pb-4">
         <p className="text-base font-semibold text-foreground">{displayName}</p>
@@ -94,13 +92,13 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
               key={href}
               href={href}
               className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
+                "group flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
                 isActive && "bg-[#3B55E6]/10 font-semibold text-[#3B55E6]"
               )}
             >
               <div
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                  "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
                   isActive ? "bg-[#3B55E6]/15" : "group-hover:bg-muted"
                 )}
               >

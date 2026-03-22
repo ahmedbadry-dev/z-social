@@ -186,17 +186,26 @@ export const updatePresence = mutation({
 export const getPresence = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first()
+
+    if (profile?.showOnlineStatus === false) {
+      return { isOnline: false, isTyping: false, isHidden: true }
+    }
+
     const presence = await ctx.db
       .query("userPresence")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first()
 
-    if (!presence) return { isOnline: false, isTyping: false }
+    if (!presence) return { isOnline: false, isTyping: false, isHidden: false }
 
     const TWO_MINUTES = 2 * 60 * 1000
     const isOnline = Date.now() - presence.lastSeen < TWO_MINUTES
 
-    return { isOnline, isTyping: false }
+    return { isOnline, isTyping: false, isHidden: false }
   },
 })
 

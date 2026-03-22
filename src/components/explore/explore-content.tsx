@@ -18,15 +18,20 @@ export function ExploreContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Compass className="size-5 text-[#3B55E6]" />
-        <h1 className="text-lg font-semibold text-foreground">Explore</h1>
+      <div className="rounded-lg bg-card px-5 py-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3B55E6]/10">
+            <Compass className="size-5 text-[#3B55E6]" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-foreground">Explore</h1>
+            <p className="text-xs text-muted-foreground">Discover trending posts</p>
+          </div>
+        </div>
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          {trendingPosts && trendingPosts.length > 0 ? "?? Trending posts" : "Trending posts"}
-        </h2>
+        <h2 className="text-sm font-semibold text-foreground">Trending posts</h2>
 
         {trendingPosts === undefined && (
           <div className="space-y-4">
@@ -78,7 +83,7 @@ export function ExploreContent() {
                   ease: "easeInOut",
                 }}
               >
-                <span className="text-lg">??</span>
+                <span className="text-xs font-bold text-amber-700">#1</span>
               </motion.div>
             )}
 
@@ -88,7 +93,7 @@ export function ExploreContent() {
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span className="text-lg">??</span>
+                <span className="text-xs font-bold text-slate-600">#2</span>
               </motion.div>
             )}
 
@@ -100,7 +105,7 @@ export function ExploreContent() {
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span className="text-lg">??</span>
+                <span className="text-xs font-bold text-orange-700">#3</span>
               </motion.div>
             )}
 
@@ -111,29 +116,57 @@ export function ExploreContent() {
                 </span>
               </div>
             ) : null}
-            <PostCard
-              currentUserId={currentUserId}
-              post={{
-                _id: post._id,
-                content: post.content,
-                mediaUrl: post.mediaUrl,
-                mediaType: post.mediaType,
-                authorId: post.authorId,
-                authorName: post.authorName ?? "Unknown",
-                authorImage: post.authorImage,
-                createdAt: post.createdAt,
-                isEdited: post.isEdited,
-                myReaction: post.myReaction,
-                reactionsCount: post.reactionsCount,
-                reactionsSummary: post.reactionsSummary.map((r) => ({
-                  ...r,
-                  type: r.type as ReactionType,
-                })),
-                commentsCount: post.commentsCount,
-                isSavedByMe: post.isSavedByMe,
-                isOwnPost: currentUserId === post.authorId,
-              }}
-            />
+            {index < 3 ? (
+              <div className="pt-4">
+                <PostCard
+                  currentUserId={currentUserId}
+                  post={{
+                    _id: post._id,
+                    content: post.content,
+                    mediaUrl: post.mediaUrl,
+                    mediaType: post.mediaType,
+                    authorId: post.authorId,
+                    authorName: post.authorName ?? "Unknown",
+                    authorImage: post.authorImage,
+                    createdAt: post.createdAt,
+                    isEdited: post.isEdited,
+                    myReaction: post.myReaction,
+                    reactionsCount: post.reactionsCount,
+                    reactionsSummary: post.reactionsSummary.map((r) => ({
+                      ...r,
+                      type: r.type as ReactionType,
+                    })),
+                    commentsCount: post.commentsCount,
+                    isSavedByMe: post.isSavedByMe,
+                    isOwnPost: currentUserId === post.authorId,
+                  }}
+                />
+              </div>
+            ) : (
+              <PostCard
+                currentUserId={currentUserId}
+                post={{
+                  _id: post._id,
+                  content: post.content,
+                  mediaUrl: post.mediaUrl,
+                  mediaType: post.mediaType,
+                  authorId: post.authorId,
+                  authorName: post.authorName ?? "Unknown",
+                  authorImage: post.authorImage,
+                  createdAt: post.createdAt,
+                  isEdited: post.isEdited,
+                  myReaction: post.myReaction,
+                  reactionsCount: post.reactionsCount,
+                  reactionsSummary: post.reactionsSummary.map((r) => ({
+                    ...r,
+                    type: r.type as ReactionType,
+                  })),
+                  commentsCount: post.commentsCount,
+                  isSavedByMe: post.isSavedByMe,
+                  isOwnPost: currentUserId === post.authorId,
+                }}
+              />
+            )}
           </motion.div>
         ))}
       </section>

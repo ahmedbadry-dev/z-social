@@ -10,7 +10,12 @@ export function useAvatarUpload() {
     if (!result?.[0]) {
       throw new Error("Upload failed")
     }
-    return result[0].ufsUrl
+    const uploadedUrl =
+      result[0].serverData?.url ?? result[0].url ?? result[0].ufsUrl
+    if (!uploadedUrl) {
+      throw new Error("Upload failed")
+    }
+    return uploadedUrl
   }
 
   return { upload, isUploading }

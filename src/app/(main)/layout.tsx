@@ -17,7 +17,7 @@ export default async function MainLayout({
       <AuthRedirect />
       <Navbar preloadedUser={preloadedUser} />
       <HydrationProvider />
-      <main className="mx-auto max-w-[960px] px-4 py-6 pb-20 md:pb-6">
+      <main className="mx-auto max-w-[1128px] px-4 py-6 pb-20 md:pb-6">
         {children}
       </main>
       <MobileTabBar />

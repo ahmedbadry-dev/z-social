@@ -1,8 +1,9 @@
 "use client"
 
 import { useQuery } from "convex/react"
-import { Lock, UserCheck } from "lucide-react"
+import { ArrowLeft, Lock, UserCheck } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { EmptyState } from "@/components/shared/empty-state"
 import { UserListItem } from "@/components/profile/user-list-item"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -37,6 +38,7 @@ function ListSkeleton() {
 }
 
 export function FollowingList({ userId }: FollowingListProps) {
+  const router = useRouter()
   const currentUser = useQuery(api.auth.getCurrentUser)
   const profile = useQuery(
     api.users.getUserProfile,
@@ -83,7 +85,24 @@ export function FollowingList({ userId }: FollowingListProps) {
   }
 
   return (
-    <section className="rounded-lg bg-card shadow-sm">
+    <>
+      <div className="mb-3 md:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 1) {
+              router.back()
+            } else {
+              router.push("/profile")
+            }
+          }}
+          className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+      </div>
+      <section className="rounded-lg bg-card shadow-sm">
       <div className="flex border-b border-border">
         <Link
           href={`/profile/followers?userId=${userId}`}
@@ -127,6 +146,7 @@ export function FollowingList({ userId }: FollowingListProps) {
           ))}
         </div>
       )}
-    </section>
+      </section>
+    </>
   )
 }

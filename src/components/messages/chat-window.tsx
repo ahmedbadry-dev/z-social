@@ -157,13 +157,14 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   const displayName = otherUser?.name?.trim() || truncatePartnerId(otherUserId)
   const otherUserImage = otherUser?.image ?? undefined
   const isOnline = otherPresence?.isOnline ?? false
+  const isStatusHidden = otherPresence?.isHidden ?? false
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
       <header className="flex items-center gap-3 border-b border-border p-4">
         <button
           type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted md:hidden"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors md:hidden"
           onClick={onBack}
         >
           <ArrowLeft className="size-4" />
@@ -174,13 +175,20 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
         >
           <div className="relative">
             <UserAvatar name={displayName} imageUrl={otherUserImage} size="md" />
-            <OnlineStatus isOnline={isOnline} className="absolute -bottom-0.5 -right-0.5" />
+            {!isStatusHidden && (
+              <OnlineStatus
+                isOnline={isOnline}
+                className="absolute -bottom-0.5 -right-0.5"
+              />
+            )}
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{displayName}</p>
-            <p className={isOnline ? "text-xs text-green-500" : "text-xs text-muted-foreground"}>
-              {isOnline ? "Online" : "Offline"}
-            </p>
+            {!isStatusHidden && (
+              <p className={isOnline ? "text-xs text-[#22C55E]" : "text-xs text-muted-foreground"}>
+                {isOnline ? "Online" : "Offline"}
+              </p>
+            )}
           </div>
         </Link>
       </header>

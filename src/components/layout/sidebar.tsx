@@ -2,7 +2,7 @@
 
 import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { Authenticated, AuthLoading } from "convex/react"
-import { Bell, Compass, Home, Send, User } from "lucide-react"
+import { Compass, Heart, Home, Send, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { api } from "../../../convex/_generated/api"
@@ -14,7 +14,7 @@ const navItems = [
   { href: "/profile", label: "Profile", icon: User },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/messages", label: "Messages", icon: Send },
-  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/notifications", label: "Notifications", icon: Heart },
 ]
 
 function SidebarSkeleton() {
@@ -41,9 +41,10 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
     : useQuery(api.auth.getCurrentUser)
   const unreadNotifications = useQuery(api.notifications.getUnreadNotificationsCount)
   const unreadMessages = useQuery(api.messages.getUnreadCount)
+  const profileUserId = currentUser?.userId ?? String(currentUser?._id ?? "")
   const userProfile = useQuery(
     api.users.getUserProfile,
-    currentUser?._id ? { userId: String(currentUser._id) } : "skip"
+    profileUserId ? { userId: profileUserId } : "skip"
   )
   const displayName =
     currentUser?.name?.trim() ||
@@ -55,27 +56,25 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
       <AuthLoading><SidebarSkeleton /></AuthLoading>
       <Authenticated>
     <div className="overflow-hidden rounded-lg bg-card shadow-sm">
-      <div className="relative h-20 bg-muted">
-        {/* Cover */}
-        <div
-          className="relative h-20"
-          style={
-            userProfile?.coverImageUrl
-              ? {
-                backgroundImage: `url(${userProfile.coverImageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-              : undefined
-          }
-        >
-          <UserAvatar
-            name={displayName}
-            imageUrl={currentUser?.image ?? undefined}
-            size="lg"
-            className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-white"
-          />
-        </div>
+      <div
+        className="relative h-20 bg-muted"
+        style={
+          userProfile?.coverImageUrl
+            ? {
+              backgroundImage: `url(${userProfile.coverImageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+            : undefined
+        }
+      >
+        <UserAvatar
+          name={displayName}
+          imageUrl={currentUser?.image ?? undefined}
+          size="lg"
+          clickable
+          className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-card"
+        />
       </div>
       <div className="border-b border-border px-4 pt-8 pb-4">
         <p className="text-base font-semibold text-foreground">{displayName}</p>
@@ -93,19 +92,26 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                isActive && "bg-muted font-semibold text-foreground"
+                "group flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
+                isActive && "bg-[#3B55E6]/10 font-semibold text-[#3B55E6]"
               )}
             >
-              <Icon className="size-5" />
+              <div
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
+                  isActive ? "bg-[#3B55E6]/15" : "group-hover:bg-muted"
+                )}
+              >
+                <Icon className="size-4" />
+              </div>
               <span>{label}</span>
               {showNotificationsBadge && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] font-medium text-white">
                   {unreadNotifications > 9 ? "9+" : unreadNotifications}
                 </span>
               )}
               {showMessagesBadge && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] font-medium text-white">
                   {unreadMessages > 9 ? "9+" : unreadMessages}
                 </span>
               )}

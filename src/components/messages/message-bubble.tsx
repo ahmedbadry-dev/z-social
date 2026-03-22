@@ -66,7 +66,7 @@ export function MessageBubble({
               )}
               {uploadFailed && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/40">
-                  <AlertCircle className="size-6 text-red-400" />
+                  <AlertCircle className="size-6 text-destructive" />
                   <button
                     type="button"
                     onClick={onRetry}
@@ -81,7 +81,7 @@ export function MessageBubble({
           )}
           {content && <p className="text-sm">{content}</p>}
           {uploadFailed && !imageUrl && (
-            <div className="flex items-center gap-1 text-xs text-red-400">
+            <div className="flex items-center gap-1 text-xs text-destructive">
               <AlertCircle className="size-3" />
               Failed to send
             </div>

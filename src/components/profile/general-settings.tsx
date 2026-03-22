@@ -159,13 +159,13 @@ export function GeneralSettings() {
 
       <Button
         type="submit"
-        className="w-full bg-foreground text-white hover:bg-foreground/90"
+        className="w-full bg-[#3B55E6] text-white hover:bg-[#2D46D6]"
         disabled={form.formState.isSubmitting || isUploading}
       >
         {form.formState.isSubmitting || isUploading ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          "Save Changes"
+          "Save changes"
         )}
       </Button>
     </form>

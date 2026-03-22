@@ -2,7 +2,7 @@
 
 import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { Authenticated, AuthLoading } from "convex/react"
-import { Bell, Compass, Home, Send, User } from "lucide-react"
+import { Compass, Heart, Home, Send, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { api } from "../../../convex/_generated/api"
@@ -14,7 +14,7 @@ const navItems = [
   { href: "/profile", label: "Profile", icon: User },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/messages", label: "Messages", icon: Send },
-  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/notifications", label: "Notifications", icon: Heart },
 ]
 
 function SidebarSkeleton() {
@@ -73,6 +73,7 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
             name={displayName}
             imageUrl={currentUser?.image ?? undefined}
             size="lg"
+            clickable
             className="absolute bottom-0 left-4 translate-y-1/2 border-2 border-white"
           />
         </div>
@@ -93,11 +94,18 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                isActive && "bg-muted font-semibold text-foreground"
+                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
+                isActive && "bg-[#3B55E6]/10 font-semibold text-[#3B55E6]"
               )}
             >
-              <Icon className="size-5" />
+              <div
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                  isActive ? "bg-[#3B55E6]/15" : "group-hover:bg-muted"
+                )}
+              >
+                <Icon className="size-4" />
+              </div>
               <span>{label}</span>
               {showNotificationsBadge && (
                 <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] font-medium text-white">

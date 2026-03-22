@@ -92,7 +92,11 @@ export function ProfileHeader({
       const result = await startUpload([file])
       if (!result?.[0]) throw new Error("Upload failed")
 
-      await updateProfile({ coverImageUrl: result[0].ufsUrl })
+      const uploadedUrl =
+        result[0].serverData?.url ?? result[0].url ?? result[0].ufsUrl
+      if (!uploadedUrl) throw new Error("Upload failed")
+
+      await updateProfile({ coverImageUrl: uploadedUrl })
       toast.success("Cover image updated!")
     } catch {
       toast.error("Failed to update cover image")

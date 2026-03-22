@@ -134,6 +134,7 @@ export function ProfileHeader({
           name={name}
           imageUrl={image}
           size="xl"
+          clickable
           className="absolute bottom-0 left-6 translate-y-1/2 border-4 border-white"
         />
       </div>

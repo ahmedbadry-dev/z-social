@@ -1,4 +1,5 @@
 import { FeedContent } from "@/components/feed/feed-content"
+import { PageTransition } from "@/components/shared/page-transition"
 import { preloadAuthQuery } from "@/lib/auth-server"
 import { api } from "../../../../convex/_generated/api"
 
@@ -9,5 +10,9 @@ export default async function FeedPage() {
     paginationOpts: { numItems: 10, cursor: null },
   })
 
-  return <FeedContent preloadedPosts={preloadedPosts} />
+  return (
+    <PageTransition>
+      <FeedContent preloadedPosts={preloadedPosts} />
+    </PageTransition>
+  )
 }

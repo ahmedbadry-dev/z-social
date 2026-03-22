@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useMutation } from "convex/react"
-import { Camera } from "lucide-react"
+import { Camera, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
@@ -129,14 +129,22 @@ export function ProfileHeader({
             </p>
           </div>
           {!isOwnProfile && (
-            <Button
-              type="button"
-              variant={following ? "default" : "outline"}
-              className={following ? "bg-[#0F172A] text-white" : ""}
-              onClick={() => void onToggleFollow()}
-            >
-              {following ? "Following" : "Follow"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant={following ? "default" : "outline"}
+                className={following ? "bg-foreground text-background" : ""}
+                onClick={() => void onToggleFollow()}
+              >
+                {following ? "Following" : "Follow"}
+              </Button>
+
+              <Link href={`/messages?userId=${userId}`}>
+                <Button type="button" variant="outline" size="icon">
+                  <MessageCircle className="size-4" />
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
 

@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import {
   Bookmark,
   BookmarkCheck,
@@ -138,11 +139,18 @@ export const PostCard = memo(function PostCard({
   return (
     <article className="rounded-lg bg-card p-4 shadow-sm">
       <header className="flex items-start gap-3">
-        <UserAvatar name={post.authorName} imageUrl={post.authorImage} size="md" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-foreground">{post.authorName}</p>
-          <p className="text-xs text-muted-foreground">{formatRelativeTime(post.createdAt)}</p>
-        </div>
+        <Link
+          href={`/profile?userId=${post.authorId}`}
+          className="flex min-w-0 flex-1 items-start gap-3 hover:opacity-80"
+        >
+          <UserAvatar name={post.authorName} imageUrl={post.authorImage} size="md" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-semibold text-foreground">{post.authorName}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatRelativeTime(post.createdAt)}
+            </p>
+          </div>
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="ghost" size="icon-sm">

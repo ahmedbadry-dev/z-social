@@ -92,10 +92,10 @@ export function PrivacySettings() {
         <div className="space-y-0.5">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Eye className="size-4 text-muted-foreground" />
-            Online Status
+            Show Online Status
           </div>
           <p className="text-xs text-muted-foreground">
-            Show when you're active in messages
+            When off, others won't see when you're active or last seen
           </p>
         </div>
         <ToggleButton

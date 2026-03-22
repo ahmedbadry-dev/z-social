@@ -10,7 +10,7 @@ export const getNotifications = query({
     if (!currentUserId) return { page: [], isDone: true, continueCursor: "" }
     const result = await ctx.db
       .query("notifications")
-      .withIndex("by_user", (q) => q.eq("userId", currentUserId))
+      .withIndex("by_user_created", (q) => q.eq("userId", currentUserId))
       .order("desc")
       .paginate(args.paginationOpts)
 

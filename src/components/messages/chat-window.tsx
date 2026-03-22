@@ -10,6 +10,7 @@ import { OnlineStatus } from "@/components/shared/online-status"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
 import { useUploadThing } from "@/lib/uploadthing"
+import { formatLastSeen, formatDateSeparator, isDifferentDay } from "@/lib/utils"
 
 interface ChatWindowProps {
   otherUserId: string
@@ -158,10 +159,11 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
   const otherUserImage = otherUser?.image ?? undefined
   const isOnline = otherPresence?.isOnline ?? false
   const isStatusHidden = otherPresence?.isHidden ?? false
+  const lastSeen = otherPresence?.lastSeen ?? null
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
-      <header className="flex items-center gap-3 border-b border-border p-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3">
         <button
           type="button"
           className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors md:hidden"
@@ -186,14 +188,14 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
             <p className="text-sm font-semibold text-foreground">{displayName}</p>
             {!isStatusHidden && (
               <p className={isOnline ? "text-xs text-[#22C55E]" : "text-xs text-muted-foreground"}>
-                {isOnline ? "Online" : "Offline"}
+                {isOnline ? "Online" : formatLastSeen(lastSeen)}
               </p>
             )}
           </div>
         </Link>
       </header>
 
-      <div className="flex-1 space-y-3 overflow-y-auto bg-muted p-4">
+      <div className="flex-1 overflow-y-auto bg-muted/50 p-4">
         {allMessages.length === 0 && (
           <p className="text-sm text-muted-foreground">No messages yet. Say hello! 👋</p>
         )}
@@ -207,38 +209,81 @@ export function ChatWindow({ otherUserId, currentUserId, onBack }: ChatWindowPro
             <span className="text-xs text-muted-foreground">typing...</span>
           </div>
         )}
-        {allMessages.map((message) => {
-          const isSent = message.senderId === currentUserId
+        {(() => {
+          const lastSentIndex = allMessages.reduce((acc, msg, i) => {
+            return msg.senderId === currentUserId ? i : acc
+          }, -1)
 
-          return (
-            <MessageBubble
-              key={message._id}
-              content={message.content}
-              createdAt={message.createdAt}
-              isSent={isSent}
-              isOptimistic={"isOptimistic" in message}
-              imageUrl={"imageUrl" in message ? message.imageUrl : null}
-              isUploading={"isUploading" in message ? message.isUploading : false}
-              uploadFailed={"uploadFailed" in message ? message.uploadFailed : false}
-              onCancel={
-                "isOptimistic" in message && message.isUploading
-                  ? () => handleCancelMessage(message._id)
-                  : undefined
-              }
-              onRetry={
-                "isOptimistic" in message && message.uploadFailed
-                  ? () => void handleRetryMessage(message)
-                  : undefined
-              }
-            />
-          )
-        })}
+          return allMessages.map((message, index) => {
+            const isSent = message.senderId === currentUserId
+            const prevMessage = index > 0 ? allMessages[index - 1] : null
+            const nextMessage = index < allMessages.length - 1 ? allMessages[index + 1] : null
+
+            const TWO_MIN = 2 * 60 * 1000
+            const isFirstInGroup =
+              !prevMessage ||
+              prevMessage.senderId !== message.senderId ||
+              message.createdAt - prevMessage.createdAt > TWO_MIN
+
+            const isLastInGroup =
+              !nextMessage ||
+              nextMessage.senderId !== message.senderId ||
+              nextMessage.createdAt - message.createdAt > TWO_MIN
+
+            const showDateSeparator =
+              !prevMessage || isDifferentDay(prevMessage.createdAt, message.createdAt)
+
+            const showReadReceipt = isSent && index === lastSentIndex
+            const isRead = "read" in message ? message.read : false
+
+            return (
+              <div key={message._id}>
+                {showDateSeparator && (
+                  <div className="my-4 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="px-2 text-[11px] font-medium text-muted-foreground">
+                      {formatDateSeparator(message.createdAt)}
+                    </span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                )}
+
+                <MessageBubble
+                  content={message.content}
+                  createdAt={message.createdAt}
+                  isSent={isSent}
+                  isRead={isRead}
+                  isFirstInGroup={isFirstInGroup}
+                  isLastInGroup={isLastInGroup}
+                  showReadReceipt={showReadReceipt}
+                  isOptimistic={"isOptimistic" in message}
+                  imageUrl={"imageUrl" in message ? message.imageUrl : null}
+                  isUploading={"isUploading" in message ? message.isUploading : false}
+                  uploadFailed={"uploadFailed" in message ? message.uploadFailed : false}
+                  onCancel={
+                    "isOptimistic" in message && message.isUploading
+                      ? () => handleCancelMessage(message._id)
+                      : undefined
+                  }
+                  onRetry={
+                    "isOptimistic" in message && message.uploadFailed
+                      ? () => void handleRetryMessage(message)
+                      : undefined
+                  }
+                />
+              </div>
+            )
+          })
+        })()}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border bg-card px-4 py-3">
         <MessageInput onSend={onSend} isSending={false} onTyping={handleTyping} />
       </div>
     </div>
   )
 }
+
+
+

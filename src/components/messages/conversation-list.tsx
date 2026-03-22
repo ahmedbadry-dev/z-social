@@ -17,12 +17,12 @@ export function ConversationList({ selectedUserId, onSelect }: ConversationListP
 
   return (
     <aside className="flex h-full flex-col border-r border-border bg-card">
-      <div className="flex items-center justify-between border-b border-border p-4">
-        <h2 className="text-base font-semibold text-foreground">Messages</h2>
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <h2 className="text-base font-bold text-foreground">Messages</h2>
         <button
           type="button"
           onClick={() => router.push("/search")}
-          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           title="New message"
         >
           <PenSquare className="size-4" />
@@ -31,13 +31,13 @@ export function ConversationList({ selectedUserId, onSelect }: ConversationListP
 
       <div className="flex-1 overflow-y-auto p-2">
         {conversations === undefined && (
-          <div className="space-y-2 p-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-md p-3">
-                <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
+          <div className="space-y-1 p-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl p-3">
+                <div className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-muted" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-                  <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+                  <div className="h-3 w-36 animate-pulse rounded-full bg-muted" />
                 </div>
               </div>
             ))}

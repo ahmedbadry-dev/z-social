@@ -192,7 +192,7 @@ export const getPresence = query({
       .first()
 
     if (profile?.showOnlineStatus === false) {
-      return { isOnline: false, isTyping: false, isHidden: true }
+      return { isOnline: false, isTyping: false, isHidden: true, lastSeen: null }
     }
 
     const presence = await ctx.db
@@ -200,12 +200,12 @@ export const getPresence = query({
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first()
 
-    if (!presence) return { isOnline: false, isTyping: false, isHidden: false }
+    if (!presence) return { isOnline: false, isTyping: false, isHidden: false, lastSeen: null }
 
     const TWO_MINUTES = 2 * 60 * 1000
     const isOnline = Date.now() - presence.lastSeen < TWO_MINUTES
 
-    return { isOnline, isTyping: false, isHidden: false }
+    return { isOnline, isTyping: false, isHidden: false, lastSeen: presence.lastSeen }
   },
 })
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { Authenticated } from "convex/react"
 import { useQuery } from "convex/react"
 import { Compass, House, Search, Send, User } from "lucide-react"
@@ -41,7 +42,15 @@ function TabBarContent() {
             )}
           >
             <div className="relative">
-              <Icon className="size-4" />
+              <motion.div
+                animate={{
+                  scale: isActive ? 1.2 : 1,
+                  y: isActive ? -2 : 0,
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
+                <Icon className="size-4" />
+              </motion.div>
               {badgeValue > 0 && (
                 <span className="absolute -top-2 -right-3 inline-flex min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-4 text-white">
                   {badgeValue > 99 ? "99+" : badgeValue}

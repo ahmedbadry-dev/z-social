@@ -1,5 +1,6 @@
 "use client"
 
+import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { useMutation } from "convex/react"
 import { ThumbsUp } from "lucide-react"
@@ -199,17 +200,28 @@ export function ReactionBar({
         disabled={isUpdating}
         onClick={() => void handleButtonClick()}
       >
-        {activeReaction ? (
-          <span className="flex items-center gap-1.5 text-[#3B55E6]">
-            <span className="text-base">{activeReaction.emoji}</span>
-            <span>{activeReaction.label}</span>
-          </span>
-        ) : (
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <ThumbsUp className="size-4" />
-            <span>Like</span>
-          </span>
-        )}
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={currentReaction ?? "default"}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.6, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 20 }}
+            className="flex items-center gap-1.5"
+          >
+            {activeReaction ? (
+              <>
+                <span className="text-base">{activeReaction.emoji}</span>
+                <span>{activeReaction.label}</span>
+              </>
+            ) : (
+              <>
+                <ThumbsUp className="size-4" />
+                <span>Like</span>
+              </>
+            )}
+          </motion.span>
+        </AnimatePresence>
       </Button>
 
       {open && (

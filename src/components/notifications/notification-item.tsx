@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { useMutation } from "convex/react"
 import type { Id } from "../../../convex/_generated/dataModel"
 import { UserAvatar } from "@/components/shared/user-avatar"
@@ -50,29 +51,37 @@ export function NotificationItem({ notification }: NotificationItemProps) {
   )
 
   return (
-    <button
-      type="button"
-      className={cn(
-        "flex w-full items-center gap-3 border-b border-border p-4 text-left transition-colors",
-        notification.read ? "bg-card" : "bg-muted"
-      )}
-      onClick={() => void markAsRead({ notificationId: notification._id })}
+    <motion.div
+      initial={{ opacity: 0, x: 16 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
     >
-      <span
+      <button
+        type="button"
         className={cn(
-          "h-2 w-2 rounded-full",
-          notification.read ? "bg-transparent" : "bg-[#3B55E6]"
+          "flex w-full items-center gap-3 border-b border-border p-4 text-left transition-colors",
+          notification.read ? "bg-card" : "bg-muted"
         )}
-      />
-      <UserAvatar
-        name={notification.actorName ?? notification.actorId}
-        imageUrl={notification.actorImage ?? undefined}
-        size="md"
-      />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-foreground">{text}</p>
-        <p className="text-xs text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>
-      </div>
-    </button>
+        onClick={() => void markAsRead({ notificationId: notification._id })}
+      >
+        <span
+          className={cn(
+            "h-2 w-2 rounded-full",
+            notification.read ? "bg-transparent" : "bg-[#3B55E6]"
+          )}
+        />
+        <UserAvatar
+          name={notification.actorName ?? notification.actorId}
+          imageUrl={notification.actorImage ?? undefined}
+          size="md"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm text-foreground">{text}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatRelativeTime(notification.createdAt)}
+          </p>
+        </div>
+      </button>
+    </motion.div>
   )
 }

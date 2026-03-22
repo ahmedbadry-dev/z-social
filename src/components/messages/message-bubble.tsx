@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { AlertCircle, Loader2, RotateCcw, X } from "lucide-react"
 import { cn, formatRelativeTime } from "@/lib/utils"
 
@@ -27,7 +28,12 @@ export function MessageBubble({
   onRetry,
 }: MessageBubbleProps) {
   return (
-    <div className={cn("flex", isSent ? "justify-end" : "justify-start")}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.92, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      className={cn("flex", isSent ? "justify-end" : "justify-start")}
+    >
       <div className={cn("max-w-[70%]", isOptimistic && "opacity-60")}>
         <div
           className={cn(
@@ -95,6 +101,6 @@ export function MessageBubble({
           {isOptimistic ? "Sending..." : formatRelativeTime(createdAt)}
         </p>
       </div>
-    </div>
+    </motion.div>
   )
 }

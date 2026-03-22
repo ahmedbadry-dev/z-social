@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { ProfilePageClient } from "@/components/profile/profile-page-client"
+import { PageTransition } from "@/components/shared/page-transition"
 
 export async function generateMetadata({
   searchParams,
@@ -23,5 +24,9 @@ export default async function ProfilePage({
   searchParams: Promise<{ userId?: string; tab?: string }>
 }) {
   const { userId } = await searchParams
-  return <ProfilePageClient targetUserId={userId} />
+  return (
+    <PageTransition>
+      <ProfilePageClient targetUserId={userId} />
+    </PageTransition>
+  )
 }

@@ -60,7 +60,7 @@ export function ExploreContent() {
               ease: [0.25, 0.46, 0.45, 0.94],
             }}
             className={cn(
-              "relative overflow-hidden",
+              "relative",
               index === 0 && "ring-2 ring-yellow-400/30 rounded-xl",
               index === 1 && "ring-2 ring-slate-400/20 rounded-xl",
               index === 2 && "ring-2 ring-orange-400/20 rounded-xl"
@@ -116,29 +116,57 @@ export function ExploreContent() {
                 </span>
               </div>
             ) : null}
-            <PostCard
-              currentUserId={currentUserId}
-              post={{
-                _id: post._id,
-                content: post.content,
-                mediaUrl: post.mediaUrl,
-                mediaType: post.mediaType,
-                authorId: post.authorId,
-                authorName: post.authorName ?? "Unknown",
-                authorImage: post.authorImage,
-                createdAt: post.createdAt,
-                isEdited: post.isEdited,
-                myReaction: post.myReaction,
-                reactionsCount: post.reactionsCount,
-                reactionsSummary: post.reactionsSummary.map((r) => ({
-                  ...r,
-                  type: r.type as ReactionType,
-                })),
-                commentsCount: post.commentsCount,
-                isSavedByMe: post.isSavedByMe,
-                isOwnPost: currentUserId === post.authorId,
-              }}
-            />
+            {index < 3 ? (
+              <div className="pt-4">
+                <PostCard
+                  currentUserId={currentUserId}
+                  post={{
+                    _id: post._id,
+                    content: post.content,
+                    mediaUrl: post.mediaUrl,
+                    mediaType: post.mediaType,
+                    authorId: post.authorId,
+                    authorName: post.authorName ?? "Unknown",
+                    authorImage: post.authorImage,
+                    createdAt: post.createdAt,
+                    isEdited: post.isEdited,
+                    myReaction: post.myReaction,
+                    reactionsCount: post.reactionsCount,
+                    reactionsSummary: post.reactionsSummary.map((r) => ({
+                      ...r,
+                      type: r.type as ReactionType,
+                    })),
+                    commentsCount: post.commentsCount,
+                    isSavedByMe: post.isSavedByMe,
+                    isOwnPost: currentUserId === post.authorId,
+                  }}
+                />
+              </div>
+            ) : (
+              <PostCard
+                currentUserId={currentUserId}
+                post={{
+                  _id: post._id,
+                  content: post.content,
+                  mediaUrl: post.mediaUrl,
+                  mediaType: post.mediaType,
+                  authorId: post.authorId,
+                  authorName: post.authorName ?? "Unknown",
+                  authorImage: post.authorImage,
+                  createdAt: post.createdAt,
+                  isEdited: post.isEdited,
+                  myReaction: post.myReaction,
+                  reactionsCount: post.reactionsCount,
+                  reactionsSummary: post.reactionsSummary.map((r) => ({
+                    ...r,
+                    type: r.type as ReactionType,
+                  })),
+                  commentsCount: post.commentsCount,
+                  isSavedByMe: post.isSavedByMe,
+                  isOwnPost: currentUserId === post.authorId,
+                }}
+              />
+            )}
           </motion.div>
         ))}
       </section>

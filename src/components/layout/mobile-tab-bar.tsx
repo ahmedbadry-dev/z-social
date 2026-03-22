@@ -2,7 +2,7 @@
 
 import { Authenticated } from "convex/react"
 import { useQuery } from "convex/react"
-import { House, Search, Send, User } from "lucide-react"
+import { Compass, House, Search, Send, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -11,6 +11,7 @@ import { api } from "../../../convex/_generated/api"
 const tabs = [
   { href: "/feed", label: "Home", icon: House, key: "home" },
   { href: "/search", label: "Search", icon: Search, key: "search" },
+  { href: "/explore", label: "Explore", icon: Compass, key: "explore" },
   { href: "/messages", label: "Messages", icon: Send, key: "messages" },
   { href: "/profile", label: "Profile", icon: User, key: "profile" },
 ] as const
@@ -25,7 +26,7 @@ function TabBarContent() {
   }
 
   return (
-    <div className="grid h-full grid-cols-4">
+    <div className="grid h-full grid-cols-5">
       {tabs.map((tab) => {
         const Icon = tab.icon
         const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`)

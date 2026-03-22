@@ -100,12 +100,12 @@ export function Sidebar({ preloadedUser }: SidebarProps) {
               <Icon className="size-5" />
               <span>{label}</span>
               {showNotificationsBadge && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] font-medium text-white">
                   {unreadNotifications > 9 ? "9+" : unreadNotifications}
                 </span>
               )}
               {showMessagesBadge && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] font-medium text-white">
                   {unreadMessages > 9 ? "9+" : unreadMessages}
                 </span>
               )}

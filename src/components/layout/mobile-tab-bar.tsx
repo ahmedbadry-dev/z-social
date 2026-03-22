@@ -52,7 +52,7 @@ function TabBarContent() {
                 <Icon className="size-4" />
               </motion.div>
               {badgeValue > 0 && (
-                <span className="absolute -top-2 -right-3 inline-flex min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-4 text-white">
+                <span className="absolute -top-2 -right-3 inline-flex min-w-[16px] items-center justify-center rounded-full bg-[#3B55E6] px-1 text-[10px] leading-4 text-white">
                   {badgeValue > 99 ? "99+" : badgeValue}
                 </span>
               )}

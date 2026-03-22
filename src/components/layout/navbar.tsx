@@ -101,7 +101,7 @@ export function Navbar({ preloadedUser }: NavbarProps) {
         <Link href="/notifications" className="relative md:hidden" aria-label="Notifications">
           <Bell className="size-5 text-foreground" />
           {unreadNotifications > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] text-white">
               {unreadNotifications > 9 ? "9+" : unreadNotifications}
             </span>
           )}

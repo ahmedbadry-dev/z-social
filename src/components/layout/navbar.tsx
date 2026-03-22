@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useMotionValueEvent, useScroll } from "motion/react"
-import { Bell, Search } from "lucide-react"
+import { Heart, Search } from "lucide-react"
 import { type Preloaded, usePreloadedQuery, useQuery } from "convex/react"
 import { useQueryState } from "nuqs"
 import Link from "next/link"
@@ -99,11 +99,9 @@ export function Navbar({ preloadedUser }: NavbarProps) {
         </div>
 
         <Link href="/notifications" className="relative md:hidden" aria-label="Notifications">
-          <Bell className="size-5 text-foreground" />
+          <Heart className="size-5 text-foreground" />
           {unreadNotifications > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#3B55E6] text-[10px] text-white">
-              {unreadNotifications > 9 ? "9+" : unreadNotifications}
-            </span>
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-[#3B55E6] ring-2 ring-card" />
           )}
         </Link>
       </div>

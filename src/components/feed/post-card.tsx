@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -170,10 +171,16 @@ export const PostCard = memo(function PostCard({
                 </DropdownMenuItem>
               </>
             ) : (
-              <DropdownMenuItem onClick={() => void handleSaveToggle()}>
-                {saved ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
-                {saved ? "Unsave Post" : "Save Post"}
-              </DropdownMenuItem>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.85 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <DropdownMenuItem onClick={() => void handleSaveToggle()}>
+                  {saved ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
+                  {saved ? "Unsave Post" : "Save Post"}
+                </DropdownMenuItem>
+              </motion.div>
             )}
           </DropdownMenuContent>
         </DropdownMenu>

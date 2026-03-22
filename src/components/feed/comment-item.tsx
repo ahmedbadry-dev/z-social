@@ -146,21 +146,28 @@ export function CommentItem({
               </div>
             </div>
 
-            <button
+            <motion.button
               type="button"
               className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5"
+              whileTap={{ scale: 1.4 }}
+              transition={{ type: "spring", stiffness: 600, damping: 15 }}
               onClick={() => void handleLike()}
             >
-              <Heart
-                className={cn(
-                  "size-3.5 transition-colors",
-                  isLikedByMe ? "fill-red-500 text-red-500" : "text-muted-foreground"
-                )}
-              />
+              <motion.div
+                animate={isLikedByMe ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Heart
+                  className={cn(
+                    "size-3.5 transition-colors",
+                    isLikedByMe ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                  )}
+                />
+              </motion.div>
               {likesCount > 0 && (
                 <span className="text-[10px] text-muted-foreground">{likesCount}</span>
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

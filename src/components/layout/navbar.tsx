@@ -65,7 +65,9 @@ export function Navbar({ preloadedUser }: NavbarProps) {
       className="navbar sticky top-0 z-50 border-b border-border bg-card"
     >
       <div className="mx-auto flex h-14 max-w-[960px] items-center justify-between gap-4 px-4">
-        <SocialLogo />
+        <Link href="/feed" aria-label="Go to home feed">
+          <SocialLogo />
+        </Link>
 
         <div className="hidden flex-1 justify-center md:flex">
           <div className="relative w-full max-w-[360px]">

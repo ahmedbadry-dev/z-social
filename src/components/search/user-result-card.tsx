@@ -26,19 +26,45 @@ export function UserResultCard({
   isCurrentUser,
 }: UserResultCardProps) {
   const router = useRouter()
-  const toggleFollow = useMutation(api.follows.toggleFollow)
+  const followUser = useMutation(api.follows.followUser)
   const followStatus = useQuery(api.follows.getFollowStatus, { targetUserId: userId })
   const [isUpdating, setIsUpdating] = useState(false)
+  const [optimisticState, setOptimisticState] = useState<
+    "following" | "requested" | "none" | null
+  >(null)
 
   const displayName = name?.trim() || username?.trim() || userId
   const displayBio = bio?.trim() || "No bio available"
-  const isFollowing = followStatus?.isFollowing ?? false
+
+  const isFollowing =
+    optimisticState === "following"
+      ? true
+      : optimisticState === "none"
+        ? false
+        : followStatus?.isFollowing ?? false
+
+  const hasRequested =
+    optimisticState === "requested"
+      ? true
+      : optimisticState === "none"
+        ? false
+        : followStatus?.hasRequestedFollow ?? false
 
   const onToggleFollow = async () => {
     setIsUpdating(true)
     try {
-      await toggleFollow({ targetUserId: userId })
+      const result = await followUser({ targetUserId: userId })
+      if (result.action === "followed") {
+        setOptimisticState("following")
+      } else if (result.action === "unfollowed") {
+        setOptimisticState("none")
+      } else if (result.action === "request_sent") {
+        setOptimisticState("requested")
+      } else if (result.action === "request_cancelled") {
+        setOptimisticState("none")
+      }
     } catch (error) {
+      setOptimisticState(null)
       const message = error instanceof Error ? error.message : "Failed to update follow status"
       toast.error(message)
     } finally {
@@ -79,7 +105,7 @@ export function UserResultCard({
             void onToggleFollow()
           }}
         >
-          {isFollowing ? "Following" : "Follow"}
+          {isFollowing ? "Following" : hasRequested ? "Requested" : "Follow"}
         </Button>
       )}
     </div>

@@ -1,8 +1,9 @@
 "use client"
 
-import { Check, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useMutation, useQuery } from "convex/react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
 import { api } from "../../../convex/_generated/api"
 
@@ -15,18 +16,45 @@ function getDisplayName(userId: string) {
 
 export function RightPanel() {
   const suggestedUsers = useQuery(api.users.getSuggestedUsers)
-  const toggleFollow = useMutation(api.follows.toggleFollow)
+  const followUser = useMutation(api.follows.followUser)
   const [followMap, setFollowMap] = useState<FollowStateMap>({})
+  const [requestedMap, setRequestedMap] = useState<FollowStateMap>({})
 
   const suggestions = useMemo(() => suggestedUsers ?? [], [suggestedUsers])
   const hasSuggestions = suggestions.length > 0
 
+  const seededRef = useRef("")
+  const seedKey = suggestions.map((user) => user.userId).join(",")
+  if (seedKey && seededRef.current !== seedKey) {
+    seededRef.current = seedKey
+    const newFollowMap: FollowStateMap = {}
+    const newRequestedMap: FollowStateMap = {}
+    for (const user of suggestions) {
+      newFollowMap[user.userId] = user.isFollowing
+      newRequestedMap[user.userId] = user.hasRequestedFollow
+    }
+    setFollowMap(newFollowMap)
+    setRequestedMap(newRequestedMap)
+  }
+
   const onToggleFollow = async (targetUserId: string) => {
-    const result = await toggleFollow({ targetUserId })
-    setFollowMap((prev) => ({
-      ...prev,
-      [targetUserId]: result.following,
-    }))
+    try {
+      const result = await followUser({ targetUserId })
+
+      if (result.action === "followed") {
+        setFollowMap((prev) => ({ ...prev, [targetUserId]: true }))
+        setRequestedMap((prev) => ({ ...prev, [targetUserId]: false }))
+      } else if (result.action === "unfollowed") {
+        setFollowMap((prev) => ({ ...prev, [targetUserId]: false }))
+        setRequestedMap((prev) => ({ ...prev, [targetUserId]: false }))
+      } else if (result.action === "request_sent") {
+        setRequestedMap((prev) => ({ ...prev, [targetUserId]: true }))
+      } else if (result.action === "request_cancelled") {
+        setRequestedMap((prev) => ({ ...prev, [targetUserId]: false }))
+      }
+    } catch {
+      toast.error("Failed")
+    }
   }
 
   return (
@@ -53,6 +81,8 @@ export function RightPanel() {
           <div className="space-y-3">
             {suggestions.map((item) => {
               const isFollowing = followMap[item.userId] ?? false
+              const isRequested = requestedMap[item.userId] ?? false
+              const buttonLabel = isFollowing ? "Following" : isRequested ? "Requested" : "+"
               const displayName = item.name?.trim() || getDisplayName(item.userId)
               return (
                 <div key={item.userId} className="flex items-center gap-2">
@@ -67,15 +97,11 @@ export function RightPanel() {
                   </div>
                   <button
                     type="button"
-                    className="inline-flex size-7 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    aria-label={isFollowing ? "Unfollow user" : "Follow user"}
+                    className="inline-flex h-7 items-center justify-center rounded-full border border-border px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label={isFollowing ? "Unfollow user" : isRequested ? "Requested" : "Follow user"}
                     onClick={() => void onToggleFollow(item.userId)}
                   >
-                    {isFollowing ? (
-                      <Check className="size-4 text-green-600" />
-                    ) : (
-                      <Plus className="size-4" />
-                    )}
+                    {buttonLabel === "+" ? <Plus className="size-4" /> : buttonLabel}
                   </button>
                 </div>
               )

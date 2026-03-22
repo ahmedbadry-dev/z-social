@@ -76,7 +76,7 @@ export function UserResultCard({
     if (isCurrentUser) {
       router.push("/profile")
     } else {
-      router.push(`/messages?userId=${userId}`)
+      router.push(`/profile?userId=${userId}`)
     }
   }
 

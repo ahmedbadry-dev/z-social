@@ -270,11 +270,22 @@ export const getFollowers = query({
               .unique())
           : false
 
+        const pendingRequest = currentUserId
+          ? await ctx.db
+              .query("followRequests")
+              .withIndex("by_pair", (q) =>
+                q.eq("fromUserId", currentUserId).eq("toUserId", doc.followerId)
+              )
+              .filter((q) => q.eq(q.field("status"), "pending"))
+              .first()
+          : null
+
         return {
           userId: doc.followerId,
           name: userDoc?.name ?? null,
           image: userDoc?.image ?? null,
           isFollowedByMe,
+          hasRequestedFollow: !!pendingRequest,
         }
       })
     )
@@ -307,11 +318,22 @@ export const getFollowing = query({
               .unique())
           : false
 
+        const pendingRequest = currentUserId
+          ? await ctx.db
+              .query("followRequests")
+              .withIndex("by_pair", (q) =>
+                q.eq("fromUserId", currentUserId).eq("toUserId", doc.followingId)
+              )
+              .filter((q) => q.eq(q.field("status"), "pending"))
+              .first()
+          : null
+
         return {
           userId: doc.followingId,
           name: userDoc?.name ?? null,
           image: userDoc?.image ?? null,
           isFollowedByMe,
+          hasRequestedFollow: !!pendingRequest,
         }
       })
     )

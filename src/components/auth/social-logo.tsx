@@ -1,5 +1,5 @@
+import Image from "next/image"
 import { cn } from "@/lib/utils"
-import logoLight from '../../../public/logo-light.png'
 
 interface SocialLogoProps {
   className?: string
@@ -8,19 +8,21 @@ interface SocialLogoProps {
 export function SocialLogo({ className }: SocialLogoProps) {
   return (
     <div className={cn("inline-flex items-center", className)}>
-      <img
+      <Image
         src="/logo-dark.png"
         alt="Z-Social"
         width={32}
         height={32}
         className="block dark:hidden object-contain"
+        priority
       />
-      <img
+      <Image
         src="/logo-light.png"
         alt="Z-Social"
         width={32}
         height={32}
         className="hidden dark:block object-contain"
+        priority
       />
     </div>
   )

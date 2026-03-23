@@ -1,6 +1,7 @@
 "use client"
 
 import { memo, useState } from "react"
+import Link from "next/link"
 import { useMutation } from "convex/react"
 import { toast } from "sonner"
 import { UserAvatar } from "@/components/shared/user-avatar"
@@ -81,11 +82,17 @@ export const UserListItem = memo(function UserListItem({
 
   return (
     <div className="flex items-center gap-3 p-4">
-      <UserAvatar name={displayName} imageUrl={image ?? undefined} size="md" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
-        <p className="truncate text-xs text-muted-foreground">{userId}</p>
-      </div>
+      <Link
+        href={`/profile?userId=${userId}`}
+        className="flex min-w-0 flex-1 items-center gap-3"
+      >
+        <UserAvatar name={displayName} imageUrl={image ?? undefined} size="md" clickable />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-foreground hover:underline">
+            {displayName}
+          </p>
+        </div>
+      </Link>
       {showFollowButton && !isCurrentUser && (
         <Button
           type="button"

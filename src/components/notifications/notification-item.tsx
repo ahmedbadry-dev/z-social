@@ -168,11 +168,11 @@ export function NotificationItem({ notification, onDelete, onUndo }: Notificatio
               notification.read ? "bg-transparent" : "bg-[#3B55E6]"
             )}
           />
-          <UserAvatar
-            name={notification.actorName ?? notification.actorId}
-            imageUrl={notification.actorImage ?? undefined}
-            size="md"
-          />
+        <UserAvatar
+          name={notification.actorName ?? notification.actorId}
+          imageUrl={notification.actorImage ?? undefined}
+          size="md"
+        />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm text-foreground">{text}</p>
             <p className="text-xs text-muted-foreground">

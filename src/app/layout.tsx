@@ -20,6 +20,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://z-social-rouge.vercel.app"
+
 export const metadata: Metadata = {
   title: {
     default: "Z-Social — Connect with people",
@@ -28,18 +30,16 @@ export const metadata: Metadata = {
   description:
     "A modern social platform to share posts, connect with friends, and stay updated.",
   keywords: ["social", "network", "posts", "connect", "z-social"],
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://z-social-rouge.vercel.app"
-  ),
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: "Z-Social — Connect with people",
     description: "A modern social platform to share posts, connect with friends, and stay updated.",
     type: "website",
-    url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://z-social-rouge.vercel.app",
+    url: siteUrl,
     siteName: "Z-Social",
     images: [
       {
-        url: "/og",
+        url: `${siteUrl}/og`,
         width: 1200,
         height: 630,
         alt: "Z-Social — Connect with people",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Z-Social — Connect with people",
     description: "A modern social platform to share posts, connect with friends, and stay updated.",
-    images: ["/og"],
+    images: [`${siteUrl}/og`],
   },
 }
 

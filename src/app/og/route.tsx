@@ -30,7 +30,7 @@ export async function GET(request: Request) {
           justifyContent: "space-between",
           padding: "64px",
           background:
-            "radial-gradient(900px circle at 85% 15%, rgba(56,189,248,0.25), transparent 45%), linear-gradient(135deg, #0f172a 0%, #0b3b2e 100%)",
+            "radial-gradient(700px circle at 85% 15%, rgba(59,130,246,0.35), transparent 55%), radial-gradient(600px circle at 15% 85%, rgba(34,197,94,0.25), transparent 60%), linear-gradient(135deg, #0b1120 0%, #0f172a 55%, #111827 100%)",
           color: "#e2e8f0",
           fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
         }}
@@ -38,44 +38,59 @@ export async function GET(request: Request) {
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div
             style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "16px",
-              background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+              width: "58px",
+              height: "58px",
+              borderRadius: "18px",
+              background: "linear-gradient(135deg, #3b82f6, #22c55e)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#04130c",
+              color: "#07131f",
               fontWeight: 800,
               fontSize: "28px",
               letterSpacing: "-1px",
-              boxShadow: "0 10px 30px rgba(14,165,233,0.35)",
+              boxShadow: "0 12px 28px rgba(59,130,246,0.35)",
             }}
           >
             Z
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: "18px", opacity: 0.8 }}>{eyebrow}</span>
-            <span style={{ fontSize: "22px", fontWeight: 700 }}>Z-Social</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            <span style={{ fontSize: "16px", opacity: 0.7, letterSpacing: "0.6px" }}>
+              {eyebrow}
+            </span>
+            <span style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.5px" }}>
+              Z-Social
+            </span>
           </div>
           <span
             style={{
               marginLeft: "auto",
               padding: "8px 14px",
               borderRadius: "999px",
-              background: "rgba(15, 23, 42, 0.7)",
-              border: "1px solid rgba(148, 163, 184, 0.3)",
-              fontSize: "14px",
-              letterSpacing: "0.4px",
+              background: "rgba(15, 23, 42, 0.75)",
+              border: "1px solid rgba(148, 163, 184, 0.35)",
+              fontSize: "13px",
+              letterSpacing: "0.6px",
               textTransform: "uppercase",
-              color: "#cbd5f5",
+              color: "#c7d2fe",
             }}
           >
             {badge}
           </span>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "18px",
+            padding: "36px 40px",
+            borderRadius: "24px",
+            background: "rgba(15, 23, 42, 0.6)",
+            border: "1px solid rgba(148, 163, 184, 0.18)",
+            boxShadow: "0 24px 60px rgba(2, 6, 23, 0.45)",
+          }}
+        >
           <h1
             style={{
               fontSize: "56px",
@@ -91,10 +106,10 @@ export async function GET(request: Request) {
           <p
             style={{
               fontSize: "24px",
-              lineHeight: 1.4,
+              lineHeight: 1.45,
               margin: 0,
               maxWidth: "900px",
-              color: "rgba(226, 232, 240, 0.85)",
+              color: "rgba(226, 232, 240, 0.82)",
             }}
           >
             {description}

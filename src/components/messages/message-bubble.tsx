@@ -45,6 +45,7 @@ export function MessageBubble({
     !isFirstInGroup && "rounded-tl-md",
     !isLastInGroup && "rounded-bl-md"
   )
+  const isImageOnly = !!imageUrl && !content
 
   return (
     <motion.div
@@ -58,26 +59,21 @@ export function MessageBubble({
       )}
     >
       <div className={cn("max-w-[70%]", isOptimistic && "opacity-70")}>
-        <div
-          className={cn(
-            "px-3.5 py-2 text-sm",
-            isSent
-              ? cn(sentRadius, "bg-[#3B55E6] text-white")
-              : cn(receivedRadius, "border border-border bg-card text-foreground")
-          )}
-        >
-          {imageUrl && (
-            <div className="relative mb-1">
+        {isImageOnly ? (
+          <div
+            className={cn(
+              isSent ? sentRadius : receivedRadius,
+              "overflow-hidden border border-border/40"
+            )}
+          >
+            <div className="relative">
               <img
                 src={imageUrl}
                 alt="Shared image"
-                className={cn(
-                  "max-h-60 w-full rounded-xl object-cover",
-                  isUploading && "opacity-60"
-                )}
+                className={cn("max-h-60 w-full object-cover", isUploading && "opacity-60")}
               />
               {isUploading && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/30">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                   <button
                     type="button"
                     onClick={onCancel}
@@ -88,7 +84,7 @@ export function MessageBubble({
                 </div>
               )}
               {uploadFailed && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/40">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
                   <AlertCircle className="size-6 text-destructive" />
                   <button
                     type="button"
@@ -101,15 +97,61 @@ export function MessageBubble({
                 </div>
               )}
             </div>
-          )}
-          {content && <p className="text-sm leading-relaxed">{content}</p>}
-          {uploadFailed && !imageUrl && (
-            <div className="flex items-center gap-1 text-xs text-destructive">
-              <AlertCircle className="size-3" />
-              Failed to send
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "px-3.5 py-2 text-sm",
+              isSent
+                ? cn(sentRadius, "bg-[#3B55E6] text-white")
+                : cn(receivedRadius, "border border-border bg-card text-foreground")
+            )}
+          >
+            {imageUrl && (
+              <div className="relative mb-1">
+                <img
+                  src={imageUrl}
+                  alt="Shared image"
+                  className={cn(
+                    "max-h-60 w-full rounded-xl object-cover",
+                    isUploading && "opacity-60"
+                  )}
+                />
+                {isUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/30">
+                    <button
+                      type="button"
+                      onClick={onCancel}
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                    >
+                      <X className="size-5" />
+                    </button>
+                  </div>
+                )}
+                {uploadFailed && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/40">
+                    <AlertCircle className="size-6 text-destructive" />
+                    <button
+                      type="button"
+                      onClick={onRetry}
+                      className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/30"
+                    >
+                      <RotateCcw className="size-3" />
+                      Retry
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            {content && <p className="text-sm leading-relaxed">{content}</p>}
+            {uploadFailed && !imageUrl && (
+              <div className="flex items-center gap-1 text-xs text-destructive">
+                <AlertCircle className="size-3" />
+                Failed to send
+              </div>
+            )}
+          </div>
+        )}
 
         {isLastInGroup && (
           <div

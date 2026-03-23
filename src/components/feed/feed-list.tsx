@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useInView } from "motion/react"
-import { Compass, Newspaper } from "lucide-react"
+import { Compass, Newspaper, Users } from "lucide-react"
 import { useMemo, useRef } from "react"
 import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
@@ -66,7 +66,23 @@ function DiscoveryBanner() {
   )
 }
 
-const INJECT_EVERY = 3
+function EndOfFeedMessage({ isDiscoveryMode }: { isDiscoveryMode: boolean }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 px-6 py-8 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+        <Users className="size-5 text-muted-foreground/60" />
+      </div>
+      <p className="text-sm font-medium text-muted-foreground/70">
+        {isDiscoveryMode
+          ? "Follow people to see fresher content in your feed"
+          : "Follow more people to see more posts"}
+      </p>
+      <p className="text-xs text-muted-foreground/50">You've seen all recent posts</p>
+    </div>
+  )
+}
+
+const INJECT_EVERY = 2
 
 export function FeedList({ preloadedPosts }: FeedListProps) {
   const { cachedUser } = useAuthStore()
@@ -181,6 +197,10 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
           />
         </AnimatedPost>
       ))}
+
+      {status === "Exhausted" && resolvedResults.length > 0 && (
+        <EndOfFeedMessage isDiscoveryMode={isDiscoveryMode} />
+      )}
 
       {status === "CanLoadMore" && (
         <div ref={loaderRef} className="py-2">

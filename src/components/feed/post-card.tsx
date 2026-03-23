@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { api } from "../../../convex/_generated/api"
 import { formatRelativeTime } from "@/lib/utils"
+import { useVideoPauseOnScroll } from "@/hooks/use-video-pause-on-scroll"
 import type { ReactionType } from "@/types"
 import dynamic from "next/dynamic"
 
@@ -88,6 +89,7 @@ export const PostCard = memo(function PostCard({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const videoRef = useVideoPauseOnScroll()
 
   const handleSaveToggle = async () => {
     const next = !saved
@@ -235,6 +237,7 @@ export const PostCard = memo(function PostCard({
         <video
           src={post.mediaUrl}
           controls
+          ref={videoRef}
           className="mt-3 max-h-[400px] w-full rounded-lg object-cover"
         />
       )}

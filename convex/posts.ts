@@ -473,3 +473,51 @@ export const toggleSave = mutation({
     return { saved: true }
   },
 })
+
+export const getDiscoveryPosts = query({
+  args: {
+    limit: v.optional(v.number()),
+    excludePostIds: v.optional(v.array(v.id("posts"))),
+  },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx)
+    const limit = args.limit ?? 5
+    const excludeIds = new Set(args.excludePostIds ?? [])
+
+    let followingIds = new Set<string>()
+    if (currentUserId) {
+      const follows = await ctx.db
+        .query("follows")
+        .withIndex("by_follower", (q) => q.eq("followerId", currentUserId))
+        .collect()
+      followingIds = new Set([currentUserId, ...follows.map((f) => f.followingId)])
+    }
+
+    const recentPosts = await ctx.db
+      .query("posts")
+      .withIndex("by_created")
+      .order("desc")
+      .take(100)
+
+    const discoveryPool = recentPosts.filter((post) => {
+      if (excludeIds.has(post._id)) return false
+      if (followingIds.has(post.authorId)) return false
+      return true
+    })
+
+    const withMeta = await Promise.all(
+      discoveryPool.slice(0, 30).map((post) => buildPostWithMeta(ctx, post, currentUserId))
+    )
+
+    const scored = withMeta
+      .map((post) => ({
+        ...post,
+        _score: post.reactionsCount + post.commentsCount * 2,
+        isDiscoveryPost: true as const,
+      }))
+      .sort((a, b) => b._score - a._score)
+      .slice(0, limit)
+
+    return scored
+  },
+})

@@ -1,9 +1,9 @@
 "use client"
 
 import { motion, useInView } from "motion/react"
-import { Newspaper } from "lucide-react"
+import { Compass, Newspaper } from "lucide-react"
 import { useRef } from "react"
-import { type Preloaded, usePaginatedQuery, usePreloadedQuery } from "convex/react"
+import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
 import { EmptyState } from "@/components/shared/empty-state"
 import { useInfiniteScroll } from "@/components/shared/use-infinite-scroll"
@@ -37,6 +37,22 @@ function AnimatedPost({
   )
 }
 
+function DiscoveryBanner() {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-[#3B55E6]/20 bg-[#3B55E6]/5 px-4 py-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3B55E6]/10">
+        <Compass className="size-4 text-[#3B55E6]" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-foreground">Discover what's trending</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Follow people to personalize your feed with content you care about.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export function FeedList({ preloadedPosts }: FeedListProps) {
   const { cachedUser } = useAuthStore()
   const preloaded = preloadedPosts
@@ -47,6 +63,8 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
     {},
     { initialNumItems: 10 }
   )
+  const followingIds = useQuery(api.follows.getFollowingIds)
+  const isDiscoveryMode = followingIds !== undefined && followingIds.length === 0
   const loaderRef = useInfiniteScroll(
     () => loadMore(10),
     status === "CanLoadMore"
@@ -65,6 +83,18 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
   const resolvedResults = preloaded?.page ?? results
 
   if ((status === "Exhausted" || preloaded) && resolvedResults.length === 0) {
+    if (isDiscoveryMode) {
+      return (
+        <div className="space-y-4">
+          <DiscoveryBanner />
+          <EmptyState
+            icon={Newspaper}
+            title="No posts yet"
+            description="Be the first to share something with the community"
+          />
+        </div>
+      )
+    }
     return (
       <EmptyState
         icon={Newspaper}
@@ -78,6 +108,7 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
 
   return (
     <div className="space-y-4">
+      {isDiscoveryMode && <DiscoveryBanner />}
       {resolvedResults.map((post, index) => (
         <AnimatedPost
           key={post._id}
@@ -101,6 +132,7 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
               commentsCount: post.commentsCount,
               isSavedByMe: post.isSavedByMe,
               isOwnPost: currentUserId === post.authorId,
+              socialContext: post.socialContext,
             }}
           />
         </AnimatedPost>

@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "motion/react"
 import { Compass, Newspaper } from "lucide-react"
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { type Preloaded, usePaginatedQuery, usePreloadedQuery, useQuery } from "convex/react"
 import { PostCard } from "@/components/feed/post-card"
 import { EmptyState } from "@/components/shared/empty-state"
@@ -10,6 +10,7 @@ import { useInfiniteScroll } from "@/components/shared/use-infinite-scroll"
 import { PostSkeleton } from "@/components/shared/post-skeleton"
 import { api } from "../../../convex/_generated/api"
 import { useAuthStore } from "@/stores/auth-store"
+import type { Id } from "../../../convex/_generated/dataModel"
 
 interface FeedListProps {
   preloadedPosts?: Preloaded<typeof api.posts.getFeedPosts>
@@ -37,6 +38,18 @@ function AnimatedPost({
   )
 }
 
+function DiscoveryLabel() {
+  return (
+    <div className="flex items-center gap-1.5 px-1 pb-1 -mb-2">
+      <div className="h-px w-3 bg-border" />
+      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        <Compass className="size-3 text-[#3B55E6]" />
+        <span>Suggested for you</span>
+      </div>
+    </div>
+  )
+}
+
 function DiscoveryBanner() {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-[#3B55E6]/20 bg-[#3B55E6]/5 px-4 py-3">
@@ -53,6 +66,8 @@ function DiscoveryBanner() {
   )
 }
 
+const INJECT_EVERY = 3
+
 export function FeedList({ preloadedPosts }: FeedListProps) {
   const { cachedUser } = useAuthStore()
   const preloaded = preloadedPosts
@@ -63,8 +78,18 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
     {},
     { initialNumItems: 10 }
   )
+  const feedPostIds = useMemo<Id<"posts">[]>(
+    () => results.map((post) => post._id as Id<"posts">),
+    [results]
+  )
   const followingIds = useQuery(api.follows.getFollowingIds)
   const isDiscoveryMode = followingIds !== undefined && followingIds.length === 0
+  const discoveryPosts = useQuery(
+    api.posts.getDiscoveryPosts,
+    !isDiscoveryMode
+      ? { limit: 8, excludePostIds: feedPostIds.slice(0, 30) }
+      : "skip"
+  )
   const loaderRef = useInfiniteScroll(
     () => loadMore(10),
     status === "CanLoadMore"
@@ -83,37 +108,56 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
   const resolvedResults = preloaded?.page ?? results
 
   if ((status === "Exhausted" || preloaded) && resolvedResults.length === 0) {
-    if (isDiscoveryMode) {
-      return (
-        <div className="space-y-4">
-          <DiscoveryBanner />
-          <EmptyState
-            icon={Newspaper}
-            title="No posts yet"
-            description="Be the first to share something with the community"
-          />
-        </div>
-      )
-    }
     return (
-      <EmptyState
-        icon={Newspaper}
-        title="Your feed is empty"
-        description="Follow people to see their posts here"
-      />
+      <div className="space-y-4">
+        {isDiscoveryMode && <DiscoveryBanner />}
+        <EmptyState
+          icon={Newspaper}
+          title={isDiscoveryMode ? "No posts yet" : "Your feed is empty"}
+          description={
+            isDiscoveryMode
+              ? "Be the first to share something with the community"
+              : "Follow people to see their posts here"
+          }
+        />
+      </div>
     )
   }
 
   const currentUserId = cachedUser?.userId ?? ""
 
+  const mergedFeed = useMemo(() => {
+    if (!discoveryPosts || discoveryPosts.length === 0 || isDiscoveryMode) {
+      return resolvedResults.map((post) => ({ post, isDiscovery: false }))
+    }
+
+    const merged: Array<{
+      post: (typeof resolvedResults)[number] | (typeof discoveryPosts)[number]
+      isDiscovery: boolean
+    }> = []
+
+    let discoveryIndex = 0
+
+    resolvedResults.forEach((post, index) => {
+      merged.push({ post, isDiscovery: false })
+      if ((index + 1) % INJECT_EVERY === 0 && discoveryIndex < discoveryPosts.length) {
+        merged.push({ post: discoveryPosts[discoveryIndex], isDiscovery: true })
+        discoveryIndex++
+      }
+    })
+
+    return merged
+  }, [resolvedResults, discoveryPosts, isDiscoveryMode])
+
   return (
     <div className="space-y-4">
       {isDiscoveryMode && <DiscoveryBanner />}
-      {resolvedResults.map((post, index) => (
+      {mergedFeed.map(({ post, isDiscovery }, index) => (
         <AnimatedPost
           key={post._id}
           index={index}
         >
+          {isDiscovery && <DiscoveryLabel />}
           <PostCard
             currentUserId={currentUserId}
             post={{
@@ -132,7 +176,7 @@ export function FeedList({ preloadedPosts }: FeedListProps) {
               commentsCount: post.commentsCount,
               isSavedByMe: post.isSavedByMe,
               isOwnPost: currentUserId === post.authorId,
-              socialContext: post.socialContext,
+              socialContext: "socialContext" in post ? post.socialContext : null,
             }}
           />
         </AnimatedPost>

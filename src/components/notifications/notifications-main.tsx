@@ -3,12 +3,14 @@
 import { ArrowLeft, Bell } from "lucide-react"
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
 import { NotificationItem } from "@/components/notifications/notification-item"
 import { NotificationSkeleton } from "@/components/notifications/notification-skeleton"
 import { UserAvatar } from "@/components/shared/user-avatar"
+import type { Id } from "../../../convex/_generated/dataModel"
 import { api } from "../../../convex/_generated/api"
 
 export function NotificationsMain() {
@@ -20,18 +22,49 @@ export function NotificationsMain() {
   const router = useRouter()
   const unreadCount = useQuery(api.notifications.getUnreadNotificationsCount)
   const markAllAsRead = useMutation(api.notifications.markAllAsRead)
+  const clearAllNotifications = useMutation(api.notifications.clearAllNotifications)
   const pendingRequests = useQuery(api.follows.getPendingFollowRequests)
   const acceptRequest = useMutation(api.follows.acceptFollowRequest)
   const rejectRequest = useMutation(api.follows.rejectFollowRequest)
+  const [deletedIds, setDeletedIds] = useState<Set<Id<"notifications">>>(new Set())
 
   const hasUnread = (unreadCount ?? 0) > 0
+  const hasNotifications = results.length > 0
   const isInitialLoading = status === "LoadingFirstPage"
+  const visibleResults = results.filter((notification) => !deletedIds.has(notification._id))
+
+  const handleDelete = (id: Id<"notifications">) => {
+    setDeletedIds((prev) => {
+      const next = new Set(prev)
+      next.add(id)
+      return next
+    })
+  }
+
+  const handleUndo = (id: Id<"notifications">) => {
+    setDeletedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
 
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead({})
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to mark all as read"
+      toast.error(message)
+    }
+  }
+
+  const handleClearAll = async () => {
+    try {
+      await clearAllNotifications()
+      setDeletedIds(new Set())
+      toast.success("All notifications cleared")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to clear notifications"
       toast.error(message)
     }
   }
@@ -70,16 +103,28 @@ export function NotificationsMain() {
 
       <div className="hidden items-center justify-between border-b border-border p-4 md:flex">
         <h2 className="text-base font-semibold text-foreground">Notifications</h2>
-        {hasUnread && (
-          <Button
-            type="button"
-            variant="ghost"
-            className="text-sm text-[#3B55E6] hover:text-[#2E46C4]"
-            onClick={() => void handleMarkAllAsRead()}
-          >
-            Mark all as read
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {hasUnread && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm text-[#3B55E6] hover:text-[#2E46C4]"
+              onClick={() => void handleMarkAllAsRead()}
+            >
+              Mark all as read
+            </Button>
+          )}
+          {hasNotifications && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => void handleClearAll()}
+            >
+              Clear all
+            </Button>
+          )}
+        </div>
       </div>
 
       {isInitialLoading && (
@@ -133,7 +178,7 @@ export function NotificationsMain() {
         </div>
       )}
 
-      {!isInitialLoading && results.length === 0 && (!pendingRequests || pendingRequests.length === 0) && (
+      {!isInitialLoading && visibleResults.length === 0 && (!pendingRequests || pendingRequests.length === 0) && (
         <EmptyState
           icon={Bell}
           title="No notifications yet"
@@ -141,22 +186,25 @@ export function NotificationsMain() {
         />
       )}
 
-      {!isInitialLoading && results.length > 0 && (
-        <>
-          <div>
-            {results.map((notification) => (
-              <NotificationItem key={notification._id} notification={notification} />
-            ))}
-          </div>
+      {!isInitialLoading && visibleResults.length > 0 && (
+        <div>
+          {visibleResults.map((notification) => (
+            <NotificationItem
+              key={notification._id}
+              notification={notification}
+              onDelete={handleDelete}
+              onUndo={handleUndo}
+            />
+          ))}
+        </div>
+      )}
 
-          {status === "CanLoadMore" && (
-            <div className="flex justify-center p-4">
-              <Button type="button" variant="outline" onClick={() => loadMore(20)}>
-                Load more
-              </Button>
-            </div>
-          )}
-        </>
+      {!isInitialLoading && status === "CanLoadMore" && (
+        <div className="flex justify-center p-4">
+          <Button type="button" variant="outline" onClick={() => loadMore(20)}>
+            Load more
+          </Button>
+        </div>
       )}
     </div>
   )

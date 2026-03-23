@@ -13,6 +13,8 @@ Real-time feeds · Direct messaging · Notifications · Rich profiles · Dark & 
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
+[Live Demo](https://z-social-rouge.vercel.app)
+
 </div>
 
 ---

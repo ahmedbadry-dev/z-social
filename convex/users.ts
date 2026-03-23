@@ -113,18 +113,24 @@ export const getSuggestedUsers = query({
       .query("posts")
       .withIndex("by_created")
       .order("desc")
-      .take(50)
+      .take(500)
 
     const seen = new Set<string>()
-    const suggestedIds: string[] = []
+    const allEligible: string[] = []
 
     for (const post of recentPosts) {
       if (!followingIds.has(post.authorId) && !seen.has(post.authorId)) {
         seen.add(post.authorId)
-        suggestedIds.push(post.authorId)
+        allEligible.push(post.authorId)
       }
-      if (suggestedIds.length >= 4) break
     }
+
+    for (let i = allEligible.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[allEligible[i], allEligible[j]] = [allEligible[j], allEligible[i]]
+    }
+
+    const suggestedIds = allEligible.slice(0, 6)
 
     return Promise.all(
       suggestedIds.map(async (userId) => {

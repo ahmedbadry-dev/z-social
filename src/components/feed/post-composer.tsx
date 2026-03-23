@@ -335,8 +335,8 @@ export function PostComposer(): ReactElement {
           onChange={handleVideoChange}
         />
 
-        <div className="flex items-center justify-between border-t pt-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
             <Button
               type="button"
               variant="outline"
@@ -356,7 +356,7 @@ export function PostComposer(): ReactElement {
               Add Video
             </Button>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
             <span className="text-xs text-muted-foreground">{contentLength}/500</span>
             <Button
               type="submit"

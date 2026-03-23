@@ -162,52 +162,56 @@ export const PostCard = memo(function PostCard({
         </div>
       )}
       <article className="rounded-lg bg-card p-4 shadow-sm">
-      <header className="flex items-start gap-3">
-        <Link
-          href={`/profile?userId=${post.authorId}`}
-          className="flex min-w-0 flex-1 items-start gap-3 hover:opacity-80"
-        >
-          <UserAvatar name={post.authorName} imageUrl={post.authorImage} size="md" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-foreground">{post.authorName}</p>
-            <p className="text-xs text-muted-foreground">
-              {formatRelativeTime(post.createdAt)}
-            </p>
+        <header className="flex items-start gap-3">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <UserAvatar
+              name={post.authorName}
+              imageUrl={post.authorImage}
+              size="md"
+              clickable
+            />
+            <div className="min-w-0 flex-1">
+              <Link href={`/profile?userId=${post.authorId}`} className="hover:underline">
+                <p className="truncate font-semibold text-foreground">{post.authorName}</p>
+              </Link>
+              <p className="text-xs text-muted-foreground">
+                {formatRelativeTime(post.createdAt)}
+              </p>
+            </div>
           </div>
-        </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="ghost" size="icon-sm">
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {post.isOwnPost ? (
-              <>
-                <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                  <Edit3 className="size-4" />
-                  Edit Post
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 className="size-4" />
-                  Delete Post
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.85 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <DropdownMenuItem onClick={() => void handleSaveToggle()}>
-                  {saved ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
-                  {saved ? "Unsave Post" : "Save Post"}
-                </DropdownMenuItem>
-              </motion.div>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </header>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="ghost" size="icon-sm">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {post.isOwnPost ? (
+                <>
+                  <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                    <Edit3 className="size-4" />
+                    Edit Post
+                  </DropdownMenuItem>
+                  <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="size-4" />
+                    Delete Post
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.85 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <DropdownMenuItem onClick={() => void handleSaveToggle()}>
+                    {saved ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
+                    {saved ? "Unsave Post" : "Save Post"}
+                  </DropdownMenuItem>
+                </motion.div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </header>
 
       <div className="mt-3 space-y-2">
         <MentionText content={post.content} className="text-sm text-foreground" />

@@ -1,7 +1,8 @@
 "use client"
 
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { AlertCircle, Check, CheckCheck, Loader2, RotateCcw, X } from "lucide-react"
+import { useState } from "react"
 import { cn, formatRelativeTime } from "@/lib/utils"
 
 interface MessageBubbleProps {
@@ -46,79 +47,41 @@ export function MessageBubble({
     !isLastInGroup && "rounded-bl-md"
   )
   const isImageOnly = !!imageUrl && !content
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: 6 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.12, ease: "easeOut" }}
-      className={cn(
-        "flex",
-        isSent ? "justify-end" : "justify-start",
-        isLastInGroup ? "mb-1" : "mb-0.5"
-      )}
-    >
-      <div className={cn("max-w-[70%]", isOptimistic && "opacity-70")}>
-        {isImageOnly ? (
-          <div
-            className={cn(
-              isSent ? sentRadius : receivedRadius,
-              "overflow-hidden border border-border/40"
-            )}
-          >
-            <div className="relative">
-              <img
-                src={imageUrl}
-                alt="Shared image"
-                className={cn("max-h-60 w-full object-cover", isUploading && "opacity-60")}
-              />
-              {isUploading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <button
-                    type="button"
-                    onClick={onCancel}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-                  >
-                    <X className="size-5" />
-                  </button>
-                </div>
+    <>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 6 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.12, ease: "easeOut" }}
+        className={cn(
+          "flex",
+          isSent ? "justify-end" : "justify-start",
+          isLastInGroup ? "mb-1" : "mb-0.5"
+        )}
+      >
+        <div className={cn("max-w-[70%]", isOptimistic && "opacity-70")}>
+          {isImageOnly ? (
+            <div
+              className={cn(
+                isSent ? sentRadius : receivedRadius,
+                "overflow-hidden border border-border/40"
               )}
-              {uploadFailed && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
-                  <AlertCircle className="size-6 text-destructive" />
-                  <button
-                    type="button"
-                    onClick={onRetry}
-                    className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/30"
-                  >
-                    <RotateCcw className="size-3" />
-                    Retry
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div
-            className={cn(
-              "px-3.5 py-2 text-sm",
-              isSent
-                ? cn(sentRadius, "bg-[#3B55E6] text-white")
-                : cn(receivedRadius, "border border-border bg-card text-foreground")
-            )}
-          >
-            {imageUrl && (
-              <div className="relative mb-1">
+            >
+              <div className="relative">
                 <img
                   src={imageUrl}
                   alt="Shared image"
                   className={cn(
-                    "max-h-60 w-full rounded-xl object-cover",
-                    isUploading && "opacity-60"
+                    "max-h-60 w-full object-cover",
+                    isUploading && "opacity-60",
+                    !isUploading && !uploadFailed && "cursor-pointer"
                   )}
+                  onClick={!isUploading && !uploadFailed ? () => setLightboxOpen(true) : undefined}
                 />
                 {isUploading && (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/30">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                     <button
                       type="button"
                       onClick={onCancel}
@@ -129,7 +92,7 @@ export function MessageBubble({
                   </div>
                 )}
                 {uploadFailed && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/40">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
                     <AlertCircle className="size-6 text-destructive" />
                     <button
                       type="button"
@@ -142,41 +105,124 @@ export function MessageBubble({
                   </div>
                 )}
               </div>
-            )}
-            {content && <p className="text-sm leading-relaxed">{content}</p>}
-            {uploadFailed && !imageUrl && (
-              <div className="flex items-center gap-1 text-xs text-destructive">
-                <AlertCircle className="size-3" />
-                Failed to send
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          ) : (
+            <div
+              className={cn(
+                "px-3.5 py-2 text-sm",
+                isSent
+                  ? cn(sentRadius, "bg-[#3B55E6] text-white")
+                  : cn(receivedRadius, "border border-border bg-card text-foreground")
+              )}
+            >
+              {imageUrl && (
+                <div className="relative mb-1">
+                  <img
+                    src={imageUrl}
+                    alt="Shared image"
+                    className={cn(
+                      "max-h-60 w-full rounded-xl object-cover",
+                      isUploading && "opacity-60",
+                      !isUploading && !uploadFailed && "cursor-pointer"
+                    )}
+                    onClick={!isUploading && !uploadFailed ? () => setLightboxOpen(true) : undefined}
+                  />
+                  {isUploading && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/30">
+                      <button
+                        type="button"
+                        onClick={onCancel}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                      >
+                        <X className="size-5" />
+                      </button>
+                    </div>
+                  )}
+                  {uploadFailed && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/40">
+                      <AlertCircle className="size-6 text-destructive" />
+                      <button
+                        type="button"
+                        onClick={onRetry}
+                        className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/30"
+                      >
+                        <RotateCcw className="size-3" />
+                        Retry
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              {content && <p className="text-sm leading-relaxed">{content}</p>}
+              {uploadFailed && !imageUrl && (
+                <div className="flex items-center gap-1 text-xs text-destructive">
+                  <AlertCircle className="size-3" />
+                  Failed to send
+                </div>
+              )}
+            </div>
+          )}
 
-        {isLastInGroup && (
-          <div
-            className={cn(
-              "mt-0.5 flex items-center gap-1",
-              isSent ? "justify-end" : "justify-start"
-            )}
-          >
-            {isOptimistic ? (
-              <Loader2 className="size-3 animate-spin text-muted-foreground" />
-            ) : (
-              <p className="text-[11px] text-muted-foreground">
-                {formatRelativeTime(createdAt)}
-              </p>
-            )}
-            {isSent && showReadReceipt && !isOptimistic && (
-              isRead ? (
-                <CheckCheck className="size-3 text-[#3B55E6]" />
+          {isLastInGroup && (
+            <div
+              className={cn(
+                "mt-0.5 flex items-center gap-1",
+                isSent ? "justify-end" : "justify-start"
+              )}
+            >
+              {isOptimistic ? (
+                <Loader2 className="size-3 animate-spin text-muted-foreground" />
               ) : (
-                <Check className="size-3 text-muted-foreground" />
-              )
-            )}
-          </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {formatRelativeTime(createdAt)}
+                </p>
+              )}
+              {isSent && showReadReceipt && !isOptimistic && (
+                isRead ? (
+                  <CheckCheck className="size-3 text-[#3B55E6]" />
+                ) : (
+                  <Check className="size-3 text-muted-foreground" />
+                )
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {lightboxOpen && imageUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="relative max-h-[90vh] max-w-[90vw]"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <img
+                src={imageUrl}
+                alt="Full size"
+                className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+              />
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(false)}
+                className="absolute -top-3 -right-3 flex h-8 w-8 items-center justify-center rounded-full bg-card text-foreground shadow-md hover:bg-muted"
+              >
+                <X className="size-4" />
+              </button>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
-    </motion.div>
+      </AnimatePresence>
+    </>
   )
 }

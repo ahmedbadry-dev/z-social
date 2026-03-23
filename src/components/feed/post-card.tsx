@@ -59,6 +59,11 @@ interface PostCardProps {
     commentsCount: number
     isSavedByMe: boolean
     isOwnPost: boolean
+    socialContext?: {
+      actorName: string
+      actorId: string
+      action: "liked" | "commented"
+    } | null
   }
   currentUserId: string
   defaultShowComments?: boolean
@@ -138,7 +143,25 @@ export const PostCard = memo(function PostCard({
   }
 
   return (
-    <article className="rounded-lg bg-card p-4 shadow-sm">
+    <>
+      {post.socialContext && (
+        <div className="flex items-center gap-1.5 px-1 pb-1 -mb-2">
+          <div className="h-px w-3 bg-border" />
+          <Link
+            href={`/profile?userId=${post.socialContext.actorId}`}
+            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span className="font-medium text-foreground/70">
+              {post.socialContext.actorName}
+            </span>
+            <span>
+              {post.socialContext.action === "liked" ? "liked this" : "commented on this"}
+            </span>
+          </Link>
+        </div>
+      )}
+      <article className="rounded-lg bg-card p-4 shadow-sm">
       <header className="flex items-start gap-3">
         <Link
           href={`/profile?userId=${post.authorId}`}
@@ -293,6 +316,7 @@ export const PostCard = memo(function PostCard({
           onConfirm={handleDeletePost}
         />
       )}
-    </article>
+      </article>
+    </>
   )
 })

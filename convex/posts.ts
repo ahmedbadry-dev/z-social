@@ -6,10 +6,72 @@ import { getCurrentUserId, requireAuth, requireAuthUserId, sendMentionNotificati
 
 type PostDoc = Doc<"posts">
 
+type SocialContext = {
+  actorName: string
+  actorId: string
+  action: "liked" | "commented"
+}
+
+async function getSocialContext(
+  ctx: QueryCtx,
+  postId: Doc<"posts">["_id"],
+  followingIds: string[],
+  currentUserId: string
+): Promise<SocialContext | null> {
+  if (followingIds.length === 0) {
+    return null
+  }
+
+  const likes = await ctx.db
+    .query("likes")
+    .withIndex("by_post", (q) => q.eq("postId", postId))
+    .collect()
+
+  const likedByFollowing = likes.find(
+    (like) => followingIds.includes(like.userId) && like.userId !== currentUserId
+  )
+
+  if (likedByFollowing) {
+    const actor = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", likedByFollowing.userId))
+      .first()
+    return {
+      actorId: likedByFollowing.userId,
+      actorName: actor?.name ?? likedByFollowing.userId,
+      action: "liked",
+    }
+  }
+
+  const comments = await ctx.db
+    .query("comments")
+    .withIndex("by_post", (q) => q.eq("postId", postId))
+    .collect()
+
+  const commentedByFollowing = comments.find(
+    (comment) => followingIds.includes(comment.authorId) && comment.authorId !== currentUserId
+  )
+
+  if (commentedByFollowing) {
+    const actor = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", commentedByFollowing.authorId))
+      .first()
+    return {
+      actorId: commentedByFollowing.authorId,
+      actorName: actor?.name ?? commentedByFollowing.authorId,
+      action: "commented",
+    }
+  }
+
+  return null
+}
+
 async function buildPostWithMeta(
   ctx: QueryCtx | MutationCtx,
   post: PostDoc,
-  currentUserId: string | null
+  currentUserId: string | null,
+  socialContext?: SocialContext | null
 ) {
   const allReactions = await ctx.db
     .query("likes")
@@ -58,6 +120,7 @@ async function buildPostWithMeta(
     reactionsSummary,
     commentsCount,
     isSavedByMe,
+    socialContext: socialContext ?? null,
   }
 }
 
@@ -73,22 +136,41 @@ export const getFeedPosts = query({
       .paginate(args.paginationOpts)
 
     let authorIds = new Set<string>()
+    let followingIds: string[] = []
     if (currentUserId) {
       const follows = await ctx.db
         .query("follows")
         .withIndex("by_follower", (q) => q.eq("followerId", currentUserId))
         .collect()
-      authorIds = new Set([currentUserId, ...follows.map((f) => f.followingId)])
+      followingIds = follows.map((f) => f.followingId)
+      authorIds = new Set([currentUserId, ...followingIds])
     }
 
-    const filteredPage = result.page.filter((post) =>
-      authorIds.size === 0 ? false : authorIds.has(post.authorId)
-    )
+    const isDiscoveryMode = followingIds.length === 0
+
+    const filteredPage = result.page.filter((post) => {
+      if (isDiscoveryMode) {
+        return true
+      }
+      return authorIds.has(post.authorId)
+    })
 
     const page = await Promise.all(
-      filteredPage.map((post) => buildPostWithMeta(ctx, post, currentUserId))
+      filteredPage.map(async (post) => {
+        const isFromStranger =
+          !!currentUserId &&
+          post.authorId !== currentUserId &&
+          !followingIds.includes(post.authorId)
+
+        const socialContext =
+          isFromStranger && currentUserId
+            ? await getSocialContext(ctx, post._id, followingIds, currentUserId)
+            : null
+
+        return buildPostWithMeta(ctx, post, currentUserId, socialContext)
+      })
     )
-    return { ...result, page }
+    return { ...result, page, isDiscoveryMode }
   },
 })
 

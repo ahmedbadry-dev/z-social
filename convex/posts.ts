@@ -481,43 +481,76 @@ export const getDiscoveryPosts = query({
   },
   handler: async (ctx, args) => {
     const currentUserId = await getCurrentUserId(ctx)
-    const limit = args.limit ?? 5
+    const limit = args.limit ?? 8
     const excludeIds = new Set(args.excludePostIds ?? [])
 
-    let followingIds = new Set<string>()
+    let followingIds: string[] = []
     if (currentUserId) {
       const follows = await ctx.db
         .query("follows")
         .withIndex("by_follower", (q) => q.eq("followerId", currentUserId))
         .collect()
-      followingIds = new Set([currentUserId, ...follows.map((f) => f.followingId)])
+      followingIds = follows.map((f) => f.followingId)
+    }
+
+    const followingSet = new Set([...(currentUserId ? [currentUserId] : []), ...followingIds])
+
+    const friendsOfFriendsIds = new Set<string>()
+    for (const followedId of followingIds) {
+      const theirFollows = await ctx.db
+        .query("follows")
+        .withIndex("by_follower", (q) => q.eq("followerId", followedId))
+        .collect()
+      for (const f of theirFollows) {
+        if (!followingSet.has(f.followingId)) {
+          friendsOfFriendsIds.add(f.followingId)
+        }
+      }
     }
 
     const recentPosts = await ctx.db
       .query("posts")
       .withIndex("by_created")
       .order("desc")
-      .take(100)
+      .take(150)
 
-    const discoveryPool = recentPosts.filter((post) => {
+    const tier1Posts = recentPosts.filter((post) => {
       if (excludeIds.has(post._id)) return false
-      if (followingIds.has(post.authorId)) return false
+      return friendsOfFriendsIds.has(post.authorId)
+    })
+
+    const tier2Posts = recentPosts.filter((post) => {
+      if (excludeIds.has(post._id)) return false
+      if (followingSet.has(post.authorId)) return false
+      if (friendsOfFriendsIds.has(post.authorId)) return false
       return true
     })
 
-    const withMeta = await Promise.all(
-      discoveryPool.slice(0, 30).map((post) => buildPostWithMeta(ctx, post, currentUserId))
-    )
+    const tier1Candidates = tier1Posts.slice(0, 20)
+    const tier2Candidates = tier2Posts.slice(0, 20)
 
-    const scored = withMeta
-      .map((post) => ({
-        ...post,
-        _score: post.reactionsCount + post.commentsCount * 2,
-        isDiscoveryPost: true as const,
-      }))
-      .sort((a, b) => b._score - a._score)
-      .slice(0, limit)
+    const [tier1WithMeta, tier2WithMeta] = await Promise.all([
+      Promise.all(tier1Candidates.map((post) => buildPostWithMeta(ctx, post, currentUserId))),
+      Promise.all(tier2Candidates.map((post) => buildPostWithMeta(ctx, post, currentUserId))),
+    ])
 
-    return scored
+    const score = (post: { reactionsCount: number; commentsCount: number }) =>
+      post.reactionsCount + post.commentsCount * 2
+
+    const tier1Scored = tier1WithMeta
+      .map((post) => ({ ...post, isDiscoveryPost: true as const, discoveryTier: 1 as const }))
+      .sort((a, b) => score(b) - score(a))
+
+    const tier2Scored = tier2WithMeta
+      .map((post) => ({ ...post, isDiscoveryPost: true as const, discoveryTier: 2 as const }))
+      .sort((a, b) => score(b) - score(a))
+
+    const tier1Count = Math.min(tier1Scored.length, Math.ceil(limit * 0.6))
+    const tier2Count = limit - tier1Count
+
+    return [
+      ...tier1Scored.slice(0, tier1Count),
+      ...tier2Scored.slice(0, tier2Count),
+    ]
   },
 })

@@ -1,5 +1,5 @@
 import { paginationOptsValidator } from "convex/server"
-import { v } from "convex/values"
+import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { getCurrentUserId, requireAuthUserId } from "./helpers"
 
@@ -81,5 +81,28 @@ export const markAsRead = mutation({
 
     await ctx.db.patch(args.notificationId, { read: true })
     return null
+  },
+})
+
+export const deleteNotification = mutation({
+  args: { notificationId: v.id("notifications") },
+  handler: async (ctx, args) => {
+    const currentUserId = await requireAuthUserId(ctx)
+    const notification = await ctx.db.get(args.notificationId)
+    if (!notification) throw new ConvexError("Notification not found")
+    if (notification.userId !== currentUserId) throw new ConvexError("Unauthorized")
+    await ctx.db.delete(args.notificationId)
+  },
+})
+
+export const clearAllNotifications = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const currentUserId = await requireAuthUserId(ctx)
+    const notifications = await ctx.db
+      .query("notifications")
+      .withIndex("by_user", (q) => q.eq("userId", currentUserId))
+      .collect()
+    await Promise.all(notifications.map((n) => ctx.db.delete(n._id)))
   },
 })

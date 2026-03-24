@@ -86,7 +86,7 @@ export function PrivacySettings() {
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
-      <div className="flex items-center justify-between py-4 border-b border-border">
+      <div className="flex flex-col gap-3 py-4 border-b border-border sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Lock className="size-4 text-muted-foreground" />
@@ -96,14 +96,16 @@ export function PrivacySettings() {
             Only your followers can see your posts
           </p>
         </div>
-        <ToggleButton
-          checked={isPrivate}
-          disabled={isDisabled}
-          onChange={handlePrivateToggle}
-        />
+        <div className="flex justify-end sm:justify-start">
+          <ToggleButton
+            checked={isPrivate}
+            disabled={isDisabled}
+            onChange={handlePrivateToggle}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center justify-between py-4 border-b border-border">
+      <div className="flex flex-col gap-3 py-4 border-b border-border sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Eye className="size-4 text-muted-foreground" />
@@ -113,14 +115,16 @@ export function PrivacySettings() {
             When off, others won't see when you're active or last seen
           </p>
         </div>
-        <ToggleButton
-          checked={showOnlineStatus}
-          disabled={isDisabled}
-          onChange={handleOnlineStatusToggle}
-        />
+        <div className="flex justify-end sm:justify-start">
+          <ToggleButton
+            checked={showOnlineStatus}
+            disabled={isDisabled}
+            onChange={handleOnlineStatusToggle}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center justify-between py-4">
+      <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Moon className="size-4 text-muted-foreground" />
@@ -130,7 +134,9 @@ export function PrivacySettings() {
             Switch between dark and light theme
           </p>
         </div>
-        <ThemeToggle />
+        <div className="flex justify-end sm:justify-start">
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   )

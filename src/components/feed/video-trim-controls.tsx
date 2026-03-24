@@ -37,8 +37,21 @@ export function VideoTrimControls({
 }: VideoTrimControlsProps): ReactElement {
   const [thumbnails, setThumbnails] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
-  const [activeHandle, setActiveHandle] = useState<"start" | "end" | null>(null)
+  const [activeHandle, setActiveHandle] = useState<"start" | "end" | "range" | null>(
+    null
+  )
   const barRef = useRef<HTMLDivElement | null>(null)
+  const durationRef = useRef(duration)
+  const trimStartRef = useRef(trimStart)
+  const trimEndRef = useRef(trimEnd)
+  const selectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 1 })
+  const rangeDragOffsetRef = useRef(0)
+  const rafRef = useRef<number | null>(null)
+  const lastClientXRef = useRef<number | null>(null)
+  const placeholderFrames = useMemo(
+    () => Array.from({ length: THUMBNAIL_COUNT }),
+    []
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -137,6 +150,13 @@ export function VideoTrimControls({
     return { start: startIndex, end: endIndex }
   }, [duration, trimEnd, trimStart])
 
+  useEffect(() => {
+    durationRef.current = duration
+    trimStartRef.current = trimStart
+    trimEndRef.current = trimEnd
+    selectionRef.current = selectionIndexes
+  }, [duration, selectionIndexes, trimEnd, trimStart])
+
   if (!videoSrc) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -164,10 +184,25 @@ export function VideoTrimControls({
   const safeStart = Math.max(0, Math.min(trimStart, duration))
   const safeEnd = Math.max(0, Math.min(trimEnd, duration))
 
-  const minIndexDelta = Math.max(
-    1,
-    Math.ceil((MIN_CLIP_LENGTH_SECONDS / duration) * THUMBNAIL_COUNT)
-  )
+  const clampStart = (value: number, end: number): number => {
+    const maxStart = Math.max(0, end - MIN_CLIP_LENGTH_SECONDS)
+    return Math.min(Math.max(0, value), maxStart)
+  }
+
+  const clampEnd = (value: number, start: number): number => {
+    const minEnd = Math.min(duration, start + MIN_CLIP_LENGTH_SECONDS)
+    return Math.max(Math.min(value, duration), minEnd)
+  }
+
+  const nudgeStart = (delta: number): void => {
+    const nextStart = clampStart(Number((trimStart + delta).toFixed(1)), trimEnd)
+    onTrimChange(nextStart, trimEnd)
+  }
+
+  const nudgeEnd = (delta: number): void => {
+    const nextEnd = clampEnd(Number((trimEnd + delta).toFixed(1)), trimStart)
+    onTrimChange(trimStart, nextEnd)
+  }
 
   const updateFromPointer = (clientX: number, handle: "start" | "end"): void => {
     const container = barRef.current
@@ -183,23 +218,69 @@ export function VideoTrimControls({
     const clampedX = Math.min(Math.max(clientX - rect.left, 0), rect.width)
     const percent = clampedX / rect.width
     const boundaryIndex = Math.round(percent * THUMBNAIL_COUNT)
+    const currentTrimStart = trimStartRef.current
+    const currentTrimEnd = trimEndRef.current
+    const currentDuration = durationRef.current
+    const currentSelection = selectionRef.current
+    const currentMinIndexDelta = Math.max(
+      1,
+      Math.ceil((MIN_CLIP_LENGTH_SECONDS / currentDuration) * THUMBNAIL_COUNT)
+    )
 
     if (handle === "start") {
       const nextStartIndex = Math.min(
         Math.max(0, boundaryIndex),
-        Math.max(0, selectionIndexes.end - minIndexDelta)
+        Math.max(0, currentSelection.end - currentMinIndexDelta)
       )
-      const nextStart = Number(((nextStartIndex / THUMBNAIL_COUNT) * duration).toFixed(1))
-      onTrimChange(nextStart, trimEnd)
+      const nextStart = Number(
+        ((nextStartIndex / THUMBNAIL_COUNT) * currentDuration).toFixed(1)
+      )
+      if (nextStart !== currentTrimStart) {
+        onTrimChange(nextStart, currentTrimEnd)
+      }
       return
     }
 
     const nextEndIndex = Math.max(
       Math.min(THUMBNAIL_COUNT, boundaryIndex),
-      Math.min(THUMBNAIL_COUNT, selectionIndexes.start + minIndexDelta)
+      Math.min(THUMBNAIL_COUNT, currentSelection.start + currentMinIndexDelta)
     )
-    const nextEnd = Number(((nextEndIndex / THUMBNAIL_COUNT) * duration).toFixed(1))
-    onTrimChange(trimStart, nextEnd)
+    const nextEnd = Number(((nextEndIndex / THUMBNAIL_COUNT) * currentDuration).toFixed(1))
+    if (nextEnd !== currentTrimEnd) {
+      onTrimChange(currentTrimStart, nextEnd)
+    }
+  }
+
+  const updateRangeFromPointer = (clientX: number): void => {
+    const container = barRef.current
+    if (!container) {
+      return
+    }
+
+    const rect = container.getBoundingClientRect()
+    if (rect.width <= 0) {
+      return
+    }
+
+    const clampedX = Math.min(Math.max(clientX - rect.left, 0), rect.width)
+    const percent = clampedX / rect.width
+    const currentDuration = durationRef.current
+    const currentTrimStart = trimStartRef.current
+    const currentTrimEnd = trimEndRef.current
+    const timeAtPointer = percent * currentDuration
+    const currentClipLength = Math.max(
+      MIN_CLIP_LENGTH_SECONDS,
+      currentTrimEnd - currentTrimStart
+    )
+    const maxStart = Math.max(0, currentDuration - currentClipLength)
+    const nextStartRaw = timeAtPointer - rangeDragOffsetRef.current
+    const nextStart = Number(
+      Math.min(Math.max(nextStartRaw, 0), maxStart).toFixed(1)
+    )
+    const nextEnd = Number((nextStart + currentClipLength).toFixed(1))
+    if (nextStart !== currentTrimStart || nextEnd !== currentTrimEnd) {
+      onTrimChange(nextStart, nextEnd)
+    }
   }
 
   useEffect(() => {
@@ -208,11 +289,31 @@ export function VideoTrimControls({
     }
 
     const handleMove = (event: PointerEvent): void => {
-      updateFromPointer(event.clientX, activeHandle)
+      lastClientXRef.current = event.clientX
+      if (rafRef.current !== null) {
+        return
+      }
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null
+        const clientX = lastClientXRef.current
+        if (clientX === null) {
+          return
+        }
+        if (activeHandle === "range") {
+          updateRangeFromPointer(clientX)
+          return
+        }
+        updateFromPointer(clientX, activeHandle)
+      })
     }
 
     const handleUp = (): void => {
       setActiveHandle(null)
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
+      lastClientXRef.current = null
     }
 
     window.addEventListener("pointermove", handleMove)
@@ -222,7 +323,7 @@ export function VideoTrimControls({
       window.removeEventListener("pointermove", handleMove)
       window.removeEventListener("pointerup", handleUp)
     }
-  }, [activeHandle, selectionIndexes.end, selectionIndexes.start, trimEnd, trimStart, duration])
+  }, [activeHandle])
 
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-3">
@@ -232,12 +333,9 @@ export function VideoTrimControls({
           <span>End: {formatClock(safeEnd)}</span>
         </div>
 
-        <div
-          ref={barRef}
-          className="overflow-hidden rounded-md border border-border bg-muted"
-        >
+        <div ref={barRef} className="overflow-hidden rounded-md border border-border bg-muted">
           <div className="flex h-20 items-stretch">
-            {(thumbnails.length > 0 ? thumbnails : Array.from({ length: THUMBNAIL_COUNT })).map(
+            {(thumbnails.length > 0 ? thumbnails : placeholderFrames).map(
               (thumb, index) => {
                 const isSelected = index >= selectionIndexes.start && index < selectionIndexes.end
                 const isStart = index === selectionIndexes.start
@@ -249,8 +347,33 @@ export function VideoTrimControls({
                       "relative flex-1 overflow-hidden",
                       isSelected ? "border-y-2 border-white" : "opacity-40 grayscale",
                       isStart && "border-l-2 border-white",
-                      isEnd && "border-r-2 border-white"
+                      isEnd && "border-r-2 border-white",
+                      isSelected && "cursor-grab touch-none"
                     )}
+                    onPointerDown={(event) => {
+                      if (!isSelected) {
+                        return
+                      }
+                      const target = event.target as HTMLElement
+                      if (target.closest("button")) {
+                        return
+                      }
+                      event.preventDefault()
+                      const container = barRef.current
+                      if (!container) {
+                        return
+                      }
+                      const rect = container.getBoundingClientRect()
+                      const clampedX = Math.min(
+                        Math.max(event.clientX - rect.left, 0),
+                        rect.width
+                      )
+                      const percent = rect.width > 0 ? clampedX / rect.width : 0
+                      const timeAtPointer = percent * duration
+                      rangeDragOffsetRef.current = timeAtPointer - trimStart
+                      setActiveHandle("range")
+                      updateRangeFromPointer(event.clientX)
+                    }}
                   >
                     {typeof thumb === "string" ? (
                       <Image
@@ -272,8 +395,10 @@ export function VideoTrimControls({
                           setActiveHandle("start")
                           updateFromPointer(event.clientX, "start")
                         }}
-                        className="absolute -left-2 top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-white bg-[#3B55E6] shadow-sm cursor-ew-resize"
-                      />
+                        className="absolute -left-3 top-1/2 z-20 size-9 -translate-y-1/2 rounded-full bg-white/20 shadow-sm cursor-ew-resize touch-none"
+                      >
+                        <span className="pointer-events-none absolute inset-[6px] rounded-full border-2 border-white bg-[#3B55E6]" />
+                      </button>
                     )}
                     {isEnd && (
                       <button
@@ -284,8 +409,10 @@ export function VideoTrimControls({
                           setActiveHandle("end")
                           updateFromPointer(event.clientX, "end")
                         }}
-                        className="absolute -right-2 top-1/2 size-4 -translate-y-1/2 rounded-full border-2 border-white bg-[#22C55E] shadow-sm cursor-ew-resize"
-                      />
+                        className="absolute -right-3 top-1/2 z-20 size-9 -translate-y-1/2 rounded-full bg-white/20 shadow-sm cursor-ew-resize touch-none"
+                      >
+                        <span className="pointer-events-none absolute inset-[6px] rounded-full border-2 border-white bg-[#22C55E]" />
+                      </button>
                     )}
                   </div>
                 )
@@ -296,6 +423,42 @@ export function VideoTrimControls({
         {isGenerating && (
           <p className="text-xs text-muted-foreground">Generating preview...</p>
         )}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-foreground">Start</span>
+            <button
+              type="button"
+              className="rounded-full border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+              onClick={() => nudgeStart(-0.5)}
+            >
+              -0.5s
+            </button>
+            <button
+              type="button"
+              className="rounded-full border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+              onClick={() => nudgeStart(0.5)}
+            >
+              +0.5s
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-foreground">End</span>
+            <button
+              type="button"
+              className="rounded-full border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+              onClick={() => nudgeEnd(-0.5)}
+            >
+              -0.5s
+            </button>
+            <button
+              type="button"
+              className="rounded-full border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+              onClick={() => nudgeEnd(0.5)}
+            >
+              +0.5s
+            </button>
+          </div>
+        </div>
         <p className="text-xs text-muted-foreground">
           The bright section will be posted. Dimmed sections will be removed.
         </p>

@@ -19,13 +19,13 @@ export function ProfileSettings() {
 
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-[160px_1fr]">
-      <aside className="space-y-1">
+      <aside className="flex flex-wrap gap-2 md:flex-col md:gap-1">
         {settings.map((item) => (
           <button
             key={item.key}
             type="button"
             className={cn(
-              "w-full rounded-md px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground",
+              "rounded-md px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground md:w-full",
               activeSetting === item.key && "bg-muted font-semibold text-foreground"
             )}
             onClick={() => void setActiveSetting(item.key)}
